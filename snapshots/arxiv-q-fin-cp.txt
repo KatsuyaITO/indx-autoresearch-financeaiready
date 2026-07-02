@@ -1,0 +1,7 @@
+Shapley in Context: Explaining Financial Language with Domain Expertise
+CLQT: A Closed-Loop, Cost-Aware, Strategy-Consistent Benchmark for Diagnostic Evaluation of LLM Portfolio-Management Agents
+When Summaries Distort Decisions: Information Fidelity in LLM-Compressed Financial Analysis
+Liquidity-Based Audit of Algorithmic Trading Strategies
+Valuing American options and Flexible Forwards contracts in time-dependent models
+Data-Driven Duration Management -- Term Structure Forecasting Using Machine Learning
+Robust Hedging Valuation Adjustment under Liquidity--Demand Stress

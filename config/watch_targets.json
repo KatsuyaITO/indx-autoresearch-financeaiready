@@ -48,6 +48,46 @@
       "selector": "main",
       "wait_until": "domcontentloaded",
       "enabled": true
+    },
+    {
+      "slug": "man-group-insights",
+      "name": "Man Group — Insights (AI-native hedge fund research)",
+      "url": "https://www.man.com/insights",
+      "selector": "main",
+      "wait_until": "domcontentloaded",
+      "enabled": true
+    },
+    {
+      "slug": "two-sigma-articles",
+      "name": "Two Sigma — Articles (AI-native hedge fund research)",
+      "url": "https://www.twosigma.com/articles/",
+      "selector": "main",
+      "wait_until": "domcontentloaded",
+      "enabled": true
+    },
+    {
+      "slug": "point72-blog",
+      "name": "Point72 — Blog (Cubist Systematic Strategies AI/ML)",
+      "url": "https://point72.com/blog/",
+      "selector": "main",
+      "wait_until": "domcontentloaded",
+      "enabled": true
+    },
+    {
+      "slug": "citadel-securities-insights",
+      "name": "Citadel Securities — News & Insights (AI market-structure research)",
+      "url": "https://www.citadelsecurities.com/news-and-insights/",
+      "selector": "main",
+      "wait_until": "domcontentloaded",
+      "enabled": true
+    },
+    {
+      "slug": "numerai-blog",
+      "name": "Numerai — Blog (crowdsourced AI hedge fund)",
+      "url": "https://blog.numer.ai/",
+      "selector": "main",
+      "wait_until": "domcontentloaded",
+      "enabled": true
     }
   ]
 }

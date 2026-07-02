@@ -1,0 +1,215 @@
+\section{壁②：時系列は本当にAIレディか}
+
+% =====================================================================
+%  Frame 1 : 一見、時系列はAIレディ
+% =====================================================================
+\begin{frame}{一見、時系列は「もうAIレディ」に見える}{株価・金利・出来高… アクセスも分析もできる}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}\small
+        \item 株価・金利・為替・出来高――数値の時系列は、いま最も\kw{整備が進んだ}データに見える。
+        \item だから素朴には、こう思ってしまう。
+      \end{itemize}
+      \vskip2mm
+      \begin{casestudy}{よくある見方}
+        \small
+        「アクセスもできる、APIもある、分析もできる。\\
+        時系列は\kw{もう解決済み}なのでは？」
+      \end{casestudy}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{center}
+      \scalebox{0.72}{%
+      \begin{tikzpicture}[node distance=2.4mm,font=\footnotesize]
+        \node[fnode good,text width=5.4cm] (a)
+          {\textbf{✓ アクセスできる}\\ヒストリカルデータが揃う};
+        \node[fnode good,below=of a,text width=5.4cm] (b)
+          {\textbf{✓ APIがある}\\J-Quants等で機械的に取得};
+        \node[fnode good,below=of b,text width=5.4cm] (c)
+          {\textbf{✓ 分析もできる}\\可視化・統計量・バックテスト};
+        \node[fnode good,below=of c,text width=5.4cm] (d)
+          {\textbf{✓ LLMも読める}\\数列をトークンとして入力可};
+        \draw[farr] (a)--(b);
+        \draw[farr] (b)--(c);
+        \draw[farr] (c)--(d);
+      \end{tikzpicture}}
+      \end{center}
+      \figcap{「できていること」は多い。だが十分だろうか。}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =====================================================================
+%  Frame 2 : 【落とし穴】本当に"理解"しているのか
+% =====================================================================
+\begin{frame}{【落とし穴】本当に「理解」しているのか}{読めること $\neq$ 統計的構造を内在化していること}
+  \begin{columns}[T]
+    \begin{column}{0.46\textwidth}
+      \begin{itemize}\wide
+        \item LLMは時系列を\kwbad{トークン列としては読める}が、\\
+          非定常性・レジーム変化・\kwbad{データリーク（先読み）}・因果を内在化していない。
+        \item 学習カットオフ\emph{以降}に評価をずらすだけで――
+      \end{itemize}
+      \vskip1.5mm
+      \begin{insight}{ベンチのアルファは脆い}
+        \footnotesize
+        77件のLLMトレーディング研究のレビューで、取引コストを明示モデル化したのは\kwbad{わずか1件}、時間整合的で再現可能な評価は\kwbad{わずか2件}のみ。
+      \end{insight}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{center}
+      \scalebox{0.9}{%
+      \begin{tikzpicture}[font=\footnotesize,y=0.12cm]
+        % 縦軸目盛（0 と 20）とゼロ基準線
+        \draw[brandline,line width=0.4pt] (0,0) -- (6.2,0);
+        \draw[brandline,line width=0.4pt] (0,20) -- (6.2,20);
+        \node[left,text=brandmute,font=\scriptsize] at (0,0) {0};
+        \node[left,text=brandmute,font=\scriptsize] at (0,20) {20};
+        \draw[brandmute,line width=0.8pt] (0,-4) -- (0,24);
+        % バー：カットオフ前（緑・+20.73）
+        \fill[brandgood!75,draw=brandgood!55!black,line width=0.6pt]
+          (0.9,0) rectangle (2.3,20.73);
+        \node[above,text=brandgood!45!black,font=\footnotesize\bfseries] at (1.6,20.73) {+20.73\%};
+        \node[below,text=brandgray,font=\scriptsize] at (1.6,0) {カットオフ前};
+        % バー：カットオフ後（赤・-1.04）
+        \fill[brandbad!78,draw=brandbad!55!black,line width=0.6pt]
+          (3.9,0) rectangle (5.3,-1.04);
+        \node[below=1mm,text=brandbad,font=\footnotesize\bfseries] at (4.6,-1.04) {-1.04\%};
+        \node[above,text=brandgray,font=\scriptsize] at (4.6,0.4) {カットオフ後};
+        \node[rotate=90,text=brandmute,font=\scriptsize] at (-0.75,10) {年率アルファ (\%)};
+        \draw[farr accent] (2.4,18) to[bend left=18] (3.8,2);
+      \end{tikzpicture}}
+      \end{center}
+      \figcap{カットオフ以降に評価をずらすと年率アルファ \kwbad{+20.73\% → -1.04\%}。}
+      \srcnote{Look-Ahead-Bench, 2026 / Agentic trading review, 2026}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =====================================================================
+%  Frame 3 : なぜ難しいか
+% =====================================================================
+\begin{frame}{なぜ難しいか：意味は「数列」に宿らない}{時系列の意味は、パラメータ・モデル・因果構造に宿る}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{itemize}\small
+        \item 時系列の意味は「数値の羅列」そのものではなく、\\
+          その背後の\kw{パラメータ・モデル・因果構造}に宿る。
+        \item LLMはテキストとしては処理できても、\\
+          \kwbad{統計的構造を理解しているわけではない}。
+      \end{itemize}
+      \vskip1.5mm
+      \begin{keytake}{壁①と同じ罠が、より深い形で}
+        \small
+        壁①の教訓「\kw{読める $\neq$ 使える}」が、\\
+        時系列では\kwg{さらに顕著}に立ちはだかる。
+      \end{keytake}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{center}
+      \scalebox{0.85}{%
+      \begin{tikzpicture}[font=\footnotesize]
+        \node[fnode muted,text width=3.0cm] (raw)
+          {\textbf{数列そのもの}\\ \texttt{102, 98, 105,\,…}};
+        \node[fnode blue,right=1.4cm of raw,text width=3.2cm] (mean)
+          {LLMが見るもの\\= \textbf{トークン列}};
+        \node[fnode accent,below=1.3cm of raw,text width=3.0cm] (param)
+          {\textbf{パラメータ}\\ボラ・自己相関・レジーム};
+        \node[fnode accent,below=1.3cm of mean,text width=3.2cm] (causal)
+          {\textbf{因果構造}\\何が何を動かすか};
+        \draw[farr dash] (raw)--(mean);
+        \node[text=brandbad,font=\scriptsize\bfseries] at ($(raw)!0.5!(mean)+(0,0.5)$) {表層のみ};
+        \draw[farr accent] (raw)--(param);
+        \draw[farr accent] (mean)--(causal);
+        \node[text=brandaccent,font=\scriptsize\bfseries,align=center]
+          at ($(param)!0.5!(causal)+(0,-1.0)$) {意味はここに宿る};
+      \end{tikzpicture}}
+      \end{center}
+      \figcap{LLMは表層のトークン列に届くが、意味の在処には届かない。}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =====================================================================
+%  Frame 4 : 【中心図】解＝専門AIエージェント＋モデルのブリッジ
+% =====================================================================
+\begin{frame}{解：専門AIエージェントがモデルを解釈し、LLMへブリッジする}{時系列 → 専門エージェント → 解釈 → ブリッジ → アウトカム}
+  \begin{center}
+  \scalebox{0.75}{%
+  \begin{tikzpicture}[font=\footnotesize,node distance=6mm]
+    \node[fnode,text width=2.5cm] (ts)
+      {\textbf{時系列データ}\\株価・金利・出来高};
+    \node[fnode accent,right=9mm of ts,text width=3.0cm] (agent)
+      {\textbf{専門AIエージェント}\\統計・DL・時系列モデルを\\\emph{道具として実行}};
+    \node[fnode blue,right=9mm of agent,text width=2.9cm] (interp)
+      {\textbf{パラメータ・\\意味の解釈}\\状態空間・GARCH・因子};
+    \node[fnode blue,right=9mm of interp,text width=2.7cm] (bridge)
+      {\textbf{LLMが読める形\\へブリッジ}\\記号・言語化};
+    \node[fnode dark,right=9mm of bridge,text width=2.3cm] (out)
+      {\textbf{アウトカム}\\（リターン）};
+    \draw[farr] (ts)--(agent);
+    \draw[farr accent] (agent)--(interp);
+    \draw[farr blue] (interp)--(bridge);
+    \draw[farr blue] (bridge)--(out);
+    % 専門エージェントが使う道具（下に添える）
+    \node[fnode muted,below=10mm of interp,text width=8.6cm,font=\scriptsize] (tools)
+      {\textbf{道具箱：}状態空間モデル／GARCH／因子モデル／ディープラーニング（時系列）――\;
+       エージェントが選び、当てはめ、\kw{パラメータの意味}を取り出す};
+    \draw[farr dash] (agent.south) to[bend right=12] (tools.west);
+    \draw[farr dash] (tools.east) to[bend right=12] (interp.south);
+  \end{tikzpicture}}
+  \end{center}
+  \begin{center}
+    \bigstate{「数列」ではなく\kwg{解釈済みの構造}を、LLMに手渡す}
+  \end{center}
+\end{frame}
+
+% =====================================================================
+%  Frame 5 : それでもまだAIレディでない
+% =====================================================================
+\begin{frame}{それでも、まだAIレディではない}{フレームワーク（部品）はあるが、一個一個つながっていない}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}\wide
+        \item モデルも、エージェントも、検証手法も\\
+          ――\kw{部品（フレームワーク）は揃っている}。
+        \item しかし、それらが\kwbad{一個一個つながっていない}。\\
+          これが壁①より\kwg{深い落とし穴}。
+        \item 解決には、意思決定まで\kw{一気通貫}でつなぎ、\\
+          \kwg{検証層}を組み込むことが要る。
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{insight}{実装条件：検証層を組み込む}
+        \footnotesize
+        \begin{itemize}\setlength\itemsep{1mm}
+          \item \kwg{棄権}――「答えてはいけない状況」を検知する能力。
+          \item グラフ・記号での\kw{経路検証}（FinChain / GBFR）。
+          \item \kw{反事実・因果}を組み込んだ検証（FinCARE ほか）。
+        \end{itemize}
+        \vskip1mm
+        {\color{brandgray} 金融AIの信頼性は、当てる力より\kwg{「答えない力」}に宿る。}
+      \end{insight}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =====================================================================
+%  Frame 6 : 壁②まとめ
+% =====================================================================
+\begin{frame}{壁②まとめ：時系列は「理解」でつまずく}
+  \begin{keytake}{壁②の要点}
+    \begin{itemize}\setlength\itemsep{2mm}
+      \item 時系列は\kw{「アクセスできる」}のと\kwbad{「理解している」}のがまったく別物。\\
+        {\small 学習カットオフをまたぐだけで、アルファは \kwbad{+20.73\% → -1.04\%} へ消える。}
+      \item 解は、\kwg{専門AIエージェント}が統計・DL・時系列モデルを道具として実行し、\\
+        その\kw{パラメータと意味を解釈}して、\kw{LLMが読める形にブリッジ}すること。
+      \item ただし部品はまだ\kwbad{つながっていない}。\\
+        \kwg{棄権・反事実・因果}を組み込んだ検証層こそ、実装の条件。
+    \end{itemize}
+  \end{keytake}
+  \vskip1mm
+  \begin{center}
+    \bigstate{時系列のAIレディ化とは、\kwg{解釈と検証を一気通貫でつなぐ}こと}
+  \end{center}
+\end{frame}

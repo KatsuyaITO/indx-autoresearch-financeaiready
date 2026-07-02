@@ -1,0 +1,100 @@
+% =====================================================================
+%  preamble.tex  —  共通パッケージ・ボックス・TikZ 語彙・ヘルパーマクロ
+%  main.tex から読み込む。テーマ（beamerthemeindx.sty）の後にロード。
+% =====================================================================
+
+% ---------- 図・表 ----------
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\renewcommand{\arraystretch}{1.28}
+
+% ---------- TikZ / pgfplots（whitepaper と同じ語彙） ----------
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit,backgrounds,
+  decorations.pathreplacing,calc,shadows.blur,patterns}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+\tikzset{
+  >={Stealth[length=2.4mm,width=2.2mm]},
+  figshadow/.style={blur shadow={shadow blur steps=6, shadow blur radius=2pt,
+    shadow xshift=0pt, shadow yshift=-1pt, shadow opacity=18}},
+  % --- ノード（枠）: 用途別 ---
+  fnode/.style={draw=fignavy!85, line width=0.7pt, rounded corners=4pt,
+    fill=figlight, figshadow, align=center, inner sep=2.6mm, font=\small},
+  fnode blue/.style={draw=figblue, line width=0.8pt, rounded corners=4pt,
+    fill=figblue!8, figshadow, align=center, inner sep=2.6mm, font=\small},
+  fnode accent/.style={draw=figaccent!85!black, line width=0.9pt, rounded corners=4pt,
+    fill=figaccent!8, figshadow, align=center, inner sep=2.6mm, font=\small},
+  fnode dark/.style={draw=fignavy, line width=0.8pt, rounded corners=4pt,
+    fill=fignavy, text=white, figshadow, align=center, inner sep=2.6mm, font=\small},
+  fnode muted/.style={draw=figgray!60, line width=0.6pt, rounded corners=4pt,
+    fill=figgray!8, figshadow, align=center, inner sep=2.6mm, font=\small},
+  fnode good/.style={draw=brandgood, line width=0.8pt, rounded corners=4pt,
+    fill=brandgood!8, figshadow, align=center, inner sep=2.6mm, font=\small},
+  fnode bad/.style={draw=brandbad, line width=0.8pt, rounded corners=4pt,
+    fill=brandbad!7, figshadow, align=center, inner sep=2.6mm, font=\small},
+  fchip/.style={rounded corners=3pt, figshadow, align=center,
+    font=\bfseries\sffamily\small, text=white, inner sep=2mm},
+  % --- 矢印 ---
+  farr/.style={-{Stealth[length=2.8mm,width=2.6mm]}, line width=1.0pt, draw=fignavy!70},
+  farr blue/.style={-{Stealth[length=2.8mm,width=2.6mm]}, line width=1.0pt, draw=figblue},
+  farr accent/.style={-{Stealth[length=2.8mm,width=2.6mm]}, line width=1.1pt, draw=figaccent},
+  farr dash/.style={-{Stealth[length=2.6mm,width=2.4mm]}, line width=0.9pt, draw=figgray, dashed},
+  fbiarr/.style={{Stealth[length=2.6mm,width=2.4mm]}-{Stealth[length=2.6mm,width=2.4mm]},
+    line width=1.0pt, draw=figaccent},
+}
+
+% ---------- tcolorbox：見出し付きボックス3種（whitepaper 準拠） ----------
+\usepackage[most]{tcolorbox}
+\tcbset{
+  keybox/.style={
+    enhanced, colback=brandnavy!5, colframe=brandnavy,
+    boxrule=0.7pt, arc=1.4mm, left=3mm, right=3mm, top=1.8mm, bottom=1.8mm,
+    fonttitle=\bfseries\sffamily, coltitle=white, colbacktitle=brandnavy,
+    title={#1}, enlarge top by=0mm, before skip=2mm, after skip=2mm,
+  },
+  casebox/.style={
+    enhanced, colback=brandlight, colframe=brandblue,
+    boxrule=0.6pt, arc=1.4mm, left=3mm, right=3mm, top=1.8mm, bottom=1.8mm,
+    fonttitle=\bfseries\sffamily, coltitle=white, colbacktitle=brandblue,
+    title={#1}, before skip=2mm, after skip=2mm,
+  },
+  insightbox/.style={
+    enhanced, colback=white, colframe=brandaccent,
+    boxrule=0.9pt, arc=1mm, left=3mm, right=3mm, top=1.8mm, bottom=1.8mm,
+    fonttitle=\bfseries\sffamily, coltitle=brandnavy,
+    title={\textcolor{brandaccent}{$\blacktriangleright$}\ #1},
+    borderline west={2.2pt}{0pt}{brandaccent},
+    before skip=2mm, after skip=2mm,
+  },
+}
+\newtcolorbox{keytake}[1]{keybox={#1}}
+\newtcolorbox{casestudy}[1]{casebox={#1}}
+\newtcolorbox{insight}[1]{insightbox={#1}}
+
+% ---------- 箇条書き間隔ヘルパー（enumitem 不使用） ----------
+% beamer 標準の itemize/enumerate で間隔を空けたいときに \wide を先頭に置く
+\newcommand{\wide}{\setlength\itemsep{2.4mm}}
+
+% ---------- ヘルパーマクロ ----------
+% 大きな一言メッセージ（キーメッセージ用）: 前後の余白を切り詰め、はみ出しを防ぐ
+\newcommand{\bigstate}[1]{%
+  \par\vskip1mm{\centering\color{brandnavy}\large\bfseries #1\par}\vskip0.5mm}
+% 強調キーワード
+\newcommand{\kw}[1]{\textcolor{brandblue}{\textbf{#1}}}
+\newcommand{\kwg}[1]{\textcolor{brandaccent}{\textbf{#1}}}      % 金＝重要
+\newcommand{\kwbad}[1]{\textcolor{brandbad}{\textbf{#1}}}
+\newcommand{\kwgood}[1]{\textcolor{brandgood}{\textbf{#1}}}
+% 図キャプション（whitepaper 風）: コンパクトに
+\newcommand{\figcap}[1]{{\par\vskip0.6mm\scriptsize\color{brandgray} #1\par}}
+% 出典ラベル（右下に小さく）
+\newcommand{\srcnote}[1]{{\par\vskip0.4mm\scriptsize\color{brandmute} 出典: #1\par}}
+% セクション進行を示す小さなステップ表示
+\newcommand{\stepchip}[2]{% #1=現在番号 #2=総数
+  \tikz[baseline]{\node[fnode blue,inner sep=1.2mm,font=\scriptsize\bfseries]{STEP #1 / #2};}}
+
+% スライド番号を出さない plain フレーム用に total を固定
+\usepackage{appendixnumberbeamer}

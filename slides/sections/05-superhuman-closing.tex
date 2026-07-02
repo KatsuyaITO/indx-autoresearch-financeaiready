@@ -1,0 +1,170 @@
+\section{その先へ：スーパーヒューマンな意思決定}
+
+% =====================================================================
+%  Part 05-1: 2つの壁を越えた先 ── 一気通貫のパイプライン
+% =====================================================================
+\begin{frame}{2つの壁を越えた先に}{多様データ × 膨大性突破 × 時系列理解 × アウトカム最適化}
+  \begin{center}
+  \scalebox{0.85}{%
+  \begin{tikzpicture}[font=\footnotesize]
+    % --- 上部バナー：完成形 ---
+    \node[fchip, fill=brandnavy, font=\bfseries\sffamily\small,
+          minimum width=11.2cm, anchor=south] (banner) at (5.6,2.35)
+      {AIエージェント・レディの完成形 ── データがそのままアウトカムを駆動する};
+
+    % --- 4段の一気通貫パイプライン ---
+    \node[fnode muted, text width=2.15cm, minimum height=2.0cm] (d) at (0,0)
+      {\textbf{多様な}\\\textbf{金融データ}\\[1mm]{\scriptsize PDF・XBRL\\HTML・画像}};
+    \node[fnode blue, text width=2.15cm, minimum height=2.0cm] (w1) at (3.75,0)
+      {\kwgood{\checkmark}\ \textbf{壁①突破}\\[0.5mm]\textbf{膨大性}\\[1mm]{\scriptsize パース・\\検索可能に}};
+    \node[fnode accent, text width=2.15cm, minimum height=2.0cm] (w2) at (7.5,0)
+      {\kwgood{\checkmark}\ \textbf{壁②突破}\\[0.5mm]\textbf{時系列理解}\\[1mm]{\scriptsize LLMへ\\ブリッジ}};
+    \node[fnode good, fill=brandgood, draw=brandgood!60!black, text=white,
+          text width=2.35cm, minimum height=2.0cm] (out) at (11.25,0)
+      {\textbf{アウトカム}\\\textbf{最適化}\\[1mm]{\scriptsize ＝リターン}};
+
+    % --- 一本につながる矢印 ---
+    \draw[farr blue, line width=1.2pt] (d)--(w1);
+    \draw[farr accent, line width=1.2pt] (w1)--(w2);
+    \draw[farr accent, line width=1.4pt] (w2)--(out);
+
+    % --- 下部の一気通貫ブレース ---
+    \draw[decorate, decoration={brace,amplitude=5pt,mirror}, brandmute, line width=0.7pt]
+      ([yshift=-3mm]d.south west) -- ([yshift=-3mm]out.south east)
+      node[midway,below=3mm,brandnavy,font=\small\bfseries] {一気通貫でつながって、はじめて「使いこなす」};
+  \end{tikzpicture}}
+  \end{center}
+  \figcap{Part 01 の一枚の図が、2つの壁を越えて完成する。}
+\end{frame}
+
+% =====================================================================
+%  Part 05-2: スーパーヒューマンな意思決定へ
+% =====================================================================
+\begin{frame}{スーパーヒューマンな意思決定へ}{究極の状態＝人間を超える意思決定は、データ基盤の上に立つ}
+  \begin{columns}[T]
+    \begin{column}{0.52\textwidth}
+      \begin{casestudy}{実運用に到達したAI-Nativeファンド}
+        \small
+        \begin{itemize}
+          \item \textbf{Bridgewater}（AIA Labs）：実資本を運用し初年度\kwgood{+11.9\%}
+          \item \textbf{Renaissance}（Medallion）：設立来\kwgood{年率+39.9\%}
+          \item \textbf{QRT}（Qube）：2025年 主力ファンドで約\kwgood{+30\%}
+        \end{itemize}
+        \vskip1mm
+        {\scriptsize\color{brandgray}
+          いずれも土台は\kwg{データ基盤への長年の投資}。}
+      \end{casestudy}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{insight}{逆に ── 基盤なきエージェント導入}
+        \footnotesize
+        基盤投資を伴わない「AIエージェント導入」は、
+        DeepFund 等の独立検証で\kwbad{純損失・性能ギャップ}に直面しやすい。
+        \vskip1mm
+        差別化は\kw{データを持つこと}から
+        \kwg{どう解釈し行動に結びつけるか}へ。
+      \end{insight}
+    \end{column}
+  \end{columns}
+  \vskip1mm
+  \bigstate{モデルの進歩を待つな。それを意思決定に変える基盤を、いま積む。}
+\end{frame}
+
+% =====================================================================
+%  Part 05-3: まとめ ── 2つのメッセージ
+% =====================================================================
+\begin{frame}{まとめ：2つのメッセージ}{きょう持ち帰ってほしいこと}
+  \begin{columns}[T]
+    \begin{column}{0.49\textwidth}
+      \begin{keytake}{メッセージ①：AIレディの本質}
+        \small
+        AI-Ready とは「\kw{アクセスできる}」ことではない。\\[1mm]
+        データが\kwg{アウトカム（＝リターン）}に
+        つながっている状態こそが本質。
+      \end{keytake}
+      \vskip2mm
+      \begin{center}
+      \scalebox{0.85}{%
+      \begin{tikzpicture}[font=\scriptsize]
+        \node[fnode muted, text width=2.0cm] (a) {アクセス\\できる};
+        \node[fnode good, fill=brandgood, text=white, draw=brandgood!60!black,
+              text width=2.1cm, right=8mm of a] (b) {アウトカムに\\つながる};
+        \draw[farr accent, line width=1.2pt] (a)--(b);
+      \end{tikzpicture}}
+      \end{center}
+    \end{column}
+    \begin{column}{0.49\textwidth}
+      \begin{keytake}{メッセージ②：2つの壁を越える}
+        \small
+        そこへ至る道には\kw{2つの壁}がある ──\\[1mm]
+        \kw{壁①膨大性}・\kw{壁②時系列}を越えて、\\
+        \kwg{AIエージェント・レディ}へ。
+      \end{keytake}
+      \vskip2mm
+      \begin{center}
+      \scalebox{0.85}{%
+      \begin{tikzpicture}[font=\scriptsize]
+        \node[fnode blue, text width=1.6cm] (w1) {壁①\\膨大性};
+        \node[fnode accent, text width=1.6cm, right=5mm of w1] (w2) {壁②\\時系列};
+        \node[fnode dark, text width=1.9cm, right=5mm of w2] (g) {エージェント\\・レディ};
+        \draw[farr blue] (w1)--(w2);
+        \draw[farr accent] (w2)--(g);
+      \end{tikzpicture}}
+      \end{center}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =====================================================================
+%  Part 05-4: INDXのスタンス
+% =====================================================================
+\begin{frame}{INDXのスタンス}{2つの壁に対する、ひとつの解を}
+  \begin{center}
+  \begin{tikzpicture}[font=\footnotesize]
+    \node[fnode blue, text width=3.4cm, minimum height=1.9cm] (s1) at (0,0)
+      {\textbf{壁①を崩す}\\[1mm]{\scriptsize 膨大な金融文書を\\読み解く}};
+    \node[fnode accent, text width=3.4cm, minimum height=1.9cm] (s2) at (4.3,0)
+      {\textbf{壁②を橋渡す}\\[1mm]{\scriptsize 時系列を専門エージェント\\で解釈しLLMへブリッジ}};
+    \node[fnode good, fill=brandgood, text=white, draw=brandgood!60!black,
+          text width=3.4cm, minimum height=1.9cm] (s3) at (8.6,0)
+      {\textbf{アウトカムへ}\\[1mm]{\scriptsize すべてをリターンに\\つなぐ}};
+    \draw[farr accent, line width=1.2pt] (s1)--(s2);
+    \draw[farr accent, line width=1.4pt] (s2)--(s3);
+  \end{tikzpicture}
+  \end{center}
+  \vskip2mm
+  \begin{keytake}{私たちがやること}
+    私たちは、この\kw{2つの壁}に対する\kwg{ひとつの解}を示したい ──
+    膨大な金融文書を読み解き、時系列を専門エージェントで解釈して LLM へブリッジし、
+    そのすべてを\kwg{アウトカム（＝リターン）}へつなぐ。
+  \end{keytake}
+\end{frame}
+
+% =====================================================================
+%  Part 05-5: クロージング / Q&A
+% =====================================================================
+{\setbeamertemplate{footline}{}
+\begin{frame}[plain]
+  \vfill
+  \begin{center}
+    {\fontsize{30}{36}\selectfont\bfseries\color{brandnavy}%
+      投資情報を\textcolor{brandblue}{AI-Ready}にせよ}\\[3.5mm]
+    {\color{brandaccent}\rule{4.4cm}{2pt}}\\[3.5mm]
+    {\large\color{brandgray} 読める、の先へ ── \kwg{人を超える意思決定}のために。}
+  \end{center}
+  \vskip9mm
+  \begin{center}
+    {\Huge\bfseries\color{brandnavy} ありがとうございました}\\[4mm]
+    {\large\color{brandmute} ご質問・ディスカッション歓迎です \quad(\,Q\,\&\,A\,)}
+  \end{center}
+  \vfill
+  \begin{center}
+    \begin{tikzpicture}
+      \node[fnode blue, text width=8.5cm, font=\normalsize]
+        {\textbf{いとう ＠ INDX}\\[1mm]
+         お問い合わせ：\kw{i@indx.jp}\\[0.5mm]
+         {\scriptsize マケデコ（market-api.dev）／ J-Quants コミュニティ}};
+    \end{tikzpicture}
+  \end{center}
+  \vskip8mm
+\end{frame}}

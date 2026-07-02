@@ -1,0 +1,183 @@
+% =====================================================================
+%  beamerthemeindx.sty  —  INDX enterprise Beamer theme
+%  白背景・青エンタープライズ・日本語（LuaLaTeX + luatexja）
+%  マケデコ / J-Quants 発表用に自作したテーマ。
+%  ホワイトペーパー（whitepaper/whitepaper.tex）と同じ配色・TikZ 語彙を継承。
+% =====================================================================
+\ProvidesPackage{beamerthemeindx}[2026/07/02 INDX enterprise beamer theme]
+
+\mode<presentation>
+
+% ---------- ベース ----------
+\useinnertheme{rectangles}
+\usefonttheme{professionalfonts}
+\setbeamertemplate{navigation symbols}{}   % ナビ記号を消す
+\setbeamertemplate{caption}[numbered]
+
+% ---------- カラーパレット（whitepaper と統一） ----------
+\usepackage{xcolor}
+\definecolor{brandnavy}{HTML}{0B2545}
+\definecolor{brandblue}{HTML}{1565C0}
+\definecolor{brandsky}{HTML}{4F9BE8}
+\definecolor{brandgray}{HTML}{4A4A4A}
+\definecolor{brandmute}{HTML}{8A94A6}
+\definecolor{brandlight}{HTML}{EEF3FA}
+\definecolor{brandline}{HTML}{D5DEEA}
+\definecolor{brandaccent}{HTML}{C9972C}
+\definecolor{brandgood}{HTML}{2E7D5B}
+\definecolor{brandbad}{HTML}{B23A48}
+
+% 図版用エイリアス（whitepaper の fig* と同じ名前で使える）
+\colorlet{figblue}{brandblue}
+\colorlet{fignavy}{brandnavy}
+\colorlet{figaccent}{brandaccent}
+\colorlet{figgray}{brandgray}
+\colorlet{figlight}{brandlight}
+
+% ---------- 全体の色設定：白背景・濃紺文字 ----------
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{normal text}{fg=brandnavy!92!black}
+\setbeamercolor{alerted text}{fg=brandaccent!85!black}
+\setbeamercolor{example text}{fg=brandgood}
+\setbeamercolor{structure}{fg=brandblue}
+
+\setbeamercolor{frametitle}{fg=brandnavy,bg=white}
+\setbeamercolor{framesubtitle}{fg=brandgray}
+\setbeamercolor{title}{fg=brandnavy}
+\setbeamercolor{itemize item}{fg=brandblue}
+\setbeamercolor{itemize subitem}{fg=brandaccent}
+\setbeamercolor{itemize subsubitem}{fg=brandmute}
+\setbeamercolor{enumerate item}{fg=brandblue}
+\setbeamercolor{block title}{fg=white,bg=brandnavy}
+\setbeamercolor{block body}{fg=brandnavy!90!black,bg=brandlight}
+
+% ---------- フォント（Hiragino / luatexja、whitepaper 準拠） ----------
+\usepackage{luatexja-fontspec}
+\setmainjfont{Hiragino Kaku Gothic Pro}   % 本文和文はゴシック（スライド向き）
+\setsansjfont{Hiragino Kaku Gothic Pro}
+\setmainfont{Helvetica Neue}
+\setsansfont{Helvetica Neue}
+\renewcommand{\familydefault}{\sfdefault}
+
+\setbeamerfont{title}{size=\Huge,series=\bfseries}
+\setbeamerfont{subtitle}{size=\large,series=\mdseries}
+\setbeamerfont{frametitle}{size=\LARGE,series=\bfseries}
+\setbeamerfont{framesubtitle}{size=\normalsize,series=\mdseries}
+\setbeamerfont{itemize/enumerate body}{size=\normalsize}
+\setbeamerfont{itemize/enumerate subbody}{size=\small}
+\setbeamerfont{footline}{size=\scriptsize}
+
+% ---------- itemize マーカー：上品な四角 ----------
+\setbeamertemplate{itemize item}{\raisebox{0.28ex}{\footnotesize\color{brandblue}\rule{0.66ex}{0.66ex}}}
+\setbeamertemplate{itemize subitem}{\raisebox{0.28ex}{\scriptsize\color{brandaccent}\rule{0.55ex}{0.55ex}}}
+\setbeamertemplate{itemize subsubitem}{\color{brandmute}\textbf{--}}
+\setbeamertemplate{enumerate item}{\color{brandblue}\bfseries\insertenumlabel.}
+
+% 箇条書きの余白（beamer 標準機構を使用。enumitem は beamer と衝突するため不使用）
+\setbeamertemplate{itemize/enumerate body begin}{\setlength\itemsep{1.4mm}}
+
+% =====================================================================
+%  フレームタイトル：濃紺の見出し＋青→金のアクセントルール＋右上セクションタグ
+% =====================================================================
+\setbeamertemplate{frametitle}{%
+  \nointerlineskip
+  \begin{beamercolorbox}[wd=\paperwidth,leftskip=0.9cm,rightskip=0.9cm,sep=0pt]{frametitle}%
+    \vskip4pt
+    {\usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}\insertframetitle\par}%
+    \ifx\insertframesubtitle\empty\else
+      \vskip1pt{\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\insertframesubtitle\par}%
+    \fi
+    \vskip3pt
+    % アクセントルール：青の太線＋金の短い先頭
+    \hbox{\color{brandaccent}\rule{1.5cm}{2.2pt}\color{brandblue}\rule{4.2cm}{2.2pt}\color{brandline}\rule{\dimexpr\paperwidth-0.9cm-0.9cm-5.7cm\relax}{0.6pt}}%
+    \vskip1pt
+  \end{beamercolorbox}%
+}
+
+% =====================================================================
+%  フッターライン：左＝演題 / 中央＝セクション / 右＝INDX ●ページ
+% =====================================================================
+\setbeamertemplate{footline}{%
+  % フッターの上に細い区切り線を引き、本文とフッターの領域を視覚的に分離
+  % （footline テンプレートは垂直モードで挿入されるので \hbox を縦に積める）
+  \hbox{\hskip0.9cm\color{brandline}\vrule height0.4pt width\dimexpr\paperwidth-1.8cm\relax}%
+  \vskip1.5pt%
+  \hbox{%
+    \begin{beamercolorbox}[wd=.34\paperwidth,ht=2.0ex,dp=1.0ex,leftskip=0.9cm]{}%
+      {\usebeamerfont{footline}\color{brandmute}\inserttitle}%
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.42\paperwidth,ht=2.0ex,dp=1.0ex,center]{}%
+      {\usebeamerfont{footline}\color{brandmute}\insertsectionhead}%
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.24\paperwidth,ht=2.0ex,dp=1.0ex,rightskip=0.9cm]{}%
+      \hfill{\usebeamerfont{footline}\color{brandnavy}\textbf{INDX}\,\color{brandaccent}$\bullet$\,\color{brandmute}\insertframenumber\,/\,\inserttotalframenumber}%
+    \end{beamercolorbox}%
+  }%
+  \vskip1.5pt%
+}
+
+% =====================================================================
+%  タイトルページ
+% =====================================================================
+\defbeamertemplate*{title page}{indx}[1][]{%
+  \begingroup
+  \setbeamancolorhack
+  \vbox to \textheight{%
+    \vspace*{0.10\textheight}
+    {\color{brandaccent}\rule{\linewidth}{1.4pt}}\par
+    \vskip4pt
+    {\usebeamerfont{footline}\color{brandmute}\sffamily\bfseries INDX INC.\quad\textcolor{brandblue}{|}\quad マケデコ / J-Quants コミュニティ登壇資料}\par
+    \vskip0.055\textheight
+    {\usebeamercolor[fg]{title}\usebeamerfont{title}\inserttitle\par}
+    \vskip10pt
+    \ifx\insertsubtitle\empty\else
+      {\color{brandblue}\usebeamerfont{subtitle}\insertsubtitle\par}
+    \fi
+    \vskip0.05\textheight
+    {\color{brandgray}\large\insertauthor\par}
+    \vskip6pt
+    {\color{brandmute}\normalsize\insertinstitute\par}
+    \vfill
+    {\color{brandline}\rule{\linewidth}{0.6pt}}\par
+    \vskip5pt
+    {\usebeamerfont{footline}\color{brandmute}\insertdate}\par
+    \vskip0.04\textheight
+  }
+  \endgroup
+}
+\def\setbeamancolorhack{}% placeholder hook
+
+% =====================================================================
+%  セクション扉（\section 実行時に自動表示）
+%  巨大なゴースト番号＋濃紺帯＋セクション名。プログレス表示付き。
+% =====================================================================
+\newcommand{\insertsectionnumberpadded}{%
+  \ifnum\value{section}<10 0\fi\thesection}
+
+\AtBeginSection[]{%
+  \begingroup
+  \setbeamertemplate{footline}{}%
+  \begin{frame}[plain]
+    \begin{tikzpicture}[remember picture,overlay]
+      % 左に淡い濃紺の縦帯
+      \fill[brandnavy] (current page.north west) rectangle ([xshift=3.6cm]current page.south west);
+      % ゴースト番号
+      \node[anchor=west,text=white,font=\fontsize{92}{92}\selectfont\bfseries]
+        at ([xshift=0.35cm,yshift=0.6cm]current page.west) {\insertsectionnumberpadded};
+      \node[anchor=west,text=brandsky,font=\scriptsize\sffamily,rotate=90]
+        at ([xshift=0.35cm,yshift=-2.9cm]current page.west) {SECTION};
+      % 右側：セクション名
+      \node[anchor=west,text width=8.3cm,align=left,text=brandnavy,
+            font=\fontsize{26}{32}\selectfont\bfseries]
+        at ([xshift=4.5cm]current page.west) (sectitle) {\insertsection};
+      % アクセントルール
+      \draw[brandaccent,line width=2pt]
+        ([xshift=4.55cm,yshift=1.3cm]current page.west) -- ++(2.4cm,0);
+      \node[anchor=west,text=brandmute,font=\footnotesize]
+        at ([xshift=4.55cm,yshift=-1.6cm]current page.west) {INDX \textcolor{brandaccent}{$\bullet$} 投資情報をAI-Readyにせよ};
+    \end{tikzpicture}
+  \end{frame}
+  \endgroup
+}
+
+\mode<all>

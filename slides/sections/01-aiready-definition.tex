@@ -1,0 +1,193 @@
+\section{AIレディとは何か}
+
+% =====================================================================
+%  Frame 1: 一般的な「AIレディ」の定義 ―― 通説を確認する
+% =====================================================================
+\begin{frame}{「AIレディ」の一般的な定義}{まずは通説をおさらいする}
+  \begin{columns}[T]
+    \begin{column}{0.54\textwidth}
+      \begin{itemize}\small
+        \item \kw{アクセス可能}\,―\,API・DBで機械的に取得できる
+        \item \kw{品質}\,―\,欠損・重複・表記ゆれが整っている
+        \item \kw{真実性}\,―\,出所が明確で、正確かつ最新である
+        \item \kw{検索可能}\,―\,メタデータが付与され、探し出せる
+      \end{itemize}
+      \vskip1.5mm
+      {\footnotesize\color{brandgray}
+        通説では、品質・網羅性・ガバナンス等を満たせば「AI利用に適す」とされる（Gartner）。}
+    \end{column}
+    \begin{column}{0.44\textwidth}
+      \begin{center}
+      \scalebox{0.82}{%
+      \begin{tikzpicture}[font=\footnotesize]
+        \node[fnode dark,text width=17mm] (d) {データ};
+        \node[fnode blue,above=7mm of d,text width=20mm] (a) {アクセス可能};
+        \node[fnode blue,right=7mm of d,text width=15mm] (q) {品質};
+        \node[fnode blue,below=7mm of d,text width=15mm] (t) {真実性};
+        \node[fnode blue,left=7mm of d,text width=15mm] (s) {検索可能};
+        \draw[farr blue] (a)--(d);
+        \draw[farr blue] (q)--(d);
+        \draw[farr blue] (t)--(d);
+        \draw[farr blue] (s)--(d);
+      \end{tikzpicture}}
+      \end{center}
+      \figcap{4つの性質で「囲めば AIレディ」が通説}
+    \end{column}
+  \end{columns}
+  \vskip1mm
+  \begin{center}
+    \large\color{brandnavy}\bfseries
+    \dots では、これで本当に「十分」なのか？
+  \end{center}
+\end{frame}
+
+% =====================================================================
+%  Frame 2: 本質の再定義 ―― 読めるではなくアウトカムを生む
+% =====================================================================
+\begin{frame}{AIレディの再定義}{「読める」ではなく「アウトカムを生む」}
+  \bigstate{AIレディ ＝ データが AI を通じて\kwg{アウトカム}を生み出せる状態}
+  \vskip1mm
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \begin{insight}{必要条件 $\neq$ 十分条件}
+        \small
+        品質・網羅性・真実性は AIレディの\kw{必要条件}。\\[0.6mm]
+        だが、それだけでは\kwbad{十分条件ではない}。\\[0.6mm]
+        整ったデータが、そのまま\kwg{リターン}を生むわけではない。
+      \end{insight}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{keytake}{律速はモデルよりデータ基盤}
+        \small
+        成否を分けるのはモデルの賢さより\kw{データ基盤への投資の深さ}。
+        AI-Readyなデータに支えられない AIプロジェクトの
+        \kwbad{60\,\%}は 2026年までに放棄される、と Gartnerは予測する。
+      \end{keytake}
+    \end{column}
+  \end{columns}
+  \srcnote{Gartner「AI-Ready Data」（2025）}
+\end{frame}
+
+% =====================================================================
+%  Frame 3: クオンツにとってのアウトカムとは ―― コスト削減 vs リターン
+% =====================================================================
+\begin{frame}{クオンツにとっての「アウトカム」とは}{コスト削減も価値。だが本丸はリターン}
+  \begin{center}
+  \begin{tikzpicture}[font=\small]
+    \node[fnode blue,text width=44mm,minimum height=27mm,align=left] (cost)
+      {\textbf{① コスト削減（効率）}\\[1.2mm]
+       \footnotesize リサーチ時間の短縮、レポートの自動生成、人手の圧縮。\\[0.8mm]
+       確実な価値だが、削れる量には\kw{上限がある}。};
+    \node[fnode accent,text width=44mm,minimum height=27mm,align=left,right=22mm of cost] (ret)
+      {\textbf{② リターン（アルファ）}\\[1.2mm]
+       \footnotesize より速く・広く・深い意思決定へ。\\[0.8mm]
+       上限が開かれた、\kwg{クオンツの本丸}。};
+    \draw[farr accent,line width=1.3pt] (cost.east)--(ret.west)
+      node[midway,above,font=\footnotesize\bfseries,text=brandaccent]{本丸へ};
+  \end{tikzpicture}
+  \end{center}
+  \vskip1mm
+  \begin{center}\color{brandnavy}
+    効率化は「使えるデータ」でも到達できる。\;
+    しかし\kwg{リターン}に接続してこそ、データは真にAIレディである。
+  \end{center}
+\end{frame}
+
+% =====================================================================
+%  Frame 4:【中心の一枚】多様な入力 → 読む/理解/検索 → アウトカム=リターン
+% =====================================================================
+\begin{frame}{AIレディの全体像}{多様な入力から、リターンというアウトカムまで}
+  \begin{center}
+  \scalebox{0.72}{%
+  \begin{tikzpicture}[font=\footnotesize]
+    % ---- 左：多様な入力 ----
+    \node[fnode,text width=23mm] (s1) {画像};
+    \node[fnode,below=2mm of s1,text width=23mm] (s2) {ニュース};
+    \node[fnode,below=2mm of s2,text width=23mm] (s3) {チャート};
+    \node[fnode,below=2mm of s3,text width=23mm] (s4) {IR情報};
+    \node[fnode,below=2mm of s4,text width=23mm] (s5) {非IR情報};
+    \node[fnode,below=2mm of s5,text width=23mm] (s6) {オルタナティブ};
+    \node[font=\bfseries\footnotesize,text=brandnavy,above=1.5mm of s1] {多様な入力};
+    % ---- 中央：第1段階 ----
+    \node[fnode blue,right=17mm of s3,yshift=-7mm,text width=30mm,minimum height=25mm,align=center] (st1)
+      {\textbf{第1段階}\\[1.5mm] AIが\\[0.5mm] 読む／理解する／\\ 検索する};
+    \node[font=\scriptsize,text=brandmute,above=1.5mm of st1] {「アクセスできる」の延長};
+    % ---- 右：第2段階 ----
+    \node[fnode accent,right=18mm of st1,text width=32mm,minimum height=25mm,align=center] (st2)
+      {\textbf{第2段階}\\[1.5mm] \kwg{アウトカム}\\[0.5mm] ＝ リターン};
+    \node[font=\scriptsize,text=brandaccent,above=1.5mm of st2] {ここで初めて「AIレディ」};
+    % ---- 矢印 ----
+    \foreach \s in {s1,s2,s3,s4,s5,s6} \draw[farr] (\s.east) -- (st1.west);
+    \draw[farr accent,line width=1.4pt] (st1.east)--(st2.west);
+  \end{tikzpicture}}
+  \end{center}
+  \vskip1mm
+  \begin{center}\small\color{brandnavy}
+    第1段階は\kw{必要}。だが\kwg{リターンにつながって初めて真のAIレディ}である。
+  \end{center}
+\end{frame}
+
+% =====================================================================
+%  Frame 5: AIレディは連続体 ―― 成熟度ラダー L0→L3
+% =====================================================================
+\begin{frame}{AIレディは「連続体」である}{成熟度ラダー：L0 $\rightarrow$ L3}
+  \begin{center}
+  \scalebox{0.85}{%
+  \begin{tikzpicture}[font=\footnotesize]
+    \node[fnode muted,text width=33mm,minimum height=12mm,align=center] (l0) at (0,0)
+      {\textbf{L0\ \ アクセス可}\\ API・DBで取得できる};
+    \node[fnode,text width=33mm,minimum height=12mm,align=center] (l1) at (3.5,1.1)
+      {\textbf{L1\ \ パース／検索可}\\ 構造化・索引化される};
+    \node[fnode blue,text width=33mm,minimum height=12mm,align=center] (l2) at (7.0,2.2)
+      {\textbf{L2\ \ 意味理解}\\ 文脈を AIが解釈できる};
+    \node[fnode accent,text width=34mm,minimum height=12mm,align=center] (l3) at (10.5,3.3)
+      {\textbf{L3\ \ アウトカム接続}\\ \kwg{＝ 真のAIレディ}};
+    \draw[farr] (l0)--(l1);
+    \draw[farr] (l1)--(l2);
+    \draw[farr accent] (l2)--(l3);
+  \end{tikzpicture}}
+  \end{center}
+  \vskip1mm
+  \begin{center}\small\color{brandnavy}
+    多くの金融データは\kw{L0〜L1}で止まる。価値は「保有」から「解釈し、行動につなげる」へ移った。
+  \end{center}
+\end{frame}
+
+% =====================================================================
+%  Frame 6: 導入の締め ―― 2つの壁への橋渡し（Part 02 予告）
+% =====================================================================
+\begin{frame}{L3へ至る道には「2つの壁」がある}{ここから Part 02 へ}
+  \begin{center}
+  \scalebox{0.74}{%
+  \begin{tikzpicture}[font=\footnotesize]
+    \node[fnode,text width=22mm,minimum height=12mm] (now) {いまの多くの\\ 金融データ\\(L0〜L1)};
+    \node[fnode bad,text width=22mm,minimum height=12mm,right=11mm of now] (w1) {\textbf{壁①}\\ 膨大性};
+    \node[fnode bad,text width=22mm,minimum height=12mm,right=9mm of w1] (w2) {\textbf{壁②}\\ 時系列};
+    \node[fnode accent,text width=24mm,minimum height=12mm,right=11mm of w2] (goal) {\kwg{L3}\\ 真のAIレディ};
+    \draw[farr] (now)--(w1);
+    \draw[farr] (w1)--(w2);
+    \draw[farr accent,line width=1.3pt] (w2)--(goal);
+  \end{tikzpicture}}
+  \end{center}
+  \vskip1mm
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \begin{casestudy}{壁①：膨大性}
+        \footnotesize
+        PDF・XBRL・HTML・画像\dots\ \kw{巨大すぎる}データを、
+        いかにパースし検索可能にするか。
+      \end{casestudy}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{casestudy}{壁②：時系列}
+        \footnotesize
+        アクセスもAPIも分析もできる。だがAIエージェントは、
+        時系列を本当に\kw{「理解」}しているのか。
+      \end{casestudy}
+    \end{column}
+  \end{columns}
+  \vskip2mm
+  \begin{center}\small\color{brandnavy}
+    「読める」の\kwg{先}にこそ落とし穴。次の Part で、この\kw{2つの壁}を一つずつ越えていく。
+  \end{center}
+\end{frame}

@@ -1,0 +1,120 @@
+\section{立ちはだかる2つの壁}
+
+% =====================================================================
+%  Part 02-1: 「読める」の先の飛躍 ── AI-Ready → AIエージェント・レディ
+% =====================================================================
+\begin{frame}{「読める」の、その先へ}{AI-Ready から AIエージェント・レディへ}
+  \begin{columns}[T]
+    \begin{column}{0.47\textwidth}
+      \begin{itemize}\small
+        \item \kw{AI-Ready} とは、データが\kwg{アウトカム（＝リターン）}につながる状態（Part 01）。
+        \item だが「\kw{読める・検索できる}」だけでは、まだ\kw{人間が使う道具}にすぎない。
+        \item ゴールは\kwg{AIエージェント}がデータを\kwg{自律的に使いこなす}状態＝\kwg{AIエージェント・レディ}。
+      \end{itemize}
+      \vskip2mm
+      \begin{keytake}{ここで初めて壁が見える}
+        \footnotesize 「読める」から「使いこなす」への\kw{段差}にこそ、越えるべき\kwg{2つの壁}が潜む。
+      \end{keytake}
+    \end{column}
+    \begin{column}{0.50\textwidth}
+      \begin{center}
+      \scalebox{0.85}{%
+      \begin{tikzpicture}[font=\footnotesize]
+        % 低い段：AI-Ready
+        \node[fnode blue, text width=4.0cm, minimum height=1.35cm] (low) at (0,0)
+          {\textbf{AI-Ready}\\[0.5mm]{\scriptsize 人間が読める・検索できる}};
+        % 高い段：AIエージェント・レディ
+        \node[fnode accent, text width=4.4cm, minimum height=1.55cm] (high) at (3.1,3.1)
+          {\textbf{AIエージェント・レディ}\\[0.5mm]{\scriptsize エージェントが自律的に使いこなす}};
+        % 段差を示す縦の点線ブラケット
+        \draw[brandmute, dashed, line width=0.7pt]
+          (low.north east) -- ([xshift=0mm]low.north east |- high.south);
+        \draw[decorate, decoration={brace,amplitude=5pt,mirror}, brandnavy, line width=0.8pt]
+          ([xshift=6mm,yshift=1mm]low.north east) -- ([xshift=6mm,yshift=-1mm]high.south -| low.north east);
+        \node[fchip, fill=brandnavy, font=\bfseries\sffamily\scriptsize, rotate=90]
+          at ([xshift=13mm]$(low.north east)!0.5!(high.south -| low.north east)$)
+          {2つの壁};
+        % 上昇を示す金の曲線矢印
+        \draw[farr accent, line width=1.3pt]
+          (low.north) .. controls +(0,1.2) and +(-1.3,-0.2) .. (high.west);
+      \end{tikzpicture}}
+      \end{center}
+      \figcap{「読める」と「使いこなす」の間には段差がある。}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =====================================================================
+%  Part 02-2: 【中心図】2つの壁の全体像
+% =====================================================================
+\begin{frame}{立ちはだかる2つの壁}{多様な金融データ ── 壁① × 壁② ── アウトカム}
+  \begin{center}
+  \resizebox{0.88\linewidth}{!}{%
+  \begin{tikzpicture}[font=\footnotesize]
+    % --- 出発点：多様な金融データ（手前） ---
+    \node[fnode muted, text width=2.5cm, minimum height=3.3cm, align=center] (data) at (0,0)
+      {\textbf{多様な金融}\\\textbf{データ}\\[1.2mm]
+       {\scriptsize PDF\\XBRL\\HTML\\画像\\API}};
+    % --- 壁①：膨大性（青系） ---
+    \node[fnode dark, fill=brandblue, draw=brandnavy, text width=2.1cm,
+          minimum height=4.4cm, align=center] (w1) at (4.0,0.1)
+      {\\[2mm]\textbf{壁①}\\[1mm]\textbf{膨大性}\\[2.5mm]
+       {\scriptsize\itshape 非構造データを\\どうパース・\\検索可能に\\するか}};
+    \node[fchip, fill=brandblue, above=1mm of w1] {WALL 1};
+    % --- 壁②：時系列（金系） ---
+    \node[fnode dark, fill=brandaccent!88!black, draw=brandaccent!60!black,
+          text width=2.1cm, minimum height=4.4cm, align=center] (w2) at (7.1,0.1)
+      {\\[2mm]\textbf{壁②}\\[1mm]\textbf{時系列}\\[2.5mm]
+       {\scriptsize\itshape アクセス可・\\API有・分析可\\ でも本当に\\理解しているか}};
+    \node[fchip, fill=brandaccent!88!black, above=1mm of w2] {WALL 2};
+    % --- ゴール：アウトカム（壁の向こう） ---
+    \node[fnode good, text width=2.4cm, minimum height=3.3cm, align=center] (out) at (11.0,0)
+      {\textbf{アウトカム}\\[0.5mm]\textbf{＝リターン}\\[1.5mm]
+       {\scriptsize エージェントが\\意思決定を\\駆動する}};
+    % --- 矢印：データ→（壁に阻まれつつ）→アウトカム ---
+    \draw[farr, line width=1.1pt] (data.east) -- (w1.west);
+    \draw[farr dash] ([yshift=3mm]w1.east) -- ([yshift=3mm]w2.west);
+    \draw[farr accent, line width=1.2pt] (w2.east) -- (out.west);
+    % 手前・向こうのラベル
+    \node[brandmute, font=\scriptsize] at (0,-2.15) {＝ 手前（入口）};
+    \node[brandmute, font=\scriptsize] at (11.0,-2.15) {＝ 向こう（目的地）};
+  \end{tikzpicture}}
+  \end{center}
+  \vskip0.5mm
+  \figcap{2本の壁を越えて初めて、データは\kwg{アウトカム}に届く。}
+\end{frame}
+
+% =====================================================================
+%  Part 02-3: なぜ「落とし穴」なのか
+% =====================================================================
+\begin{frame}{なぜ「落とし穴」なのか}{解決済みに見えて、じつはまだ越えていない}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{tikzpicture}[font=\footnotesize, node distance=3mm]
+        \node[fnode good, text width=6.0cm] (seen)
+          {「\,APIもある・アクセスできる・分析もできる\,」\\[1mm]
+           \kwbad{→ 一見、解決済みに見える}};
+        \node[fnode bad, below=of seen, text width=6.0cm] (real)
+          {しかし実態は ──\\[1mm]
+           \kwg{AIエージェントが本当に使える状態ではない}};
+        \draw[farr, line width=1.0pt] (seen)--(real);
+      \end{tikzpicture}
+      \vskip2mm
+      \begin{itemize}\wide
+        \item だから「壁はもう無い」と思い込む ── これが最大の\kwbad{落とし穴}。
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{insight}{壁②はさらに深い落とし穴}
+        \small
+        壁①（膨大性）は「大きすぎて明らかに難しい」と\kw{見える}分、
+        まだ気づける。\\[1.5mm]
+        だが壁②（時系列）は ──\\
+        \kwg{フレームワークはあるのに、一個一個がつながっていない}。
+        「できているつもり」で素通りしてしまう。
+      \end{insight}
+      \vskip1.5mm
+      {\footnotesize\color{brandmute} → 次は \kw{Part 03＝膨大性}／\kw{Part 04＝時系列} の順に崩す。}
+    \end{column}
+  \end{columns}
+\end{frame}

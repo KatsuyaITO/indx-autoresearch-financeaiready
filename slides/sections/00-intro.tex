@@ -1,0 +1,45 @@
+% =====================================================================
+%  自己紹介 ＋ 会社紹介（冒頭・タイトルの直後）
+% =====================================================================
+\begin{frame}{自己紹介と会社紹介}{Speaker \& Company}
+  \begin{columns}[T]
+    % ---------------- 左：話者 ----------------
+    \begin{column}{0.49\textwidth}
+      \begin{tikzpicture}[baseline=(txt.base)]
+        \node[circle,fill=brandnavy,text=white,minimum size=12mm,inner sep=0pt,
+              font=\bfseries\small] (av) {伊藤};
+        \node[right=2.5mm of av,anchor=west,inner sep=0pt,align=left] (txt)
+          {{\large\bfseries\color{brandnavy}伊藤 克哉}\,{\footnotesize\color{brandmute}（いとう かつや）}\\[0.3mm]
+           {\footnotesize\color{brandgray}株式会社INDX 代表取締役CEO}};
+      \end{tikzpicture}
+      \vskip1mm
+      \begin{itemize}\footnotesize\setlength\itemsep{1.2mm}
+        \item 東京大学 \kw{数学科} → 大学院 \kw{経済学研究科}
+        \item \kw{Preferred Networks} → \kw{三井物産} → 2025年 \kw{INDX 創業}
+        \item 専門：\kwg{機械学習 × クオンツ金融}
+        \item \kw{AAAI／AAMAS} 等に筆頭著者論文
+      \end{itemize}
+    \end{column}
+    % ---------------- 右：会社 ----------------
+    \begin{column}{0.49\textwidth}
+      \begin{keytake}{株式会社INDX}
+        \footnotesize
+        \begin{tabular}{@{}p{1.1cm}@{}p{4.0cm}@{}}
+          \color{brandmute}設立 & 2025年4月・東京都港区\\
+          \color{brandmute}代表 & 伊藤 克哉\\
+          \color{brandmute}資金 & シードで総額\kw{1億円}\\
+        \end{tabular}
+        \vskip1mm
+        日本企業に眠る\kw{非構造データ}を価値に変える
+        \kwg{AI \& データプラットフォーマー}。\kw{オンプレミス生成AI}でデータ主権を守る。
+      \end{keytake}
+    \end{column}
+  \end{columns}
+  \vskip1mm
+  % ---------------- 下：タグライン帯（今日のテーマと直結） ----------------
+  \begin{tcolorbox}[enhanced,colback=brandaccent!92!black,coltext=white,boxrule=0pt,
+    arc=1mm,left=3mm,right=3mm,top=1mm,bottom=1mm,halign=center,
+    fontupper=\bfseries\sffamily\small]
+    ミッション：「日本を、\,AIレディに。」\ ── 眠る企業データを、AIの力に変える
+  \end{tcolorbox}
+\end{frame}

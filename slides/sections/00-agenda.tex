@@ -1,0 +1,64 @@
+% =====================================================================
+%  アジェンダ + 話者紹介
+% =====================================================================
+
+% ---- 話者・きょうの問い ----
+\begin{frame}{きょうの問い}{いとう＠INDX}
+  \begin{columns}[T]
+    \begin{column}{0.54\textwidth}
+      \begin{itemize}\small
+        \item 私たちは金融データを\kw{AI-Ready}にする仕事をしています。
+        \item きょう話したいのは、2つの素朴な問いです。
+      \end{itemize}
+      \vskip2mm
+      \begin{keytake}{2つの問い}
+        \small
+        \begin{enumerate}
+          \item \kw{AI-Readyデータとは何か？}\ ―「読める」だけで十分なのか。
+          \item AIエージェントが金融情報を\kwg{「使える」}ようになると、いったい\kwg{何が起きるのか？}
+        \end{enumerate}
+      \end{keytake}
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      \begin{insight}{結論を先に}
+        AI-Readyの本質は「アクセスできる」ことではなく、\\
+        データが\kwg{アウトカム（＝リターン）}に
+        つながる状態にあること。\\[1mm]
+        そこへ至る道には\kw{2つの壁}がある。
+      \end{insight}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ---- アジェンダ ----
+\begin{frame}{アジェンダ}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \begin{enumerate}\wide
+        \item[\textcolor{brandblue}{\textbf{01}}] \textbf{AIレディとは何か}\\
+          {\small\color{brandgray} 「読める」から「アウトカムを生む」へ}
+        \item[\textcolor{brandblue}{\textbf{02}}] \textbf{立ちはだかる2つの壁}\\
+          {\small\color{brandgray} AI-Ready から AIエージェント・レディへ}
+        \item[\textcolor{brandblue}{\textbf{03}}] \textbf{壁①：膨大性}\\
+          {\small\color{brandgray} PDF・XBRL・HTML・画像をどう読み解くか}
+        \item[\textcolor{brandblue}{\textbf{04}}] \textbf{壁②：時系列}\\
+          {\small\color{brandgray} 本当にAIエージェントは時系列を理解しているか}
+        \item[\textcolor{brandblue}{\textbf{05}}] \textbf{その先：スーパーヒューマンへ}\\
+          {\small\color{brandgray} まとめと展望}
+      \end{enumerate}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{center}
+      \begin{tikzpicture}[node distance=3.2mm,font=\footnotesize]
+        \node[fnode blue,text width=5.4cm] (a) {\textbf{① AIレディの再定義}\\アウトカム（リターン）起点で考える};
+        \node[fnode,below=of a,text width=5.4cm] (b) {\textbf{② 2つの壁}\\「読める」の先にある落とし穴};
+        \node[fnode accent,below=of b,text width=5.4cm] (c) {\textbf{③④ 壁を越える解}\\膨大性 × 時系列};
+        \node[fnode dark,below=of c,text width=5.4cm] (d) {\textbf{⑤ スーパーヒューマン}\\人を超える意思決定へ};
+        \draw[farr blue] (a)--(b);
+        \draw[farr] (b)--(c);
+        \draw[farr accent] (c)--(d);
+      \end{tikzpicture}
+      \end{center}
+    \end{column}
+  \end{columns}
+\end{frame}

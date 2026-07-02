@@ -1,0 +1,243 @@
+\section{壁①：膨大性をどう読み解くか}
+
+% =====================================================================
+%  Frame 1: 問題定義 — 金融文書は明らかに大きすぎる／構造が壊れている
+% =====================================================================
+\begin{frame}{壁①：膨大性}{金融文書は「明らかに大きすぎる／構造が壊れている」}
+  \begin{columns}[T]
+    \begin{column}{0.44\textwidth}
+      \begin{itemize}\small
+        \item 有価証券報告書・決算短信・目論見書……
+          金融の一次情報は\kw{PDF・XBRL・HTML・スキャン画像}が入り混じる。
+        \item 数百ページ、ネストした表、注記・脚注に散る数値。
+          \kwbad{人が全部を読み切ることは不可能}。
+        \item しかもLLMに\kwbad{生のまま}渡すと、
+          構造が壊れて数値を取り違える。
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.54\textwidth}
+      \begin{center}
+      \scalebox{0.75}{%
+      \begin{tikzpicture}[font=\footnotesize,node distance=3mm]
+        % データ源アイコン群
+        \node[fnode,text width=2.1cm] (pdf) {\textbf{PDF}\\有報・短信};
+        \node[fnode,right=of pdf,text width=2.1cm] (xbrl) {\textbf{XBRL}\\財務タグ};
+        \node[fnode,below=of pdf,text width=2.1cm] (html) {\textbf{HTML}\\適時開示};
+        \node[fnode,below=of xbrl,text width=2.1cm] (img) {\textbf{画像}\\スキャンPDF};
+        % 束ねてLLMへ
+        \node[fnode dark,right=8mm of $(xbrl)!0.5!(img)$,text width=1.9cm] (llm) {\textbf{生のLLM}};
+        \draw[farr] (pdf.east) -- (llm.west);
+        \draw[farr] (xbrl.east) -- (llm.west);
+        \draw[farr] (html.east) -- (llm.west);
+        \draw[farr] (img.east) -- (llm.west);
+        \node[fnode bad,right=7mm of llm,text width=2.0cm] (fail) {\textbf{数値の}\\\textbf{取り違え}};
+        \draw[farr accent] (llm) -- (fail);
+      \end{tikzpicture}}
+      \end{center}
+      \figcap{バラバラな一次情報を、そのまま流し込むと壊れる。}
+    \end{column}
+  \end{columns}
+  \vskip1mm
+  \bigstate{「読める」だけでは足りない。まず\kwg{読み解ける}形にする必要がある。}
+\end{frame}
+
+% =====================================================================
+%  Frame 2: 証拠 — 生のLLMは金融文書で崩れる（4数値の棒グラフ）
+% =====================================================================
+\begin{frame}{証拠：生のLLMは金融文書で崩れる}{ボトルネックはモデルではなく、データ準備}
+  \begin{columns}[T]
+    \begin{column}{0.56\textwidth}
+      \begin{center}
+      \scalebox{0.8}{%
+      \begin{tikzpicture}
+        \begin{axis}[
+          width=6.9cm, height=5.0cm,
+          ybar, bar width=8pt,
+          ymin=0, ymax=100,
+          ylabel={\footnotesize 精度 (\%)},
+          symbolic x coords={PDF表,FinBench,Fin-RATE,AUDIT},
+          xtick=data,
+          x tick label style={font=\scriptsize,align=center},
+          y tick label style={font=\scriptsize},
+          ylabel style={font=\scriptsize},
+          enlarge x limits=0.18,
+          nodes near coords, every node near coord/.append style={font=\scriptsize\bfseries},
+          axis line style={brandline},
+          tick style={brandline},
+          ymajorgrids, grid style={brandline!70,line width=0.3pt},
+        ]
+          % 壊れた設計（低い方）=bad、整った設計（高い方）=good
+          \addplot[fill=brandbad!80,draw=brandbad] coordinates
+            {(PDF表,56) (FinBench,19) (Fin-RATE,1.27) (AUDIT,18)};
+          \addplot[fill=brandgood!75,draw=brandgood] coordinates
+            {(PDF表,76) (Fin-RATE,23.91) (AUDIT,82)};
+        \end{axis}
+      \end{tikzpicture}}
+      \end{center}
+      \figcap{\textcolor{brandbad}{■}生のまま\quad\textcolor{brandgood}{■}前処理・検証を入れた整った設計}
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      \footnotesize
+      \begin{itemize}\setlength\itemsep{1.6mm}
+        \item \kw{ネスト表PDF}：GPT-4oは前処理なしで\kwbad{56\%}→専用パイプラインで\kwgood{76\%}。
+        \item \kw{FinanceBench}：GPT-4-Turbo＋検索でも\kwbad{81\%}の質問が誤答・回答拒否。
+        \item \kw{Fin-RATE}：企業横断比較で精度が\kwbad{23.91\%→1.27\%}へ崩壊（検索設計の失敗）。
+        \item \kw{AUDITFLOW}：検証層を外すと\kwbad{82\%→18\%}へ崩壊。
+      \end{itemize}
+      \vskip1mm
+      \begin{insight}{結論}
+        崩れるのは\kwg{データ準備}の失敗が原因。
+        モデルを替えても解決しない。
+      \end{insight}
+    \end{column}
+  \end{columns}
+  \srcnote{Multi-structured 2025 / FinanceBench 2023 / Fin-RATE 2026 / AUDITFLOW 2026}
+\end{frame}
+
+% =====================================================================
+%  Frame 3: 中心図 — 1つの解＝AI-Readyパイプライン（横流れ）
+% =====================================================================
+\begin{frame}{一つの解：AI-Readyパイプライン}{raw文書を「読み解ける」状態へ変換する}
+  \begin{center}
+  \scalebox{0.85}{%
+  \begin{tikzpicture}[font=\footnotesize,node distance=6mm]
+    \node[fnode muted,text width=1.7cm] (raw) {\textbf{raw文書}\\PDF/XBRL/HTML};
+    \node[fnode blue,right=of raw,text width=1.9cm] (parse) {\textbf{パース／}\\\textbf{正規化}};
+    \node[fnode blue,right=of parse,text width=2.1cm] (struct) {\textbf{構造化}\\表・数値・脚注の\\意味を保持};
+    \node[fnode blue,right=of struct,text width=1.9cm] (chunk) {\textbf{チャンク化}\\／索引};
+    \node[fnode accent,right=of chunk,text width=2.0cm] (search) {\textbf{階層・グラフ}\\\textbf{検索}};
+    \draw[farr] (raw)--(parse);
+    \draw[farr] (parse)--(struct);
+    \draw[farr] (struct)--(chunk);
+    \draw[farr accent] (chunk)--(search);
+    % 下段：エージェント→アウトカム
+    \node[fnode dark,below=10mm of $(chunk)!0.5!(search)$,text width=2.3cm] (agent) {\textbf{LLM／}\\\textbf{エージェント}};
+    \node[fnode good,left=10mm of agent,text width=2.3cm] (outcome) {\textbf{アウトカム}\\（リターン）};
+    \draw[farr accent] (search) |- (agent);
+    \draw[farr] (agent)--(outcome);
+  \end{tikzpicture}}
+  \end{center}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \begin{insight}{設計の勘所}
+        \footnotesize
+        表・数値・脚注の\kw{意味を保ったまま}構造化することが、
+        後段の検索と推論の精度を決める。
+      \end{insight}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{keytake}{検索アーキテクチャ}
+        \footnotesize
+        \kwg{階層型・グラフ型}の検索は、フラットなベクトル検索を
+        上回る。文書の構造を捨てないことが鍵。
+      \end{keytake}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =====================================================================
+%  Frame 4: コストのパレートフロンティア
+% =====================================================================
+\begin{frame}{高精度＝最善とは限らない}{コストのパレートフロンティアで選ぶ}
+  \begin{columns}[T]
+    \begin{column}{0.52\textwidth}
+      \begin{center}
+      \begin{tikzpicture}
+        \begin{axis}[
+          width=6.6cm, height=5.0cm,
+          xlabel={\footnotesize 文書あたりコスト (\$)},
+          ylabel={\footnotesize F1スコア},
+          xmin=0, xmax=0.5, ymin=0.90, ymax=0.96,
+          x tick label style={font=\scriptsize},
+          y tick label style={font=\scriptsize},
+          xlabel style={font=\scriptsize}, ylabel style={font=\scriptsize},
+          axis line style={brandline}, tick style={brandline},
+          ymajorgrids, grid style={brandline!70,line width=0.3pt},
+        ]
+          % 反射型（高精度・高コスト）
+          \addplot[only marks,mark=*,mark size=3pt,brandbad] coordinates {(0.430,0.943)};
+          \node[anchor=west,font=\scriptsize\bfseries,brandbad] at (axis cs:0.430,0.943) {\ 反射型};
+          % 階層型（低コスト・僅差の精度）
+          \addplot[only marks,mark=*,mark size=3pt,brandgood] coordinates {(0.148,0.924)};
+          \node[anchor=west,font=\scriptsize\bfseries,brandgood] at (axis cs:0.148,0.924) {\ 階層型};
+        \end{axis}
+      \end{tikzpicture}
+      \end{center}
+      \figcap{F1は僅差（0.943 vs 0.924）だが、コストは\kwg{約3倍}違う。}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \footnotesize
+      \begin{tabular}{@{}lcc@{}}
+        \toprule
+         & \textbf{反射型} & \textbf{階層型} \\
+        \midrule
+        F1 & 0.943 & 0.924 \\
+        \$/文書 & \kwbad{0.430} & \kwgood{0.148} \\
+        \bottomrule
+      \end{tabular}
+      \vskip2mm
+      \begin{insight}{100万文書規模なら}
+        \footnotesize
+        コスト差は\kwg{\$282{,}000}。
+        リーダーボードの精度だけで調達を決めると、
+        \kwbad{TCOを見誤る}。
+      \end{insight}
+      \vskip1mm
+      \kw{規模に応じた設計}がTCO（総保有コスト）を左右する。
+    \end{column}
+  \end{columns}
+  \srcnote{Benchmarking multi-agent 2026}
+\end{frame}
+
+% =====================================================================
+%  Frame 5: 接続はコモディティ化、価値は解釈へ
+% =====================================================================
+\begin{frame}{接続はコモディティ化する}{価値は「持つこと」から「解釈・行動」へ}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \begin{center}
+      \scalebox{0.85}{%
+      \begin{tikzpicture}[font=\footnotesize,node distance=4mm]
+        \node[fchip,fill=brandblue] (b) {Bloomberg};
+        \node[fchip,fill=brandblue,right=of b] (l) {LSEG};
+        \node[fchip,fill=brandblue,below=of b] (f) {FactSet};
+        \node[fchip,fill=brandblue,right=of f] (d) {Daloopa};
+        \node[fnode dark,below=7mm of $(f)!0.5!(d)$,text width=3.6cm] (mcp)
+          {\textbf{MCP サーバー}\\（2025〜2026 提供開始）};
+        \draw[farr] (b) -- (mcp); \draw[farr] (l) -- (mcp);
+        \draw[farr] (f) -- (mcp); \draw[farr] (d) -- (mcp);
+      \end{tikzpicture}}
+      \end{center}
+      \figcap{主要ベンダーがMCPを提供し、AIから\kw{標準接続}できる。}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{insight}{価値の移動：接続から解釈へ}
+        データへの\kw{接続}はコモディティ化した。残る差別化は――
+        \begin{itemize}\setlength\itemsep{1.2mm}
+          \item データを\kwg{解釈}する力
+          \item 文脈を与え\kwg{文脈化}する力
+          \item \kwg{行動（アウトカム）につなぐ}力
+        \end{itemize}
+      \end{insight}
+    \end{column}
+  \end{columns}
+  \srcnote{Bloomberg / LSEG / FactSet / Daloopa の MCP 提供（2025〜2026）}
+\end{frame}
+
+% =====================================================================
+%  Frame 6: 壁①まとめ
+% =====================================================================
+\begin{frame}{壁①：膨大性 — まとめ}{}
+  \begin{keytake}{押さえるべき3点}
+    \begin{enumerate}\setlength\itemsep{2mm}
+      \item 膨大性は\kw{前処理・構造化・検索設計}で越えられる。
+        生のLLM任せでは崩れるが、パイプラインで\kwgood{56\%→76\%}のように取り戻せる。
+      \item ボトルネックは\kwg{モデル能力ではなくデータ準備}。
+        モデルを替える前に、データを読み解ける形にする。
+      \item 差別化は\kwg{接続ではなく解釈}。
+        MCPで接続がコモディティ化したいま、価値は解釈・文脈化・行動へ移る。
+    \end{enumerate}
+  \end{keytake}
+  \vskip1.5mm
+  \bigstate{壁①は\kwg{AI-Readyパイプライン}で越えられる。次は壁②：時系列。}
+\end{frame}

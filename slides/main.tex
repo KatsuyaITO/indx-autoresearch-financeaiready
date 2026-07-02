@@ -1,0 +1,45 @@
+% !TEX program = lualatex
+% =====================================================================
+%  投資情報をAI-Readyにせよ  —  マケデコ / J-Quants 登壇スライド
+%  Compile: latexmk -lualatex main.tex   （または lualatex を2回）
+%  白背景・青エンタープライズ・日本語（LuaLaTeX + luatexja）
+% =====================================================================
+\documentclass[aspectratio=169,11pt,dvipsnames]{beamer}
+
+\usepackage{fontspec}
+\usepackage{luatexja}
+
+% ---- 自作テーマ＋共通プリアンブル ----
+\usepackage{./theme/beamerthemeindx}
+\input{theme/preamble}
+
+% ---- タイトル情報 ----
+\title{投資情報を{\color{brandblue}AI-Ready}にせよ}
+\subtitle{AI-Readyデータとは何か？\ ―\ AIエージェントが金融情報を「使える」ようになると何が起きるのか}
+\author{いとう\,\textcolor{brandmute}{＠}\,INDX}
+\institute{マケデコ（market-api.dev）／ J-Quants コミュニティ}
+\date{2026年7月2日 \quad\textcolor{brandmute}{|}\quad 「投資情報をAI-Readyにせよ！」}
+
+\begin{document}
+
+% ---- 表紙 ----
+{\setbeamertemplate{footline}{}\begin{frame}[plain]\titlepage\end{frame}}
+
+% ---- 自己紹介・会社紹介 ----
+\input{sections/00-intro}
+
+% ---- アジェンダ ----
+\input{sections/00-agenda}
+
+% ---- Part 1: AIレディとは何か ----
+\input{sections/01-aiready-definition}
+
+% ---- Part 2: 2つの壁（AIエージェント・レディへ） ----
+\input{sections/02-two-walls-intro}
+\input{sections/03-wall1-volume}
+\input{sections/04-wall2-timeseries}
+
+% ---- Part 3: 究極の状態とまとめ ----
+\input{sections/05-superhuman-closing}
+
+\end{document}

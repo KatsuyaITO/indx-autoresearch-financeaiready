@@ -1,0 +1,16 @@
+# LaTeX build intermediates
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.fls
+*.fdb_latexmk
+*.vrb
+*.bbl
+*.bcf
+*.blg
+*.run.xml
+*.synctex.gz
+build.log

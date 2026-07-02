@@ -1,0 +1,52 @@
+Insights. Original thinking. Creative minds. Man Group’s Insights.
+Man Institute
+Stay ahead of the curve with market snapshots and in-depth research.
+MARKET VIEWS READ 4 MIN
+JULY 1, 2026
+Views from the Floor
+The Hard Questions for AI Bonds Investors
+Investors looked to SpaceX for signals on the AI bond wave, but what they found probably raises more questions.
+PODCASTS READ & LISTEN 42 MIN
+JULY 1, 2026
+A Sustainable Future
+Cecilia Tam on the IEA's 2026 World Energy Investment Report
+Cecilia Tam, IEA Head of Energy Investment Unit, explains why energy security has become one of the most powerful drivers of the clean energy transition.
+IN FOCUS READ 11 MIN
+JUNE 25, 2026
+A Trend Following Deep Dive: Cash (Equities) Is King
+There is more to equity trend following than index futures.
+MARKET VIEWS READ 4 MIN
+JUNE 23, 2026
+Views from the Floor
+The Strait of Uncertainty
+The absence of a roadmap to a full peace deal means investors may need to prepare for more volatility and inflation spikes for the rest of the year. Also, what will markets make of prospective UK Prime Minister Andy Burnham?
+ACADEMIC RESEARCH READ 12 MIN
+JUNE 23, 2026
+Catching Angels Before They Fall
+Can machine learning potentially advance credit rating transition forecasting for insurance portfolio optimisation?
+DISCRETIONARY READ 7 MIN
+JUNE 18, 2026
+After the Strait, What’s Next for Commodities?
+The Iran war has created a new commodities paradigm where investors need to prepare for both cyclical and structural dislocations and investment opportunities.
+VIEW ALL
+Man Technology Articles
+From quantum computing and data science to innovations in database management and trade execution, technology powers everything we do.
+Subscribe to Tech Articles now
+Faster Python 3.14: faster compression and fixing 28-year-old bugs
+May 8, 2026
+Python 3.14 swaps the ageing zlib library for zlib-ng, bringing 2–3x faster compression and 2x faster decompression. A 28-year-old bug in Python's default gzip level was also fixed along the way.
+,
+Improving Python: How we made pip install twice as fast
+July 15, 2025
+This article shares our journey to optimise pip, proving that even well-established tools like pip and the Python interpreter have room for improvement.
+TL;DR: Use pip 24.2 or newer – it’s twice as fast!
+,
+Inside Man Technology: Insights from Our Summer Interns
+October 18, 2024
+Hear first-hand from our summer interns what it's like to work at Man Technology, highlighting the projects, learning, and opportunities they embraced.
+,
+Leveraging Aeron Open-Source Technology to Improve Latency of FX Execution System
+April 30, 2024
+FX trading is fast-paced and complex, requiring low-latency trading systems to compete with the best.
+,
+MORE

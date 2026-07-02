@@ -46,12 +46,12 @@
 % =====================================================================
 \begin{frame}{証拠：生のLLMは金融文書で崩れる}{ボトルネックはモデルではなく、データ準備}
   \begin{columns}[T]
-    \begin{column}{0.56\textwidth}
+    \begin{column}{0.50\textwidth}
       \begin{center}
       \scalebox{0.8}{%
       \begin{tikzpicture}
         \begin{axis}[
-          width=6.9cm, height=5.0cm,
+          width=6.9cm, height=4.0cm,
           ybar, bar width=8pt,
           ymin=0, ymax=100,
           ylabel={\footnotesize 精度 (\%)},
@@ -76,19 +76,14 @@
       \end{center}
       \figcap{\textcolor{brandbad}{■}生のまま\quad\textcolor{brandgood}{■}前処理・検証を入れた整った設計}
     \end{column}
-    \begin{column}{0.42\textwidth}
-      \footnotesize
-      \begin{itemize}\setlength\itemsep{1.6mm}
-        \item \kw{ネスト表PDF}：GPT-4oは前処理なしで\kwbad{56\%}→専用パイプラインで\kwgood{76\%}。
-        \item \kw{FinanceBench}：GPT-4-Turbo＋検索でも\kwbad{81\%}の質問が誤答・回答拒否。
-        \item \kw{Fin-RATE}：企業横断比較で精度が\kwbad{23.91\%→1.27\%}へ崩壊（検索設計の失敗）。
+    \begin{column}{0.48\textwidth}
+      \scriptsize
+      \begin{itemize}\setlength\itemsep{2.4mm}
+        \item \kw{ネスト表PDF}：前処理なし\kwbad{56\%}→専用パイプラインで\kwgood{76\%}。
+        \item \kw{FinanceBench}：GPT-4-Turbo＋検索でも\kwbad{81\%}が誤答・回答拒否。
+        \item \kw{Fin-RATE}：企業横断比較で\kwbad{23.91\%→1.27\%}へ崩壊。
         \item \kw{AUDITFLOW}：検証層を外すと\kwbad{82\%→18\%}へ崩壊。
       \end{itemize}
-      \vskip1mm
-      \begin{insight}{結論}
-        崩れるのは\kwg{データ準備}の失敗が原因。
-        モデルを替えても解決しない。
-      \end{insight}
     \end{column}
   \end{columns}
   \srcnote{Multi-structured 2025 / FinanceBench 2023 / Fin-RATE 2026 / AUDITFLOW 2026}
@@ -99,21 +94,20 @@
 % =====================================================================
 \begin{frame}{一つの解：AI-Readyパイプライン}{raw文書を「読み解ける」状態へ変換する}
   \begin{center}
-  \scalebox{0.85}{%
-  \begin{tikzpicture}[font=\footnotesize,node distance=6mm]
-    \node[fnode muted,text width=1.7cm] (raw) {\textbf{raw文書}\\PDF/XBRL/HTML};
-    \node[fnode blue,right=of raw,text width=1.9cm] (parse) {\textbf{パース／}\\\textbf{正規化}};
-    \node[fnode blue,right=of parse,text width=2.1cm] (struct) {\textbf{構造化}\\表・数値・脚注の\\意味を保持};
-    \node[fnode blue,right=of struct,text width=1.9cm] (chunk) {\textbf{チャンク化}\\／索引};
-    \node[fnode accent,right=of chunk,text width=2.0cm] (search) {\textbf{階層・グラフ}\\\textbf{検索}};
+  \scalebox{0.72}{%
+  \begin{tikzpicture}[font=\footnotesize,node distance=4mm]
+    \node[fnode muted,text width=1.6cm] (raw) {\textbf{raw文書}\\PDF/XBRL/HTML};
+    \node[fnode blue,right=of raw,text width=1.6cm] (parse) {\textbf{パース／}\\\textbf{正規化}};
+    \node[fnode blue,right=of parse,text width=1.9cm] (struct) {\textbf{構造化}\\表・数値・脚注の\\意味を保持};
+    \node[fnode blue,right=of struct,text width=1.6cm] (chunk) {\textbf{チャンク化}\\／索引};
+    \node[fnode accent,right=of chunk,text width=1.7cm] (search) {\textbf{階層・グラフ}\\\textbf{検索}};
+    \node[fnode dark,right=of search,text width=1.8cm] (agent) {\textbf{LLM／}\\\textbf{エージェント}};
+    \node[fnode good,right=of agent,text width=1.7cm] (outcome) {\textbf{アウトカム}\\（リターン）};
     \draw[farr] (raw)--(parse);
     \draw[farr] (parse)--(struct);
     \draw[farr] (struct)--(chunk);
     \draw[farr accent] (chunk)--(search);
-    % 下段：エージェント→アウトカム
-    \node[fnode dark,below=10mm of $(chunk)!0.5!(search)$,text width=2.3cm] (agent) {\textbf{LLM／}\\\textbf{エージェント}};
-    \node[fnode good,left=10mm of agent,text width=2.3cm] (outcome) {\textbf{アウトカム}\\（リターン）};
-    \draw[farr accent] (search) |- (agent);
+    \draw[farr accent] (search)--(agent);
     \draw[farr] (agent)--(outcome);
   \end{tikzpicture}}
   \end{center}
@@ -140,11 +134,11 @@
 % =====================================================================
 \begin{frame}{高精度＝最善とは限らない}{コストのパレートフロンティアで選ぶ}
   \begin{columns}[T]
-    \begin{column}{0.52\textwidth}
+    \begin{column}{0.48\textwidth}
       \begin{center}
       \begin{tikzpicture}
         \begin{axis}[
-          width=6.6cm, height=5.0cm,
+          width=6.4cm, height=4.0cm,
           xlabel={\footnotesize 文書あたりコスト (\$)},
           ylabel={\footnotesize F1スコア},
           xmin=0, xmax=0.5, ymin=0.90, ymax=0.96,
@@ -167,23 +161,25 @@
     \end{column}
     \begin{column}{0.46\textwidth}
       \footnotesize
+      \renewcommand{\arraystretch}{1.05}%
       \begin{tabular}{@{}lcc@{}}
         \toprule
-         & \textbf{反射型} & \textbf{階層型} \\
+         & \textbf{\color{brandbad}反射型} & \textbf{\color{brandgood}階層型} \\
         \midrule
         F1 & 0.943 & 0.924 \\
         \$/文書 & \kwbad{0.430} & \kwgood{0.148} \\
         \bottomrule
       \end{tabular}
-      \vskip2mm
+      \vskip1mm
+      {\scriptsize
+       \textcolor{brandbad}{\textbf{反射型}}＝答えを\kwbad{自己検証して再試行}（高精度・高コスト）\\
+       \textcolor{brandgood}{\textbf{階層型}}＝管理役が\kwgood{下位に分担}（僅差の精度・低コスト）\par}
+      \vskip1.5mm
       \begin{insight}{100万文書規模なら}
         \footnotesize
-        コスト差は\kwg{\$282{,}000}。
-        リーダーボードの精度だけで調達を決めると、
-        \kwbad{TCOを見誤る}。
+        コスト差は\kwg{\$282{,}000}。精度だけで調達を決めると
+        \kwbad{TCOを見誤る}。\kw{規模に応じた設計}が鍵。
       \end{insight}
-      \vskip1mm
-      \kw{規模に応じた設計}がTCO（総保有コスト）を左右する。
     \end{column}
   \end{columns}
   \srcnote{Benchmarking multi-agent 2026}

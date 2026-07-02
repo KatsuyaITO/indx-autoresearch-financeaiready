@@ -45,12 +45,12 @@
 \begin{frame}{【落とし穴】本当に「理解」しているのか}{読めること $\neq$ 統計的構造を内在化していること}
   \begin{columns}[T]
     \begin{column}{0.46\textwidth}
-      \begin{itemize}\wide
+      \begin{itemize}\footnotesize\setlength\itemsep{1.0mm}
         \item LLMは時系列を\kwbad{トークン列としては読める}が、\\
           非定常性・レジーム変化・\kwbad{データリーク（先読み）}・因果を内在化していない。
         \item 学習カットオフ\emph{以降}に評価をずらすだけで――
       \end{itemize}
-      \vskip1.5mm
+      \vskip0.4mm
       \begin{insight}{ベンチのアルファは脆い}
         \footnotesize
         77件のLLMトレーディング研究のレビューで、取引コストを明示モデル化したのは\kwbad{わずか1件}、時間整合的で再現可能な評価は\kwbad{わずか2件}のみ。

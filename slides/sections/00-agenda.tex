@@ -4,26 +4,27 @@
 
 % ---- 話者・きょうの問い ----
 \begin{frame}{きょうの問い}{いとう＠INDX}
+  % ---- 全幅リード：両カラムの箱を同じ高さから始めるため、導入文は上に一本で ----
+  {\small 私たちは金融データを\kw{AI-Ready}にする仕事をしています。きょう話したいのは、\textbf{2つの素朴な問い}です。}
+  \vskip3mm
   \begin{columns}[T]
-    \begin{column}{0.54\textwidth}
-      \begin{itemize}\small
-        \item 私たちは金融データを\kw{AI-Ready}にする仕事をしています。
-        \item きょう話したいのは、2つの素朴な問いです。
-      \end{itemize}
-      \vskip2mm
+    % ---- 左：2つの問い ----
+    \begin{column}{0.53\textwidth}
       \begin{keytake}{2つの問い}
         \small
-        \begin{enumerate}
-          \item \kw{AI-Readyデータとは何か？}\ ―「読める」だけで十分なのか。
-          \item AIエージェントが金融情報を\kwg{「使える」}ようになると、いったい\kwg{何が起きるのか？}
+        \begin{enumerate}\setlength\itemsep{2.6mm}
+          \item \kw{AI-Readyデータとは何か？}\\
+            {\small ―「読める」だけで十分なのか。}
+          \item AIエージェントが金融情報を\kwg{「使える」}ようになると、\\
+            いったい\kwg{何が起きるのか？}
         \end{enumerate}
       \end{keytake}
     \end{column}
-    \begin{column}{0.42\textwidth}
+    % ---- 右：結論を先に ----
+    \begin{column}{0.44\textwidth}
       \begin{insight}{結論を先に}
-        AI-Readyの本質は「アクセスできる」ことではなく、\\
-        データが\kwg{アウトカム（＝リターン）}に
-        つながる状態にあること。\\[1mm]
+        AI-Readyの本質は「アクセスできる」ことではなく、
+        データが\kwg{アウトカム（＝リターン）}につながる状態にあること。\\[2mm]
         そこへ至る道には\kw{2つの壁}がある。
       \end{insight}
     \end{column}
@@ -34,7 +35,7 @@
 \begin{frame}{アジェンダ}
   \begin{columns}[T]
     \begin{column}{0.5\textwidth}
-      \begin{enumerate}\wide
+      \begin{enumerate}\small\setlength\itemsep{1.7mm}
         \item[\textcolor{brandblue}{\textbf{01}}] \textbf{AIレディとは何か}\\
           {\small\color{brandgray} 「読める」から「アウトカムを生む」へ}
         \item[\textcolor{brandblue}{\textbf{02}}] \textbf{立ちはだかる2つの壁}\\
@@ -49,7 +50,8 @@
     \end{column}
     \begin{column}{0.46\textwidth}
       \begin{center}
-      \begin{tikzpicture}[node distance=3.2mm,font=\footnotesize]
+      \scalebox{0.9}{%
+      \begin{tikzpicture}[node distance=2.7mm,font=\footnotesize]
         \node[fnode blue,text width=5.4cm] (a) {\textbf{① AIレディの再定義}\\アウトカム（リターン）起点で考える};
         \node[fnode,below=of a,text width=5.4cm] (b) {\textbf{② 2つの壁}\\「読める」の先にある落とし穴};
         \node[fnode accent,below=of b,text width=5.4cm] (c) {\textbf{③④ 壁を越える解}\\膨大性 × 時系列};
@@ -57,7 +59,7 @@
         \draw[farr blue] (a)--(b);
         \draw[farr] (b)--(c);
         \draw[farr accent] (c)--(d);
-      \end{tikzpicture}
+      \end{tikzpicture}}
       \end{center}
     \end{column}
   \end{columns}

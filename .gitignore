@@ -63,3 +63,8 @@ prompt.md
 # Remotion source for the README tutorial video. The whole project is ignored —
 # only the rendered output in /docs (tutorial.gif / .mp4) is committed.
 /remotion/
+
+# Local working docs for the talk/handson (personal notes + generated spec),
+# not part of the public template.
+spec.md
+talk.md

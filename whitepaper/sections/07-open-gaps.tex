@@ -1,0 +1,373 @@
+\section{未解決の課題（Open Gaps）}
+\label{sec:open-gaps}
+
+本節では、精査した一次情報が明示的に指摘している、現時点で未解決の研究・実装ギャップを整理する。ここに挙げるのは著者チームの推測ではなく、各論文・ベンチマーク報告が自らの限界として記載した内容――「本研究は〜を対象としない」「〜の標準はまだ存在しない」といった記述――を横断的に収集し、4つのカテゴリに再構成したものである。すなわち本節自体が、一次資料への遡及可能性を優先する本書の編集方針の延長線上にある。これらは今後の投資・研究の優先順位を検討するうえでの参照点となる。
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\small,
+  gapbox/.style={fnode, align=left, text width=52mm, minimum height=30mm},
+  gapbox2/.style={fnode blue, align=left, text width=52mm, minimum height=30mm},
+  gapbox3/.style={fnode muted, align=left, text width=52mm, minimum height=30mm},
+  gapbox4/.style={fnode accent, align=left, text width=52mm, minimum height=30mm}
+]
+
+\node[gapbox] (data) at (0,0) {
+  \textbf{①データ基盤・文書処理}\\[1.5mm]
+  \footnotesize
+  ・E2Eベンチマーク不在\\
+  ・非米国基準（IFRS/J-GAAP）の空白\\
+  ・継続自己更新型KG不在
+};
+
+\node[gapbox2] (agent) at (6.2,0) {
+  \textbf{②エージェント・意思決定}\\[1.5mm]
+  \footnotesize
+  ・敵対的評価・ストレステスト欠如\\
+  ・点時点整合性の標準不在\\
+  ・エージェント安全評価の非開示
+};
+
+\node[gapbox3] (eval) at (0,-3.6) {
+  \textbf{③評価・再現性・忠実性}\\[1.5mm]
+  \footnotesize
+  ・再現性の危機（取引コスト明示1/77件）\\
+  ・見かけの予測可能性（spurious）\\
+  ・忠実性・内部バイアスの監査不在
+};
+
+\node[gapbox4] (systemic) at (6.2,-3.6) {
+  \textbf{④システミックリスク・規制}\\[1.5mm]
+  \footnotesize
+  ・表現同質性とアルファ減衰の未計測\\
+  ・群集行動のリアルタイム監視基盤不在\\
+  ・静的モデルリスク枠組みの前提乖離
+};
+
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 未解決ギャップの全体地図}\ 4カテゴリ・20件超のギャップのうち特に重要な項目を抜粋。個々の内容は各小節を参照。①②は入力層と実行層、③は両者を横断する評価・検証層、④は市場・規制の外部性に対応する。}
+
+\subsection{データ基盤・文書処理}
+
+このカテゴリのギャップに共通するのは、モデル自体の能力不足ではなく、モデルへ入力する手前の層――ベンチマーク設計・知識グラフの更新様式・タクソノミの地域対応――がグローバル展開の足かせになっている点である。既存のベンチマーク・KG・抽出パイプラインの多くが米国基準・英語圏のデータに偏っており、その外側は事実上の空白地帯として残されている。
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\footnotesize,
+  hdr/.style={font=\small\bfseries\color{fignavy}, align=center, text width=62mm},
+  covbox/.style={fnode, align=left, text width=62mm, minimum height=11mm, anchor=west},
+  gapbox/.style={fnode muted, dashed, align=left, text width=62mm, minimum height=11mm, anchor=west},
+  dimlab/.style={font=\small\bfseries, align=right, text width=19mm, anchor=west}
+]
+
+\node[hdr] at (24mm,0) {既存ベンチマーク／パイプラインがカバー};
+\node[hdr] at (91mm,0) {地域・様式のギャップ};
+
+\node[dimlab] at (0,-11mm) (l1) {言語・地域};
+\node[covbox] at (24mm,-11mm) (c1) {英語・米国上場企業の提出書類\\\footnotesize（FinanceBench, BigFinanceBench）};
+\node[gapbox] at (91mm,-11mm) (g1) {日本・欧州・新興国の規制文書向け同等スイートなし（FinMMEvalは着手段階）};
+
+\node[dimlab] at (0,-25mm) (l2) {会計基準};
+\node[covbox] at (24mm,-25mm) (c2) {米国GAAPへのXBRLグラウンディング\\\footnotesize（FinTagging）};
+\node[gapbox] at (91mm,-25mm) (g2) {IFRS・J-GAAP・中国会計基準への拡張は未着手};
+
+\node[dimlab] at (0,-39mm) (l3) {知識グラフ};
+\node[covbox] at (24mm,-39mm) (c3) {スナップショット／イベント駆動型KG\\\footnotesize（FinDKG, FinKG-News）};
+\node[gapbox] at (91mm,-39mm) (g3) {継続自己更新型・ニュース/株式調査横断の統合KGは不在};
+
+\node[dimlab] at (0,-53mm) (l4) {ESG開示};
+\node[covbox] at (24mm,-53mm) (c4) {香港取引所2022年レポート\\\footnotesize（ESGReveal）};
+\node[gapbox] at (91mm,-53mm) (g4) {EU CSRD／ISSB S1,S2／SEC気候開示は未カバー};
+
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: データ基盤ギャップのカバレッジ地図}\ 実線＝既存ベンチマーク・パイプラインが到達している範囲、破線＝一次情報が指摘する未到達領域。4次元とも「米国・英語圏では前進、それ以外は空白」という同一パターンを示す。}
+
+\begin{itemize}
+  \item \textbf{エンドツーエンド・ベンチマークの不在}: AIネイティブ投資ライフサイクル（データ取り込み→構造化→仮説生成→ポートフォリオ構築→執行→取引後帰属分析）を端から端までカバーする権威あるベンチマークが存在せず、システム横断の厳密な比較が困難である。
+  \item \textbf{ハイブリッド記号-ニューラルアーキテクチャの未成熟}: RAGシステムは複雑な複数ページ表・文書横断の数値推論・正確な会計演算に依然として苦戦しており、記号エンジンに算術検証を委譲しLLMは意味理解に専念するハイブリッドアーキテクチャが未成熟である（AUDITFLOW\cite{auditflow2026}、FinGround\cite{finground2026}等が部分的な解を示すのみ）。
+  \item \textbf{継続自己更新型ナレッジグラフの不在}: FinDKG\cite{findkg2024}・FinKG-Newsのような金融知識グラフはスナップショット／イベント駆動型が中心で、ストリーミングニュース・開示・価格データをバッチ再構築なしにリアルタイムで取り込む継続自己更新型KGは未構築である。
+  \item \textbf{非米国会計基準向けXBRLグラウンディングの空白}: FinTagging\cite{fintagging2025}の約17\%精度ギャップは米国GAAPが対象であり、IFRS・J-GAAP・中国会計基準といったタクソノミ構造が異なる体系への構造化データ優先パイプラインの拡張は、グローバル投資AIにとって重大なインフラギャップとして残る。
+  \item \textbf{多言語・多形式文書の同時最適化研究の不在}: 本番OCR-LLM文書パイプラインではOCRがスループットのボトルネックであることが判明しているが、手書き注釈・複数スクリプトの表・決算資料に埋め込まれたチャートなど、多言語・多形式の金融文書をデータ居住性・プライバシー制約の下で同時最適化する大規模研究はまだない。
+  \item \textbf{ESG開示の地域横断カバレッジ不足}: ESGReveal\cite{esgreveal2023}は香港取引所の2022年レポートを対象としており、EU CSRD、ISSB S1/S2、SEC気候開示フレームワークをカバーしていない。非英語文書を含む地域横断のESG AI-readiness測定は未解決の研究課題である。
+  \item \textbf{財務QAベンチマークの地域偏在}: FinanceBench\cite{financebench2023}、BigFinanceBench\cite{bigfinancebench2026}はいずれも英語・米国上場企業の提出書類のみを対象とし、日本・欧州・新興国の規制文書（IFRS、J-GAAP、中国会計基準）向けの同等の評価スイートが存在しない。CLEF-2026 FinMMEval\cite{finmmeval2026}が着手を始めたばかりの段階である。
+  \item \textbf{ナレッジグラフの分断}: ニュース由来・株式調査由来のナレッジグラフはそれぞれ孤立して構築・評価されており、提出書類・ニュース・決算説明会・アナリストレポートを統合しポートフォリオ意思決定タスクでベンチマークされる統一的・継続更新型のマルチソースKGはまだ存在しない。
+\end{itemize}
+
+\subsection{エージェント・意思決定}
+
+このカテゴリのギャップは、エージェントが「何ができるか」ではなく「その判断をどう検証・監査するか」の空白に集約される。マルチエージェント投資フレームワークの実装は先行しているのに対し、敵対的評価・時間的整合性・規制トレーサビリティといった検証インフラは体系的に整備されておらず、公表される超過収益や自律性の主張を第三者が独立に検証する手段が乏しい。
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\footnotesize,
+  implbox/.style={fnode blue, align=center, text width=128mm, minimum height=11mm},
+  missbox/.style={fnode blue, dashed, align=left, text width=128mm, minimum height=9mm},
+  lbl/.style={font=\footnotesize\color{figgray}, align=center, text width=128mm},
+  node distance=2mm
+]
+
+\node[implbox] (impl) {\textbf{マルチエージェント投資フレームワークの実装は先行}\\\footnotesize リサーチ・デューデリジェンス・ポートフォリオモニタリング・リスク分析を担うエージェントは既に稼働};
+
+\node[lbl, below=1.5mm of impl] (gaplabel) {▼\ しかしその判断を検証・監査する標準は下の4層すべてで未整備\ ▼};
+
+\node[missbox, below=1.5mm of gaplabel] (m1) {\textbf{標準なし①}\ 敵対的評価・レジーム変化ストレステスト};
+\node[missbox, below=1.5mm of m1] (m2) {\textbf{標準なし②}\ 点時点（Point-in-Time）整合性の公開認証};
+\node[missbox, below=1.5mm of m2] (m3) {\textbf{標準なし③}\ 監査証跡を規制義務（MiFID II／SEC受託者責任／FINRA Rule 3110）へマッピングする公表フレームワーク};
+\node[missbox, below=1.5mm of m3] (m4) {\textbf{標準なし④}\ 文書取り込みから投資判断までを結合するE2E評価ハーネス};
+
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 実装先行・検証インフラ空白の構図}\ 上段（実線）はすでに稼働しているエージェント能力、下段4層（破線）はいずれも「未実装」ではなく「公表された評価・監査標準が存在しない」ギャップである。}
+
+\begin{itemize}
+  \item \textbf{敵対的評価・レジーム変化ストレステストの欠如}: エージェント型投資フレームワークはバックテストや短期のライブリターンを報告するが、市場レジーム変化・流動性危機・分布シフトデータに対する標準化された敵対的評価が欠如しており、公表された超過収益の主張を検証しづらい。
+  \item \textbf{点時点（Point-in-Time）整合性を強制する公開標準の不在}: ほとんどの財務LLM評価フレームワークは厳密な点時点の正確性を強制しておらず、モデルが模擬投資判断中に改訂済み提出書類や将来データに暗黙にアクセスしうる。本番投資システムにはルックアヘッドバイアスを防ぐ時間的ガードレールが必要だが、点時点コンプライアンスを監査・認証する公開標準は存在しない。
+  \item \textbf{自律型投資エージェントのガバナンス・監査可能性基準の欠如}: 「境界付き自律性（bounded autonomy）」アーキテクチャは有望だが、マルチエージェント金融システムの意思決定監査証跡を、MiFID II最良執行義務、SEC受託者責任、FINRA Rule 3110といった投資分野固有の規制義務にマッピングする公表フレームワークは存在しない。
+  \item \textbf{文書→意思決定の統合評価ハーネスの不在}: 生スキャンPDF取り込み、多言語OCR、ネストされた表抽出、文書横断的な数値検索、投資意思決定品質は個別には評価されてきたが、単一のエンドツーエンド評価ハーネスで結合的に評価した例はなく、性能劣化がパイプラインのどの段階に起因するか特定不能である。
+  \item \textbf{ドメイン適応と規制遵守の両立方法論の不在}: ドメイン適応型金融LLMはOpen FinLLM\cite{finllmleaderboard2025}など公開リーダーボードで評価されるが、規制遵守・データガバナンス制約を保ちつつ社内固有知識（内部リサーチモデル、案件フロー、リスク限度額）に適合させる確立された方法論が存在しない。
+\end{itemize}
+
+\subsection{評価・再現性・忠実性}
+
+前2カテゴリが「入力層（データ基盤）」と「実行層（エージェント）」の空白を扱ったのに対し、このカテゴリは両者を横断する検証層――報告された性能そのものが信用に足るか――のギャップに焦点を当てる。ここでの中心的な問いは「モデルが何を出力したか」ではなく「その出力・その超過収益の主張が、独立に再現・反証できるように測られているか」である。第\ref{sec:llm-analysis}部・第\ref{sec:cross-cutting}部で個別事例として触れた再現性・ルックアヘッドの問題を、ここでは方法論上の未解決課題として体系化する。
+
+複数の独立した2026年の研究が、金融MLの「見かけの予測可能性」がどの段階で混入するかを、それぞれ異なる切り口で分離しようと試みている。下図はその混入経路を、パイプラインの上流から下流へ並べたものである。
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\footnotesize,
+  stage/.style={fnode blue, align=center, text width=26mm, minimum height=13mm},
+  leakbox/.style={fnode muted, dashed, align=left, text width=52mm, minimum height=13mm, anchor=west},
+  arr/.style={farr blue},
+  lbl/.style={font=\scriptsize\color{figgray}}
+]
+
+\node[stage] (s1) at (0,0) {\textbf{特徴量生成}\\\scriptsize 正規化・時間特徴};
+\node[stage] (s2) at (0,-1.8) {\textbf{学習・選択}\\\scriptsize 仕様探索・多重検定};
+\node[stage] (s3) at (0,-3.6) {\textbf{執行仮定}\\\scriptsize 約定価格・取引コスト};
+
+\node[leakbox] (l1) at (2.0,0) {\footnotesize \textbf{正規化・centered temporal features}のリークは選択的だが大きい\cite{x07alphadisappears2026}};
+\node[leakbox] (l2) at (2.0,-1.8) {\footnotesize \textbf{適応的仕様探索}がゼロ予測可能性下でも有意なバックテストを生成\cite{x07spurious2026}};
+\node[leakbox] (l3) at (2.0,-3.6) {\footnotesize \textbf{取引コスト無視}が77件中76件、符号を反転させうる\cite{agentictrading2026,x07finmaseval2026}};
+
+\draw[arr] (s1.east) -- (l1.west);
+\draw[arr] (s2.east) -- (l2.west);
+\draw[arr] (s3.east) -- (l3.west);
+\draw[farr, draw=figgray] (s1.south) -- (s2.north);
+\draw[farr, draw=figgray] (s2.south) -- (s3.north);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 「見かけの予測可能性」の混入経路}\ 特徴量生成・学習/選択・執行仮定という3段階のいずれでもバイアスが混入しうる。いずれも独立の一次研究が指摘するが、3段階を単一の反証プロトコルで一括検定する共有基盤はまだ存在しない。}
+
+\begin{itemize}
+  \item \textbf{見かけの予測可能性（spurious predictability）を反証する標準手続きの不在}: Nikolopoulos\cite{x07spurious2026}は、適応的な仕様探索がmartingale-difference帰無仮説の下でさえ統計的に有意なバックテストを生成しうることを示し、合成参照クラス（ゼロ予測可能性環境・マイクロストラクチャplacebo）に対しワークフロー全体を検定する「反証監査（falsification audit）」を提案した。多くの見かけ上の発見が真の予測可能性ではなく方法論的アーティファクトであると結論づけられており、選択誘発性能インフレを有効多重性で調整して定量化する枠組みが提示されたものの、こうした反証手続きを標準として組み込んだ共有評価基盤は業界に存在しない。
+  \item \textbf{decision-time leakageの発生源分離の未成熟}: Zhangら\cite{x07alphadisappears2026}は、バックテストの評価規約を1つずつ切り替える「one-switch」ベンチマークでリークの発生源を分離し、centered temporal featuresと同日始値執行（始値後の日次バー情報を含む）が予測・取引指標を大きく安定的に押し上げる一方、グローバル正規化や同日終値執行の影響は小さいことを示した。リークが一様ではなく「highly selective」である以上、どの評価規約が結果を汚染するかを網羅的に検定する感度分析の標準化が求められるが、それはまだ整備されていない。
+  \item \textbf{因果と相関を切り分ける投資AI評価の不足}: FinCARE\cite{x07fincare2025}は、ポートフォリオ分析が相関ベースの分析とヒューリスティックに依存しがちで、パフォーマンスを動かす真の因果関係を捉えにくいことを出発点に、SEC 10-K由来の金融KG制約とLLM推論を、PC・GES・NOTEARSの3種類の因果発見アルゴリズムへ組み込む枠組みを提案した。合成データ上ではF1改善や介入効果の方向精度が報告されているが、これはあくまで\emph{因果推論を金融AI評価へ入れる研究プロトタイプ}であり、実市場・非定常レジーム・執行制約を含むポートフォリオ評価で「相関的に当たっただけ」のモデルと「反事実に耐える」モデルを区別する標準手続きは未確立である。
+  \item \textbf{マルチエージェント評価インフラの不在}: Nguyen \& Pham\cite{x07finmaseval2026}は12のマルチエージェントシステムを4次元（アーキテクチャ・協調機構・メモリ・ツール統合）で分類し、「協調プロトコル設計がモデル規模の拡大より取引性能に効きうる」というCoordination Primacy Hypothesisを\emph{反証可能な仮説}として提示した。だが同論文は、この仮説を検証するために必要なインフラ――取引コスト控除後に協調が価値を生むかを測るCoordination Breakeven Spread（CBS）のような指標を備えた評価環境――が現状のフィールドに存在しないと明言している。look-ahead bias・survivorship bias・overfitting・取引コスト無視・レジーム変化盲目という5つの評価失敗はいずれも「報告リターンの符号を反転させうる」。
+  \item \textbf{欠損文書下での忠実性（faithfulness）評価の未確立}: 金融文書はしばしば不完全であり、モデルが欠損情報をどう扱うかが実務上の信頼性を左右する。JurisTechの2026年ベンチマーク\cite{x07juristech2026}では、強いモデルが「欠損情報を認識し、与えられていないものの捏造を拒否」した一方、弱いモデルは「欠損を埋め、仮定を置き、根拠なき入力の上に一見完全な回答を生成」した。ハルシネーションはもはや単独のモデル選択の問題ではなく、プロンプト・ワークフロー・テスト条件を含む「評価層」の欠落として捉えるべきであるが、欠損下の忠実性を測る標準化されたfaithfulness評価プロトコルは未確立である（ベンダーベンチマークであり査読を経ていない点に留意）。
+  \item \textbf{モデル内部表現に潜む資産バイアスの監査手段の不在}: Wu\cite{x07assetbias2026}は、フロンティアLLMの内部にBitcoin選択的な特徴（Gemma 3のsparse autoencoder特徴として同定）が存在し、これを増幅・抑制するだけでポートフォリオのBitcoin配分が明示的言及なしに\textbf{+5.2／-4.6パーセントポイント}変動する「bounded behavioral leverage」を実証した。出力の妥当性検証だけでは捉えられない、内部表現レベルの資産固有バイアスを検出・監査する透明性標準は存在せず、自律的投資判断における忠実性保証の空白として残る。
+\end{itemize}
+
+\subsection{システミックリスク・規制}
+
+このカテゴリのギャップの根は、個々のファンド・モデル単位のAI導入が先行する一方、市場全体・規制当局の側の計測・検証インフラがそれに追いついていない非対称性にある。マイクロストラクチャーへの実際の影響も、学術的に主張される「アルファ」の頑健性も、独立に再現・監視する共有基盤が欠けたままである。
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\footnotesize,
+  flowbox/.style={fnode accent, align=center, text width=110mm, minimum height=10mm},
+  gapflow/.style={fnode accent, dashed, align=center, text width=110mm, minimum height=10mm},
+  tagS/.style={fnode muted, dashed, align=left, text width=49mm, minimum height=15mm, font=\scriptsize},
+  tagL/.style={fnode muted, dashed, align=left, text width=74mm, minimum height=13mm, font=\scriptsize},
+  lbl/.style={font=\scriptsize\color{figgray}, align=center, text width=110mm}
+]
+
+\node[flowbox] (fund) at (0,0) {個別ファンド・モデル単位のAI導入拡大};
+\node[lbl] at (0,-8mm) (a1) {↓};
+\node[flowbox] (market) at (0,-16mm) {市場全体への影響（マイクロストラクチャー・与信・オルタナデータ・システミックリスク）};
+\node[lbl] at (0,-24mm) (gaplbl) {▼\ リアルタイム計測・独立検証の共有基盤が存在しない\ ▼};
+\node[gapflow] (reg) at (0,-34mm) {規制の閾値較正・監督（未計測ゆえ届いていない）};
+
+\node[font=\scriptsize\bfseries\color{figgray}] at (0,-43mm) (taghdr) {具体的に欠けている計測・検証基盤};
+
+\node[tagS] (t1) at (-52mm,-55mm) {マイクロストラクチャー影響: SEC 13F（静的保有）のみで、リアルタイムのオーダーフロー計測なし};
+\node[tagS] (t2) at (0,-55mm) {オルタナデータ統合（衛星画像・決済フロー等）の統合ベンチマーク不在};
+\node[tagS] (t3) at (52mm,-55mm) {オープンウェイト財務基盤モデル不在（BloombergGPT級の公開モデルなし）};
+
+\node[tagL] (t4) at (-38.5mm,-72mm) {与信解釈可能性研究をEU AI Act／FRBモデルリスクガイダンス／Basel IRBへ橋渡す規制マッピング標準は未発表};
+\node[tagL] (t5) at (38.5mm,-72mm) {再現性の危機: LLMトレーディング研究77件中、取引コスト明示1件・時系列整合プロトコル2件のみ\cite{agentictrading2026}};
+
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 計測・検証基盤が欠けたフィードバックループ}\ ファンド単位のAI導入拡大が市場全体に及ぼす影響は、リアルタイムでは計測されないまま規制の閾値較正へたどり着けずにいる（破線＝未整備）。下段は本節が指摘する具体的な欠落項目。}
+
+\begin{itemize}
+  \item \textbf{マイクロストラクチャー影響のリアルタイム測定の欠如}: AIモノカルチャーのシステミックリスクは現状パッシブなポートフォリオ保有（SEC 13F）でしか測定されておらず、ストレス時の同期的アルゴリズム注文がイントラデイ流動性・ボラティリティに与える直接的なマイクロストラクチャー影響はリアルタイムのオーダーフローデータで観測されていない。規制当局は介入のための較正済み閾値を欠く。
+  \item \textbf{与信リスク解釈可能性の規制マッピング標準の不在}: 与信リスクの解釈可能性研究はモデルレベルの説明可能性（chain-of-thought、特徴量寄与度）をカバーするが、EU AI Actの高リスクAI規定、米連邦準備制度のモデルリスクガイダンス、Basel IRB内部格付け検証といった規制監査証跡へのマッピング標準は未発表である。精度・コンプライアンス・説明可能性のトリレンマ（\cite{fintrilemma2026}）が示すように、説明可能性が導入の可否を決めるゲートウェイである以上、この規制マッピングの空白は与信AIの実装を直接に律速する。
+  \item \textbf{オルタナティブデータ統合の統合ベンチマークの不在}: 衛星画像・クレジットカード取引フロー・位置情報/人流シグナルなどのオルタナティブデータ統合について、シグナル抽出品質・データパイプラインレイテンシ・下流ポートフォリオアトリビューションを同時測定するエンドツーエンドベンチマークが存在せず、プロバイダー・パイプライン設計の比較が不可能である。
+  \item \textbf{再現性の危機}: 77件のLLMトレーディング研究の系統的レビュー\cite{agentictrading2026}では、取引コストを明示的にモデル化していたのはわずか1件、再現可能で時系列整合性のあるプロトコルを用いたのはわずか2件と判明した。学術コンテストサーバーのような標準化された取引コストモデル・レジーム変化ストレステストを備えた共有ライブ市場評価基盤が不在である。
+  \item \textbf{オープンウェイト財務基盤モデルの不在}: BloombergGPT\cite{bloomberggpt2023}に匹敵するベンチマークスコアを持つオープンウェイトモデルが存在せず、公開されている大規模財務事前学習コーパスも限定的である（Stanford SEFD\cite{stanfordedgar2026}が端緒）。実務家の多くが高価な独自APIか、ドメインミスマッチのある汎用モデルに依存せざるを得ない状況が続いている。
+  \item \textbf{エージェント型AI決済ガバナンス・信頼性標準の未成熟}: 決済領域のエージェント型AIに対する三層ガバナンス枠組み（IMF\cite{imfpayments2026}）や、金融AIライフサイクル全体を対象とした信頼できるAIのセキュリティタクソノミ（\cite{trustworthyfintech2026}）はいずれも提案・整理の段階にとどまり、確率的AIと決定論的な決済インフラの整合や、データ・モデルポイズニング／プロンプトインジェクション／ディープフェイクKYCへの防御を規定する拘束力ある技術標準としては未確立である。
+  \item \textbf{表現同質性とアルファ減衰の未計測}: \S\ref{sec:cross-cutting}で扱ったAIモノカルチャー\cite{aisystemicrisk2026}に対し、2026年には作用機序をより構造的に分離する研究が現れた。Qiu \& Han\cite{x07homogeneity2026}は「表現の同質性（representation homogeneity）」と「予測の重なり（forecast overlap）」を区別し、予測が平時には多様に見えてもストレス時には表現の同質性が予測不一致の有効空間を圧縮し、position stickinessを通じて蓄積した「隠れたレバレッジ」がショック時に協調的デレバレッジで顕在化すると論じた。Meng \& Chen\cite{x07alphadecay2026}は同じSEC 13F系データ（99.5百万件保有、2013--2024）でAI採用ファンドのポートフォリオ収束が\textbf{42\%}増大したことを示し、現行の普及率（約70\%）ではシグナル寿命がpre-AI期の5〜7年から\textbf{約18カ月}へ短縮すると試算した。だが\emph{予測の見かけ上の多様性ではなく内部表現の多様性}を、あるいは\emph{アルファ半減期そのもの}を、リアルタイムで計測しマクロプルーデンス監視する共有基盤は存在しない。
+  \item \textbf{群集行動のリアルタイム監視・ストレステスト基盤の構想段階}: 英議会Treasury Committeeの報告に対する規制当局回答（2026年4月）で、Bank of Englandは「wait and see」ではないとし、国際カウンターパートと共同で「AIトレーディングエージェントがどの条件下で相関的挙動（herding）を示しストレスシナリオを増幅しうるか」を理解するシミュレーション研究を進めていると回答した\cite{x07tsc2026}。しかしこれは条件解明のための研究段階であり、前掲の表現同質性・アルファ減衰を平時から継続監視し、規制の介入閾値較正へ接続する運用可能な計測基盤（マクロプルーデンスなAIストレステスト）はまだ整備されていない。HM Treasuryが大手AI／クラウドをCritical Third Partiesに指定する評価を進めている点も、監督対象の外縁がなお流動的であることを示す。
+  \item \textbf{静的モデルリスク枠組みと連続学習AIの前提乖離}: Kurshanら\cite{x07agenticregulator2025}は、現行のモデルリスク枠組みが「静的で仕様が明確なアルゴリズムと一回限りの検証」を前提とする一方、現代の金融AIは継続学習・創発的挙動によって動作するため、両者の間に観測性・制御のギャップが残ると指摘する。彼らは①各モデル埋め込み型の自己規制、②社内ガバナンス、③セクター全体の不安定性を監視する規制当局ホスト型エージェント、④独立監査ブロックからなる4層の監督構造を提案するが、これはあくまで提案であり、SR 11-7系ガイダンス（\S\ref{sec:cross-cutting}）が想定する静的・一回限りの検証と、連続更新されるエージェント出力の監督可能性を橋渡す実装標準は未確立である。
+  \item \textbf{規制期限の後ろ倒しによる不確実性の延伸}: EU AI ActのAnnex III高リスク分類（信用スコアリング・保険料算定AI）の完全適用は当初2026年8月2日予定だったが、Digital Omnibus（欧州議会承認2026年6月16日）により、standalone Annex IIIの信用・保険AI義務の拘束的期限は\textbf{2027年12月2日}へ約16カ月延期された\cite{x07digitalomnibus2026}。高リスク分類は既存のモデルリスク管理の軽量版ではなく、適合性評価・技術文書・データガバナンス・ログ記録・人間監督・市販後監視の6カテゴリを追加要求する点は変わらない。期限の後ろ倒しは準備時間を与える一方で規制不確実性を延伸させ、CRR/CRD・DORA・EBAガイドライン等の既存規則との重畳マッピングと文書化ギャップをいつ・どの深度で埋めるべきかという実装判断の空白を長引かせている。
+  \item \textbf{標準化・プライバシー・コスト制約を統合する運用標準の不足}: 2026年6月のFSB consultation report\cite{x07fsbsound2026}は、金融機関のAI採用に対し12のsound practicesを提示し、GenAIとagentic AIを含むライフサイクル管理を組織全体の統治課題として扱う。一方、米財務省は金融サービス固有のAI情報共有、データ標準、リスク管理ベストプラクティス、データプライバシー・セキュリティ・品質基準の明確化、AIプロバイダー集中リスクの監視を提言している\cite{x07treasuryai2024}。さらにCyber Risk InstituteのFS AI RMFは、NIST AI RMFに構造的に整合する230のcontrol objectivesへ金融セクター向けに落とし込む\cite{x07crifsairmf2026}。これらは原則から統制項目への前進であるが、\emph{どの統制証跡が、どのモデル評価・プライバシー境界・ベンダー集中リスク・推論コストSLOを満たせば本番投資エージェントを許可できるか}を結ぶ共通の適合性テストはまだ存在しない。
+\end{itemize}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{@{}p{3.0cm}p{4.2cm}p{4.2cm}p{2.6cm}@{}}
+\toprule
+\textbf{統治レイヤー} & \textbf{到達点} & \textbf{残る未解決点} & \textbf{投資AIでの意味} \\
+\midrule
+原則・横断RMF & NIST AI RMFに整合する金融セクター実装が出現\cite{x07crifsairmf2026} & 汎用RMFと証券・運用・与信の監督証跡の接続は機関ごと & 監査人が同じ証跡を同じ意味で読めない \\
+\addlinespace
+金融セクターsound practice & FSBが12の実務慣行をconsultationとして提示\cite{x07fsbsound2026} & agentic AIの評価ログ・停止条件・第三者検証は拘束的標準ではない & 自律性の上限を事前に合意しにくい \\
+\addlinespace
+データ標準・プライバシー & 米財務省がデータ標準、プライバシー・セキュリティ・品質基準の明確化を提言\cite{x07treasuryai2024} & 社内リサーチ、顧客情報、ベンダーデータをまたぐRAG境界の実装標準が不足 & 高価な専用環境か、過度に制限された汎用環境へ二極化 \\
+\addlinespace
+集中リスク・コスト & AIプロバイダー集中リスクの監視が政策課題化\cite{x07treasuryai2024} & 推論コスト、レイテンシ、クラウド集中、モデル切替可能性を同時に測るSLOがない & 「性能は高いが運用不能」なエージェントを除外しにくい \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\small\color{brandgray}\textbf{表: 標準化・プライバシー・コストの統合ギャップ}\ 金融AIの統治は原則論からcontrol objectivesへ進んでいるが、評価ログ・データ境界・ベンダー集中・推論コストを同じ適合性テストへ束ねる段階には達していない。}
+
+\subsection{ギャップ・現状・必要な取り組みの対応表}
+
+以上の4カテゴリの主要ギャップを、それぞれの「現状（到達点）」と「解消に必要な取り組み」の対で一覧化する。共通するのは、\emph{個別能力の実装は先行しているのに、その能力を横断的に検証・計測・監査する共有基盤が欠けている}という非対称性である。
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{@{}p{2.0cm}p{4.3cm}p{4.3cm}p{2.6cm}@{}}
+\toprule
+\textbf{カテゴリ} & \textbf{未解決ギャップ} & \textbf{現状（到達点）} & \textbf{必要な取り組み} \\
+\midrule
+データ基盤 & E2Eベンチマーク／非米国会計基準グラウンディング & 米国GAAP・英語圏で前進（FinTagging\cite{fintagging2025}, FinanceBench\cite{financebench2023}） & IFRS/J-GAAP対応・端から端までの権威あるスイート \\
+\addlinespace
+エージェント & 点時点整合性・敵対的評価・安全開示 & 実装は先行、安全結果は25/30が非開示\cite{x07agentindex2026} & PiT認証・レジーム変化ストレステスト・第三者検証の開示標準 \\
+\addlinespace
+評価・再現性 & 見かけの予測可能性／リーク源分離／忠実性 & 反証監査\cite{x07spurious2026}・one-switch\cite{x07alphadisappears2026}は個別提案どまり & 3段階（特徴量・選択・執行）を一括検定する共有反証プロトコル \\
+\addlinespace
+忠実性・バイアス & 欠損文書の忠実性／内部表現バイアス & 弱モデルは捏造\cite{x07juristech2026}、内部Bitcoin偏好で配分±5pp\cite{x07assetbias2026} & faithfulness評価層と内部表現監査の透明性標準 \\
+\addlinespace
+因果・反事実 & 相関ベースの予測と因果的に妥当な判断の分離 & KG+LLMで因果発見を補強するFinCARE\cite{x07fincare2025}は研究段階 & 非定常市場・執行制約を含む反事実評価プロトコル \\
+\addlinespace
+システミック & 表現同質性・アルファ減衰・群集行動 & 42\%収束・半減期18カ月\cite{x07alphadecay2026}、BoEは研究段階\cite{x07tsc2026} & 内部表現多様性のリアルタイム監視・閾値較正 \\
+\addlinespace
+規制 & 静的モデルリスク枠組み／期限不確実性 & 4層監督は提案\cite{x07agenticregulator2025}、EU期限は2027年へ延期\cite{x07digitalomnibus2026} & 連続学習AIを監督する動的検証・重畳規則の文書化 \\
+\addlinespace
+標準化・プライバシー・コスト & 統制項目、データ境界、推論コストSLOの統合 & FSB sound practices\cite{x07fsbsound2026}、FS AI RMF 230統制\cite{x07crifsairmf2026}、Treasury提言\cite{x07treasuryai2024}が並立 & 証跡・プライバシー・集中リスク・コストを束ねる本番許可基準 \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\small\color{brandgray}\textbf{表: 未解決ギャップ×現状×必要な取り組み}\ いずれの行も「個別実装は先行、横断的検証・計測・監査の共有基盤が欠落」という同一パターンを示す。右列は本書が今後の研究・投資の優先順位を検討する際の参照点となる。}
+
+\subsection{汎用AIの未解決課題と金融というストレステスト領域}
+\label{sec:cross-domain-gaps}
+
+本節がここまで整理してきた4カテゴリのギャップ――評価・再現性の危機、エージェントの安全性、モデル集中とモノカルチャー、規制の断片化――は、実は金融に固有の欠陥ではない。2024〜2026年にかけて、生成AI・エージェントAI業界全体が金融の外側でほぼ同型の課題を独立に指摘しており、しかもその多くは金融特有の議論より先に、あるいは並行して一次資料化されている。以下ではその汎用AI側の一次資料を確認したうえで、「なぜ金融がこれらの汎用AI課題を最初に、かつ最も深刻な形で顕在化させるストレステスト領域になるのか」を論じる。金融関係者にとっての含意は明確である――これらの課題は「金融が特殊だから起きている」のではなく「AI業界全体で今起きており、金融はその影響を実資金の損益として最初に、かつ最も鋭敏に計測してしまう立場にある」ということである。
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\small,
+  challenge/.style={fnode muted, align=left, text width=46mm, minimum height=13mm},
+  amp/.style={fnode accent, align=left, text width=46mm, minimum height=13mm},
+  hdr/.style={font=\small\bfseries\color{fignavy}, align=center, text width=46mm},
+  arr/.style={farr accent}
+]
+
+\coordinate (Lcol) at (0,0);
+\coordinate (Rcol) at (64mm,0);
+
+\node[hdr] (h1) at (Lcol) {汎用AI業界で観測される課題};
+\node[hdr] (h2) at (Rcol) {金融に固有の増幅要因};
+
+% 右列（増幅要因）を基準に縦に積み、左列を各行の上端に揃える（内容が伸びても重ならない）
+\node[amp, below=6mm of h2] (a1) {「正解」が市場自体にしかなく、実資金の損益として即座に検証・淘汰される};
+\node[challenge, anchor=north] (c1) at (a1.north -| Lcol) {評価クライシス：ベンチマーク汚染・再現性崩壊\cite{y07aiindex2026,y07swebenchcontam2026}};
+
+\node[amp, below=6mm of a1] (a2) {発注・送金権限を持つエージェントは「読むだけ」を超え資金流出に直結};
+\node[challenge, anchor=north] (c2) at (a2.north -| Lcol) {エージェント安全性：プロンプトインジェクション・権限濫用\cite{y07owaspagentic2026,y07googlepromptinjection2026}};
+
+\node[amp, below=6mm of a2] (a3) {SEC 13F等の公開データで集中の影響を実数値として追跡できる稀有な産業};
+\node[challenge, anchor=north] (c3) at (a3.north -| Lcol) {基盤モデル集中・モノカルチャー\cite{y07monoculture2022,y07foundationconcentration2023}};
+
+\node[amp, below=6mm of a3] (a4) {受託者責任・最良執行等の垂直規制が既に高密度に存在し、水平規制と衝突する};
+\node[challenge, anchor=north] (c4) at (a4.north -| Lcol) {規制の水平性 vs 断片化された監督\cite{y07euaiacthorizontal,y07govopacity2026}};
+
+\draw[arr] (c1.east) -- (c1.east -| a1.west);
+\draw[arr] (c2.east) -- (c2.east -| a2.west);
+\draw[arr] (c3.east) -- (c3.east -| a3.west);
+\draw[arr] (c4.east) -- (c4.east -| a4.west);
+
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 金融が汎用AI課題のストレステスト領域になる4つの増幅経路}\ 左列はAI業界全体で一次資料が指摘する汎用課題、右列はそれが金融という文脈に置かれた時に増幅される固有の要因。金融固有の欠陥ではなく、汎用課題が金融という「増幅装置」を通ることで最初に顕在化する構図である。}
+
+\subsubsection*{評価クライシス：ベンチマーク汚染と再現性の崩壊は業界横断の現象}
+
+Stanford HAI「2026 AI Index Report」は、AI業界全体で「能力の進歩」と「それを測る・統治する枠組みの整備」の乖離が拡大していると指摘する。Humanity's Last Examのような、当初は数年単位で飽和しないよう設計されたベンチマークでさえ、フロンティアモデルが単年で約30ポイントの上昇を記録し、飽和までの想定期間を一つの製品サイクルへ圧縮した\cite{y07aiindex2026}。OpenAI共同創業者のAndrej Karpathyはこの状況を「評価クライシス（evaluation crisis）」と呼び、「いま何を指標として見ればよいのか、正直分からない」と述べている\cite{y07karpathyevalcrisis2025}。同レポートはさらに、Foundation Model Transparency Indexの平均スコアが前年の58点から40点へ低下したことも記録しており、最先端ラボがモデルの能力を上げる一方で学習データ・パラメータ数等の開示を減らしている実態を示す\cite{y07aiindex2026}。この「能力は測れなくなり、開示も減っていく」という2つの潮流が同時進行している点が、金融固有ではなく業界全体の構造的傾向であることを裏付ける。
+
+\begin{casestudy}{OpenAIがSWE-bench Verifiedを「引退」させた2026年2月の汚染監査}
+コーディングエージェントの標準的ベンチマークであったSWE-bench Verifiedについて、OpenAIのFrontier Evalsチームは2026年2月23日、同ベンチマークのスコア報告を取りやめると発表した。汚染監査の結果、GPT-5.2、Claude Opus 4.5、Gemini 3 Flash Previewを含む全フロンティアモデルが、タスクIDのみから正解パッチ（gold patch）や問題文の詳細を一言一句再現できることが判明し、学習データへの混入が裏付けられた。さらに残存タスクの少なくとも59.4\%が、公正な評価条件下では欠陥があるか解答不能と判定された。OpenAIは後継としてSWE-bench Proの使用を推奨している\cite{y07swebenchcontam2026}。
+\end{casestudy}
+
+\begin{insight}{金融への示唆：金融の「バックテスト汚染」は業界全体の評価クライシスの特殊ケースにすぎない}
+77件のLLMトレーディング研究のうち取引コストを明示的にモデル化したのはわずか1件という金融側の再現性の危機\cite{agentictrading2026}は、非金融領域のソフトウェア工学エージェントで起きたSWE-bench Verifiedの汚染発覚と、根は同じ「評価データ・評価プロトコルへの信頼が体系的に崩れている」現象である。Semmelrockらの系統的レビューは、この種の再現性の障壁がドメインを問わない機械学習研究全般の構造的問題であることを裏付ける\cite{y07mlreproducibility2024}。決定的な違いは、金融ではベンチマークの汚染が「学術的な指摘」で終わらず、実資金の運用損益として即座に――しかも第三者の反証なしに――市場から突きつけられる点にある。裏を返せば、金融は汎用AIの評価クライシスに対する「最も過酷な、しかし最も早く結果が出る検証環境」であり、他業界が数年かけて気づく評価の欠陥を、金融は四半期決算のタイムスケールで露呈させうる。
+\end{insight}
+
+\subsubsection*{エージェント安全性：ガードレール・権限・監査は業界横断で未解決}
+
+自律エージェントの安全性は、金融エージェントに限らずAI業界全体で標準化が追いついていない領域である。OWASP GenAI Security Projectは2025年12月9日、100名超の業界専門家の協力を得て「OWASP Top 10 for Agentic Applications for 2026」を公開し、Agent Goal Hijack（ASI01）、Tool Misuse \& Exploitation（ASI02）、Agent Identity \& Privilege Abuse（ASI03）からMemory \& Context Poisoning（ASI06）、Rogue Agents（ASI10）まで10カテゴリの汎用エージェントリスク分類を定義した\cite{y07owaspagentic2026}。これは特定業界向けではなく、あらゆるエージェント型アプリケーションに適用される横断的な脅威分類である。Googleのセキュリティチームは2026年4月23日、Common Crawlのアーカイブ（月間20〜30億ページ）を走査した調査で、悪質な間接プロンプトインジェクションの検出数が2025年11月から2026年2月の間に相対で32\%増加したと報告した\cite{y07googlepromptinjection2026}。METRによる12社のフロンティアAI安全方針の分析では、能力閾値・モデル重み保護・展開緩和策など9つの共通要素が識別された一方、各社の脅威モデル（自律的複製・有害な操作・不整合等）の成熟度にはばらつきが残ることが指摘された\cite{y07metrcommon2025}。
+
+\begin{casestudy}{「プロンプトインジェクションは永久に完全解決しないかもしれない」というOpenAIの公式見解}
+OpenAIは2025年12月、自社の自動化されたレッドチーミングが発見した具体的なプロンプトインジェクション攻撃手法を開示し、ブラウザ型AIエージェント「ChatGPT Atlas」向けの継続的な耐性強化策を公表した。同社のHead of Preparednessは複数の報道（TechCrunch、CyberScoop、いずれも2025年12月22日）に対し、ブラウザエージェントに対するプロンプトインジェクションは「永久に完全にパッチが当たらないかもしれない」と明言し、OpenAIはその後、より高リスクなエージェント的ブラウジング向けに「Lockdown Mode」を追加投入した\cite{y07openaiatlas2025}。
+\end{casestudy}
+
+\begin{insight}{金融への示唆：「読むだけ」の被害と「動かせる」被害の非対称性}
+消費者向けブラウザエージェントにおいてすら、フロンティアラボ自身が安全性の天井を「不確実」と認めている以上、発注執行・資金移動・与信判断の権限を段階的にエージェントへ委譲しつつある金融機関は、自らが完全には制御できないリスクの上に業務プロセスを構築していることになる。OWASP ASI03（Agent Identity \& Privilege Abuse）やASI06（Memory \& Context Poisoning）が指摘する汎用リスクは、金融エージェントでは「誤った要約を返す」ではなく「誤った発注を執行する」「改竄された市場データに基づき与信を承認する」という、可逆性の低い結果に直結する。第\ref{sec:open-gaps}部\S7.2で述べた「点時点整合性の公開認証」「監査証跡を規制義務へマッピングする公表フレームワーク」の不在は、業界横断のエージェント安全性標準（OWASP ASI、METRの9要素）が未成熟であることの、金融という文脈での必然的な帰結として読み直すことができる。
+\end{insight}
+
+\subsubsection*{基盤モデル集中とモノカルチャー：金融外で先に理論化された懸念}
+
+「AIモノカルチャー」という概念自体、金融発ではない。Bommasaniらは2022年のNeurIPS論文で、Kleinberg \& Raghavan（2021）の「アルゴリズムモノカルチャー」概念を拡張し、意思決定者が同じ学習データや基盤モデルという「共有コンポーネント」に依存すると、特定の個人・集団を体系的に同じように扱ってしまうという「コンポーネント共有仮説」を提示した。同論文は視覚（CLIP）・言語（RoBERTa）という非金融領域のモデルで実証実験を行っており、基盤モデルの共有が必ずしも結果の同質化を悪化させるとは限らないという、単純な直観に反する知見も示している\cite{y07monoculture2022}。VipraとKorinekは2023年、フロンティア基盤モデルが自然独占へ向かう傾向を持ち、市場の競争性を保つための反トラスト介入と、安全性・プライバシー・非差別性・信頼性・相互運用性を対象とする品質基準規制の両方が必要になると論じた\cite{y07foundationconcentration2023}。Stanford AI Index 2026が記録するFoundation Model Transparency Indexの58点から40点への低下\cite{y07aiindex2026}は、この集中傾向が2026年時点でむしろ強まっていることを示す。
+
+\begin{casestudy}{最先端ラボの透明性スコアが1年で58点から40点へ低下（Stanford AI Index 2026）}
+Foundation Model Transparency Indexは、学習コード・データセット規模・パラメータ数等の開示状況を指数化したものである。Stanford HAIの2026年版レポートは、最も能力の高いモデルが今や最も不透明なモデルになりつつあると指摘し、大手AI企業がこれらの情報を非開示にする傾向を強めた結果、平均スコアが前年の58点から40点へ低下したと報告している\cite{y07aiindex2026}。
+\end{casestudy}
+
+\begin{insight}{金融への示唆：金融は集中・同質化の影響を数値化できる稀有な産業}
+金融は、SEC 13Fのような公開保有データを通じて、基盤モデルへの依存が実際にポートフォリオの収束やアルファ減衰としてどの程度顕在化するかを、他業界にはほぼ存在しない精度で計測できる産業である。本節既述のQiu \& Han\cite{x07homogeneity2026}・Meng \& Chen\cite{x07alphadecay2026}による表現同質性・アルファ半減期（約18カ月への短縮）の実証は、Bommasaniらが2022年に非金融領域で理論化・実証したコンポーネント共有仮説の、初期の産業横断的な検証事例として位置づけられる。しかも透明性が低下する（＝どのモデルにどれだけ依存しているかの外部からの検証が難しくなる）局面でこの集中が進行している以上、金融の集中リスク監視基盤の欠如（\S7.4）は、汎用AI業界の透明性低下トレンドと組み合わさることで、今後さらに計測困難になっていく可能性が高い。
+\end{insight}
+
+\subsubsection*{規制の水平性と金融の垂直規制が衝突する場所}
+
+EU AI Actは欧州委員会自身が「horizontal（水平的）」な法律と位置づける、業種を問わない単一のリスク階層規制であり、金融・医療・雇用・法執行など、あらゆるセクターに同じ「許容不可／高リスク／限定的リスク／最小リスク」という分類を適用する\cite{y07euaiacthorizontal}。NIST AI Risk Management Framework（2023年1月公表）も同様に業種非依存・任意ベースの枠組みとして設計されている\cite{y07nistairmf2023}。しかし、Rostの2026年の論文は、こうした水平的なガバナンス枠組みが業種横断で適用される際に生じる構造的な緊張――開示要求と営業秘密の対立、AIシステムが自らを評価する自己言及的な説明責任の空洞化、セクター間の規制の不整合、技術的説明可能性と規制上の説明要求の乖離、独立監査の実務上の限界、責任の所在の不明確化――を「6つの緊張の次元」として整理した\cite{y07govopacity2026}。Future of Life Instituteの2025年夏版AI Safety Indexは、この整理を裏付けるように、7社のフロンティアAI企業のうち終末リスク（existential risk）計画についてD評価を上回った企業が一社もなかったと報告している（Anthropic C+、OpenAI C、Google DeepMind C-、xAI D、Meta D、Zhipu AI F、DeepSeek F）\cite{y07flisafetyindex2025}。
+
+\begin{insight}{金融への示唆：水平規制と垂直規制の摩擦を最初に露呈するのが金融}
+金融は、MiFID II最良執行義務、SEC受託者責任、FINRA Rule 3110、Basel IRBといった高密度な垂直規制がすでに存在する数少ない業界である。EU AI ActやNIST AI RMFのような水平規制は、これらの垂直規制と重畳した瞬間に、Rostの言う「6つの緊張」――特に説明責任の所在の不明確化と監査の実務上の限界――を最も早く可視化する。加えてFuture of Life Instituteの評価が示すように、金融機関がエージェント型投資システムの基盤として採用するベンダー自身が、独立した第三者評価でC〜Fレンジの安全性ガバナンスにとどまっている。これは、金融の「静的モデルリスク枠組みと連続学習AIの前提乖離」（本節既述、\cite{x07agenticregulator2025}）という課題が、金融機関自身のガバナンス整備だけでは解決せず、ベンダー選定時のデューデリジェンス項目として「モデル性能」だけでなく「ベンダーの安全性ガバナンス成熟度」を組み込む必要があることを示唆する。
+\end{insight}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{@{}p{2.6cm}p{4.4cm}p{3.9cm}p{3.3cm}@{}}
+\toprule
+\textbf{汎用AI課題} & \textbf{業界横断の一次証拠（2024--2026）} & \textbf{金融での深刻化要因} & \textbf{金融がストレステスト領域になる理由} \\
+\midrule
+評価クライシス（ベンチマーク汚染・再現性） & OpenAIがSWE-bench Verifiedの汚染を認め引退\cite{y07swebenchcontam2026}／Stanford AI Index 2026「評価クライシス」\cite{y07aiindex2026}／ML再現性の障壁は業界共通\cite{y07mlreproducibility2024} & バックテストの「正解」は市場自体にしかなく、第三者による反証手段が乏しい & 実資金の損益として即座に、かつ独立に検証される稀有な産業 \\
+\addlinespace
+エージェント安全性（プロンプトインジェクション・権限濫用） & OWASP ASI01--10\cite{y07owaspagentic2026}／悪質なプロンプトインジェクション検出32\%増\cite{y07googlepromptinjection2026}／ChatGPT Atlas「永久に完全解決しないかもしれない」\cite{y07openaiatlas2025} & 発注・送金権限を持つエージェントは「誤情報」を超え資金流出・誤執行に直結 & MiFID II・SEC受託者責任等、権限濫用の結果が法的責任へ直結する数少ない産業 \\
+\addlinespace
+基盤モデル集中・モノカルチャー & コンポーネント共有仮説（NeurIPS 2022）\cite{y07monoculture2022}／基盤モデルの自然独占リスク\cite{y07foundationconcentration2023}／透明性指数58→40\cite{y07aiindex2026} & 同一基盤モデルへの依存が個別損失でなく協調的デレバレッジへ波及\cite{x07homogeneity2026} & SEC 13F等の公開データで集中の影響を実数値として追跡できる稀有な産業 \\
+\addlinespace
+規制の水平性 vs 垂直規制の接続 & EU AI Actは業種横断の水平規制\cite{y07euaiacthorizontal}／NIST AI RMFも業種非依存\cite{y07nistairmf2023}／水平ガバナンスの6つの緊張\cite{y07govopacity2026}／フロンティア企業の安全性はC\textasciitilde{}F評価\cite{y07flisafetyindex2025} & MiFID II／Basel／SEC受託者責任という垂直規制との重畳マッピングが未整備 & 水平規制と垂直規制の摩擦を最初に、かつ最も高密度に露呈する規制産業 \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\small\color{brandgray}\textbf{表: 汎用AI課題×金融での深刻化要因×ストレステスト領域としての金融}\ 4行とも「金融固有の欠陥」ではなく「汎用AI課題が金融という増幅装置を通ることで最初に、かつ最も鋭敏に顕在化する」という同一パターンを示す。金融関係者にとっての実務的含意は、これらの課題の解決を待つのではなく、金融自身が汎用AI業界に先んじて計測・監査手法を確立する「最初の実験場」になり得るという点にある。}

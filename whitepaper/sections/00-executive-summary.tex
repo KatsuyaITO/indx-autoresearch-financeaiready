@@ -1,0 +1,60 @@
+\section{エグゼクティブサマリー}
+\label{sec:exec-summary}
+
+本ホワイトペーパーは、2026年前半にかけて収集された440件を超える一次情報――学術論文（arXiv等）、大手金融機関・スタートアップの公式発表、業界ニュース、および調査チームによる仮説的考察（Takes）――を体系的に精査し、「金融データのAI-Ready化」と「AI-Nativeな投資運用」という一体の潮流を、4つの視点から統合的に描き出したものである。数百件の周辺情報を漏れなく列挙することよりも、追跡可能な一次資料に裏付けられた、驚きのある・示唆に富む事例を厳選して深く掘り下げることを編集方針としている。
+
+\subsection*{本書の4つの柱}
+
+\begin{enumerate}
+  \item \textbf{AI-Ready金融データ基盤}: 決算資料・SEC提出書類・アナリストレポート・市場データ・ニュース・PDF・表・スプレッドシート・社内文書といった大量の構造化・非構造化データを、LLM／AIエージェント／RAG／自動分析ワークフローが確実に利用できる形式へ変換する技術と実装。
+  \item \textbf{AI-Nativeヘッジファンド・投資会社}: Bridgewater、Man Group、Renaissance Technologies、Two Sigma、Citadel、D.E.\ Shaw、Point72/Cubist、Voleon、Numerai、QRT、WorldQuantなど、LLM・AIエージェント・機械学習を投資リサーチ・ポートフォリオ管理・リスク管理・トレーディングの中核に据える機関の実例。
+  \item \textbf{投資意思決定のためのAIエージェント}: マルチエージェント・アーキテクチャによる財務分析・投資アイデア創出・デューデリジェンス・ポートフォリオモニタリング・リスク分析の支援・自動化。
+  \item \textbf{LLM／AIエージェントによる金融データ分析}: 構造化・非構造化データを問わず、財務データを抽出・要約・分類・構造化・比較・推論する技術とその限界。
+\end{enumerate}
+
+4つの柱は独立した並列トピックではなく、下図のように一方向に積み上がる依存関係を成す。データ基盤の整備水準がファンド・エージェントの運用可能性を規定し、そこで得られた実例が分析技術の妥当性検証の場となり、最終的に4つの柱を横断する構造的示唆（第\ref{sec:cross-cutting}部）へ収束する。
+
+\begin{center}
+\begin{tikzpicture}[
+  pillar/.style={fnode, text width=4.0cm, minimum height=1.8cm, font=\small},
+  synth/.style={fnode accent, text width=8.6cm, minimum height=1.4cm, font=\small},
+  arr/.style={farr blue}
+]
+\node[pillar] (data)    at (0,3)    {\textbf{(1)\,データ基盤}\\金融文書をAIが確実に利用できる形へ変換};
+\node[pillar] (funds)   at (6.6,3)  {\textbf{(2)\,AI-Nativeファンド}\\AIを運用の中核に据える機関の実例};
+\node[pillar] (agents)  at (0,0)    {\textbf{(3)\,投資AIエージェント}\\リサーチ・DD・モニタリングの自動化};
+\node[pillar] (analysis) at (6.6,0) {\textbf{(4)\,LLM分析技術}\\抽出・要約・推論とその限界};
+\node[synth] (synth) at (3.3,-2.6) {\textbf{柱を横断する構造的示唆}（第\ref{sec:cross-cutting}部）\\コスト構造・規制・標準化が実装の遅速を左右する};
+
+\draw[arr] (data) -- (funds);
+\draw[arr] (data) -- (agents);
+\draw[arr] (funds) -- (analysis);
+\draw[arr] (agents) -- (analysis);
+\draw[arr] (agents.south) -- ++(0,-0.5) -| (synth.north);
+\draw[arr] (analysis.south) -- ++(0,-0.5) -| (synth.north);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 本書の4つの柱と全体構造}\ データ基盤がファンド・エージェントの実装水準を規定し、そこで得られた実例が分析技術の限界を検証する場となる。4つの柱の交点に現れる構造的示唆を第\ref{sec:cross-cutting}部で統合する。}
+
+\subsection*{主要な発見}
+
+\begin{itemize}
+  \item \textbf{ボトルネックはモデル能力ではなくデータ準備}: GPT-4oはネスト表を含む金融PDFで前処理なしでは56\%の精度に留まるが、専用の前処理パイプラインを挟むと76\%まで改善する（\cite{multistructured2025}、\S\ref{sec:data-infra}）。FinanceBenchではGPT-4-Turbo＋検索でも81\%の質問が誤答・回答拒否となり\cite{financebench2023}、AUDITFLOWではシンボリック検証層を除去すると精度が82\%から18\%へ崩壊する\cite{auditflow2026}。
+  \item \textbf{検索アーキテクチャが精度の主要な律速要因}: Fin-RATEベンチマークでは、企業横断比較タスクにおいてファインチューン済み金融LLMの精度が23.91\%から1.27\%へ崩壊する事例が確認されており\cite{finrate2026}、階層型・グラフ型の検索設計がフラットなベクトル検索を上回ることを複数の研究が裏付けている。
+  \item \textbf{実運用に到達したAI-Nativeファンドが複数存在}: Bridgewater AIA Labsは実資本を運用し初年度11.9\%のリターンを記録\cite{bridgewater_aialabs_nd}、Renaissance TechnologiesのMedallion Fundは設立来年率39.9\%の純リターンを継続\cite{institutionalinvestor2025renaissance}、QRT（Qube Research \& Technologies）は2025年に主力ファンドで約30\%のリターンを達成する\cite{bloomberg_qube2026}など、AIを核とした運用体制が既に大規模な実績を残している（\S\ref{sec:ai-native-funds}）。
+  \item \textbf{ベンチマーク上の「アルファ」の多くは方法論的に脆弱}: 77件のLLMトレーディング研究の系統的レビューでは、取引コストを明示的にモデル化していたのはわずか1件、再現可能で時間整合的な評価プロトコルを用いていたのはわずか2件にとどまる\cite{agentictrading2026}。Look-Ahead-Benchでは、評価期間をモデルの学習カットオフ以降に移すだけで年率アルファが+20.73\%から-1.04\%へほぼ消失する例が報告されている\cite{lookaheadbench2026}（\S\ref{sec:llm-analysis}）。
+  \item \textbf{コスト構造がアーキテクチャ選択を左右する}: 反射型自己修正アーキテクチャ（F1 0.943、\$0.430/文書）に対し、最適化された階層型supervisor-workerアーキテクチャはF1 0.924を\$0.148/文書で達成する\cite{benchmarkingmultiagent2026}。100万文書規模では\$282,000のコスト差に相当し、リーダーボード精度だけに基づく調達判断は体系的に誤りうる。
+  \item \textbf{規制・ガバナンスが実装の遅速を左右する新たな変数に}: EU AI Actの高リスク分類（与信スコアリング・保険料算定AI）は当初2026年8月2日の完全適用が予定されていたが、Digital Omnibus（欧州議会承認2026年6月）により信用・保険AI義務の拘束的期限は2027年12月2日へ約16カ月延期された\cite{eba2025aiact,x07digitalomnibus2026}。ただし非準拠に最大3,000万ユーロまたは世界売上高6\%の罰金が科される点、適合性評価・技術文書・データガバナンス・人間監督等を追加要求する点は変わらない。米国ではSR 11-7がリスク階層型ガイダンスへ置き換えられ\cite{databricksndmodelrisk}、これまでLLMコパイロットの本番投入を躊躇させてきた曖昧さが緩和されつつある（\S\ref{sec:cross-cutting}、\S\ref{sec:open-gaps}）。
+  \item \textbf{価値はデータそのものから「解釈アーキテクチャ」へ移動}: 差別化の焦点は、埋め込み・検索・オーケストレーションといった\emph{解釈}層へ移りつつある。金融ドメインでは素朴なBag-of-Wordsが密な汎用埋め込みを上回る事例すら報告されており、埋め込み選択は精度を左右する「沈黙のボトルネック」になっている（\S\ref{sec:data-infra}）。同時に、JPMorgan（LLM Suiteが23万人超に到達）・Goldman（GS AIプラットフォーム）・BlackRock（Aladdin Copilot）に見られる\textbf{全社的democratization型}の展開は、アルファ創出型・完全自律型に次ぐ第3のAI-Native類型として立ち現れている（\S\ref{sec:ai-native-funds}）。
+  \item \textbf{データ接続性はコモディティ化へ向かう}: Bloomberg、LSEG、FactSet、Daloopaが2025〜2026年に相次いでMCP（Model Context Protocol）サーバーを提供開始し\cite{factset_mcp_nd}、標準化されたデータ接続の限界価値はゼロに近づきつつある。差別化の焦点は「データを持っていること」から「データをどう解釈し文脈化し行動に結びつけるか」へ移行している。
+  \item \textbf{エージェント標準は接続から協調・決済へ拡張}: OpenAI Responses APIのremote MCP対応\cite{x01openai2025responsesmcp}、Google A2A\cite{x01google2025a2a}、AP2\cite{x01google2025ap2}、Linux FoundationでのA2A普及\cite{x01linuxfoundation2026a2a}は、金融AIの標準化が「データを読む」段階から「複数エージェントが協調し、権限付きで経済行為を行う」段階へ移ったことを示す。
+  \item \textbf{信頼性の鍵はグラフ・記号・棄権を組み込んだ検証層}: FinChainは金融推論を実行可能な記号テンプレートで評価し\cite{x05finchain2025}、GBFRは金融メトリック知識グラフ・経路検証・安全な回答棄権を組み合わせる\cite{x05gbfr2026}。単なる自然言語回答精度ではなく、計算経路・根拠・棄権判断を同時に評価する方向へベンチマークが移行している。
+  \item \textbf{標準化・集中リスク・業界統制が未解決ギャップの中心へ}: FSBの2026年AI sound practices\cite{x07fsbsound2026}、米財務省の金融AI報告\cite{x07treasuryai2024}、Cyber Risk Instituteの金融AIリスク管理フレームワーク\cite{x07crifsairmf2026}はいずれも、モデル単体よりもプロバイダ集中、情報共有、データ標準、統制証跡を金融AIの主要リスクとして扱い始めている。
+  \item \textbf{金融は業界横断のAI技術波の「速い追随者」}: AI-ready／AI-nativeへの移行は金融固有の現象ではなく経済全体の潮流であり、採用曲線ではソフトウェア開発（GitHub Copilotは2,000万ユーザー超\cite{y01techcrunch2025copilot20m}）やエンタープライズ検索が金融の買い手側に先行している。MCPはLinux Foundation傘下の業界横断標準として採用され\cite{y01linuxfoundation2025aaif}、金融は接続層を「作る」側ではなく「乗る」側になっている。Stanford AI Index\cite{y01stanfordhai2025aiindex}のような外部の物差しで自らの現在地を測れることは、投資判断のタイミングを計るうえで実務的な含意を持つ（\S\ref{sec:intro-cross-domain}）。
+  \item \textbf{文書AIとエージェント評価は周辺分野が先行し、忠実性の教訓を借用できる}: 契約解析（CUAD\cite{y02cuad2021}）・GraphRAG\cite{y02graphrag2024}・エンタープライズ検索（Glean\cite{y02glean2025}）、およびSWE-bench Verified\cite{y04swebenchverified2024}に象徴される厳密なエージェント評価は、金融よりも文書AI・自律エージェントの成熟が進んでいる領域である。医療・法律の忠実性研究――Med-PaLM 2\cite{y05medpalm2_2025}や法的ハルシネーションの体系的実証\cite{y05dahl2024legalfictions}――は、金融が評価設計・検証層・自律度の段階付けをそのまま借用できる先行事例を提供する（\S\ref{sec:data-infra}、\S\ref{sec:investment-agents}、\S\ref{sec:llm-analysis}）。
+  \item \textbf{金融は汎用AI課題が最も早く鋭く顕在化する「ストレステスト領域」}: 評価クライシス、エージェント安全性、基盤モデル集中（algorithmic monoculture\cite{y07monoculture2022}）、水平的規制（EU AI Actは特定業界向けではなく横断的に設計\cite{y07euaiacthorizontal}）はいずれも金融固有ではない汎用AIの未解決課題である。しかし実資本の毀損リスク・執行／決済権限・13F型の公開可測性・既存の規制密度ゆえに、これらは他業界に先んじて金融で最も先鋭化する（\S\ref{sec:open-gaps}）。
+\end{itemize}
+
+\subsection*{本書の読み方}
+
+第\ref{sec:data-infra}部から第\ref{sec:llm-analysis}部までが4つの柱に対応する本論であり、各部は具体的な事例（企業名・論文名・数値・出典）を中心に構成される。第\ref{sec:cross-cutting}部では柱を横断する構造的な示唆を、第\ref{sec:open-gaps}部では現時点で未解決の研究・実装ギャップを整理し、第\ref{sec:conclusion}部で総括と示唆を述べる。巻末に参考文献（出典URL）の一覧を付す。各部の本文は、網羅的な事例集としてではなく、\textbf{casestudy}（検証済みの具体事例）と\textbf{insight}（そこから導かれる仮説）を対にして提示する構成を基本としており、量よりも一次情報への遡及可能性を優先している。

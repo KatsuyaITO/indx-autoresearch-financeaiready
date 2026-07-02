@@ -1,0 +1,224 @@
+% !TEX program = lualatex
+%
+% AI-Ready Finance Whitepaper (日本語)
+% Compile: lualatex whitepaper.tex (2回実行してTOC/参照を確定させる)
+%
+\documentclass[11pt,a4paper]{ltjsarticle}
+
+% ---------- フォント ----------
+\usepackage{luatexja-fontspec}
+\setmainjfont{Hiragino Mincho ProN}
+\setsansjfont{Hiragino Kaku Gothic Pro}
+\setmainfont{Times New Roman}
+\setsansfont{Helvetica Neue}
+
+% ---------- レイアウト ----------
+\usepackage[a4paper,top=25mm,bottom=28mm,left=22mm,right=22mm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{parskip}
+\setlength{\parskip}{0.6\baselineskip}
+
+% ---------- 色 ----------
+\usepackage{xcolor}
+\definecolor{brandnavy}{HTML}{0B2545}
+\definecolor{brandblue}{HTML}{1565C0}
+\definecolor{brandgray}{HTML}{4A4A4A}
+\definecolor{brandlight}{HTML}{EEF3FA}
+\definecolor{brandaccent}{HTML}{C9972C}
+
+% ---------- 見出し ----------
+\usepackage{titlesec}
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{brandnavy}}
+  {第\thesection 部}{1em}{}
+\titlespacing*{\section}{0pt}{3.2ex plus 1ex minus .2ex}{2ex}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{brandblue}}
+  {\thesubsection}{0.8em}{}
+\titlespacing*{\subsection}{0pt}{2.6ex plus 1ex minus .2ex}{1.2ex}
+
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\color{brandgray}}
+  {\thesubsubsection}{0.6em}{}
+\titlespacing*{\subsubsection}{0pt}{2ex plus .8ex minus .2ex}{1ex}
+
+% ---------- ヘッダー/フッター ----------
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancyhead[L]{\small\color{brandgray} AI-Ready Finance ホワイトペーパー}
+\fancyhead[R]{\small\color{brandgray} \leftmark}
+\fancyfoot[C]{\small\color{brandgray} \thepage}
+
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[C]{\small\color{brandgray} \thepage}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+% ---------- 表・図 ----------
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\renewcommand{\arraystretch}{1.25}
+
+% ---------- 図解 (TikZ / pgfplots) ----------
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit,backgrounds,decorations.pathreplacing,calc}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+% 図の共通カラーパレット（本文の brandnavy/brandblue/brandaccent と統一）
+\colorlet{figblue}{brandblue}
+\colorlet{fignavy}{brandnavy}
+\colorlet{figaccent}{brandaccent}
+\colorlet{figgray}{brandgray}
+\colorlet{figlight}{brandlight}
+
+% ---------- 図版の共通スタイル（統一された洗練された見た目） ----------
+% すべての図はこのスタイル群を土台に組む：ソフトな影・角丸・統一された矢印。
+% 個々の図では text width / minimum height / align などを追記して調整する。
+\usetikzlibrary{shadows.blur}
+\tikzset{
+  % 既定の矢先を上品な Stealth に統一
+  >={Stealth[length=2.4mm,width=2.2mm]},
+  % ソフトなドロップシャドウ（浮き上がる立体感）
+  figshadow/.style={blur shadow={shadow blur steps=6, shadow blur radius=2pt,
+    shadow xshift=0pt, shadow yshift=-1pt, shadow opacity=20}},
+  % --- ノード（枠）: 用途別の 5 種 ---
+  fnode/.style={draw=fignavy!85, line width=0.7pt, rounded corners=4pt,
+    fill=figlight, figshadow, align=center, inner sep=2.8mm, font=\small},
+  fnode blue/.style={draw=figblue, line width=0.7pt, rounded corners=4pt,
+    fill=figblue!7, figshadow, align=center, inner sep=2.8mm, font=\small},
+  fnode accent/.style={draw=figaccent!85!black, line width=0.8pt, rounded corners=4pt,
+    fill=white, figshadow, align=center, inner sep=2.8mm, font=\small},
+  fnode dark/.style={draw=fignavy, line width=0.8pt, rounded corners=4pt,
+    fill=fignavy, text=white, figshadow, align=center, inner sep=2.8mm, font=\small},
+  fnode muted/.style={draw=figgray!70, line width=0.6pt, rounded corners=4pt,
+    fill=figgray!8, figshadow, align=center, inner sep=2.8mm, font=\small},
+  % --- 見出しチップ（列ヘッダ等） ---
+  fchip/.style={rounded corners=3pt, figshadow, align=center,
+    font=\bfseries\sffamily\small, text=white, inner sep=2mm},
+  % --- 矢印: 用途別 ---
+  farr/.style={-{Stealth[length=2.6mm,width=2.4mm]}, line width=0.9pt, draw=fignavy!70},
+  farr blue/.style={-{Stealth[length=2.6mm,width=2.4mm]}, line width=0.9pt, draw=figblue},
+  farr accent/.style={-{Stealth[length=2.6mm,width=2.4mm]}, line width=0.9pt, draw=figaccent},
+  farr dash/.style={-{Stealth[length=2.4mm,width=2.2mm]}, line width=0.8pt, draw=figgray, dashed},
+  fbiarr/.style={{Stealth[length=2.4mm,width=2.2mm]}-{Stealth[length=2.4mm,width=2.2mm]},
+    line width=0.9pt, draw=figaccent},
+}
+
+% ---------- 箇条書き ----------
+\usepackage{enumitem}
+\setlist[itemize]{leftmargin=1.6em, itemsep=0.35em, topsep=0.3em}
+\setlist[enumerate]{leftmargin=1.8em, itemsep=0.35em, topsep=0.3em}
+
+% ---------- ボックス ----------
+\usepackage[most]{tcolorbox}
+\tcbset{
+  casebox/.style={
+    enhanced, breakable, colback=brandlight, colframe=brandblue,
+    boxrule=0.6pt, arc=1.5mm, left=3mm, right=3mm, top=2mm, bottom=2mm,
+    fonttitle=\bfseries\sffamily, coltitle=white,
+    colbacktitle=brandblue, title={#1}
+  },
+  insightbox/.style={
+    enhanced, breakable, colback=white, colframe=brandaccent,
+    boxrule=0.7pt, arc=1mm, left=3mm, right=3mm, top=2mm, bottom=2mm,
+    fonttitle=\bfseries\sffamily, coltitle=brandnavy,
+    title={\textcolor{brandaccent}{\textbullet}\ #1}
+  },
+}
+\newtcolorbox{casestudy}[1]{casebox={#1}}
+\newtcolorbox{insight}[1]{insightbox={#1}}
+
+% コラム（初学者向けの概念解説ボックス）: casestudy(青)/insight(金)と視覚的に区別する
+% ため、濃紺の見出し帯＋淡い背景＋左端の金色ストライプで構成する。用途は本文で
+% 初めて登場する重要概念を、図解付きで自己完結的に噛み砕くこと。
+\tcbset{
+  conceptbox/.style={
+    enhanced, breakable, colback=brandlight!45, colframe=brandnavy,
+    boxrule=0.7pt, arc=1.5mm, left=3mm, right=3mm, top=2mm, bottom=2mm,
+    fonttitle=\bfseries\sffamily, coltitle=white,
+    colbacktitle=brandnavy, title={コラム｜#1},
+    borderline west={2.4pt}{0pt}{brandaccent},
+  },
+}
+\newtcolorbox{concept}[1]{conceptbox={#1}}
+
+% ---------- リンク ----------
+\usepackage{xurl}
+\usepackage[bookmarksnumbered,hidelinks]{hyperref}
+\hypersetup{
+  colorlinks=true, linkcolor=brandblue, urlcolor=brandblue, citecolor=brandblue,
+  pdftitle={AI-Ready 金融データ基盤とAI-Native投資運用の最前線},
+  pdfauthor={株式会社INDX 伊藤克哉 (k1ito)},
+}
+
+% ---------- 参考文献 (biblatex + biber) ----------
+\usepackage[backend=biber,style=numeric,sorting=nyt,maxbibnames=99,urldate=iso]{biblatex}
+\addbibresource{references.bib}
+
+% ---------- 目次の見た目 ----------
+\usepackage{tocloft}
+\renewcommand{\cftsecfont}{\bfseries\color{brandnavy}}
+\renewcommand{\cftsecpagefont}{\color{brandnavy}}
+
+\begin{document}
+
+% ============================================================
+% 表紙
+% ============================================================
+\begin{titlepage}
+\begin{center}
+\vspace*{18mm}
+{\color{brandaccent}\rule{\textwidth}{1.2pt}}\\[6mm]
+{\sffamily\color{brandgray}\large AI-READY FINANCE RESEARCH WHITEPAPER}\\[10mm]
+{\sffamily\bfseries\color{brandnavy}\LARGE AI-Ready金融データ基盤と\\[2mm] AI-Native投資運用の最前線}\\[6mm]
+{\large\color{brandgray} 学術研究・大手金融機関・スタートアップ事例に見る\\ LLM／AIエージェントによる投資意思決定の変革}\\[10mm]
+{\color{brandaccent}\rule{\textwidth}{1.2pt}}\\[14mm]
+
+\begin{minipage}{0.8\textwidth}
+\centering
+\small\color{brandgray}
+本書は、440件を超える一次情報（学術論文・企業発表・ニュース・仮説的考察）を\\
+体系的に精査し、AI-ready金融データ基盤、AI-nativeヘッジファンド、\\
+投資意思決定AIエージェント、LLMによる金融データ分析の4領域について\\
+事例・数値・示唆を網羅的に整理したリサーチホワイトペーパーである。\\[2mm]
+金融は主役であると同時に、より広いAI業界の技術波の上にある。本書は各領域で、\\
+リーガル・医療・ソフトウェア開発など周辺分野の同型の技術・動向を対比し、\\
+金融が学べる示唆・借用できる設計・先取りすべきリスクを併記する。
+\end{minipage}
+
+\vfill
+
+{\small\color{brandgray} 株式会社INDX　伊藤克哉 (k1ito)}\\[1mm]
+{\small\color{brandgray} 2026年7月}
+
+\end{center}
+\end{titlepage}
+
+\newpage
+\tableofcontents
+\newpage
+
+% ============================================================
+% 本文（別ファイルからinput）
+% ============================================================
+\input{sections/00-executive-summary}
+\input{sections/01-introduction}
+\input{sections/02-data-infrastructure}
+\input{sections/03-ai-native-funds}
+\input{sections/04-investment-agents}
+\input{sections/05-llm-data-analysis}
+\input{sections/06-cross-cutting-insights}
+\input{sections/07-open-gaps}
+\input{sections/08-conclusion}
+\input{sections/09-references}
+
+\end{document}

@@ -1,0 +1,352 @@
+\section{はじめに}
+\label{sec:introduction}
+
+\subsection{背景と目的}
+
+投資運用業界は、ここ数年で二つの制約に同時に直面してきた。第一に、分析対象となる情報量の爆発的増加である。SEC提出書類、決算説明会トランスクリプト、アナリストレポート、ニュース、オルタナティブデータ、社内メモは、人間のアナリストが処理できる量をとうに超えている。第二に、その情報の大半が非構造化・半構造化の形式――PDF、スキャン画像、ネストした表、自由記述テキスト――で存在し、伝統的な定量分析パイプラインに直接投入できない。
+
+大規模言語モデル（LLM）とAIエージェントは、この二つの制約を同時に解消しうる技術として急速に投資業界に浸透しつつある。しかし「LLMを使えば金融データがAI-readyになる」という単純な図式は成り立たない。本書で精査した一次情報は、モデル単体の能力よりも、前処理・検索アーキテクチャ・シンボリック検証層・組織的なガバナンス設計こそが実運用の成否を分けていることを繰り返し示している。
+
+\begin{concept}{LLM・生成AI・AIエージェント}
+生成AI（LLM: 大規模言語モデル）は、膨大な文章を学習し、次に来る語を確率的に予測して文章を紡ぐモデルである。同じ入力でも出力が揺らぎうる点で、通常のプログラムの決定論的な計算とは性質が異なる。決算短信や有価証券報告書のような自由記述テキストを読ませ、要約・抽出・分類させられる点が実務での価値となる。一方AIエージェントは、このLLMを「頭脳」として、検索・計算・社内API・データベースといった外部ツールを呼び出し、記憶を保持しながら「観測→思考→行動」の自律ループを回す仕組みである。一問一答で終わるチャットボットと異なり、「決算書を取得し、表を抽出し、計算し、レポート化する」といった多工程のタスクを自分の判断で最後まで進められる点が本質的な違いである。
+\begin{center}
+\begin{tikzpicture}[node distance=6mm, every node/.style={font=\scriptsize}]
+\node[fchip] (t1) {LLM（生成AI）};
+\node[fnode, below=5mm of t1, text width=20mm, align=center] (in) {テキスト入力};
+\node[fnode blue, below=6mm of in, text width=22mm, align=center] (pred) {次の語を\\確率的に予測};
+\node[fnode, below=6mm of pred, text width=20mm, align=center] (out) {テキスト出力};
+\draw[farr] (in) -- (pred);
+\draw[farr] (pred) -- (out);
+\node[fchip, right=34mm of t1] (t2) {AIエージェント};
+\node[fnode dark, below=8mm of t2, text width=22mm, align=center] (brain) {LLM＝頭脳\\（思考）};
+\node[fnode muted, right=8mm of brain, text width=20mm, align=center] (tool) {ツール\\（検索・計算・API）};
+\node[fnode muted, below=8mm of brain, text width=16mm, align=center] (mem) {記憶};
+\draw[farr accent] (brain) to[bend left=22] node[midway, above, font=\tiny] {行動} (tool);
+\draw[farr accent] (tool) to[bend left=22] node[midway, below, font=\tiny] {観測} (brain);
+\draw[fbiarr] (brain) -- (mem);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: LLMとAIエージェントの違い}\ LLMは入力から次の語を予測して出力するだけだが、AIエージェントはLLMを頭脳にツールと記憶を使い、観測と行動のループを自律的に回す。}
+このループにより、単発の応答では終わらない「取得→抽出→計算→報告」のような多段階業務を、人手を介さず一気通貫で任せられるようになる。
+\end{concept}
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\small,
+  constraint/.style={fnode, align=left, text width=70mm, minimum height=27mm},
+  merge/.style={fnode dark, text width=92mm, minimum height=10mm, font=\bfseries\small},
+  factor/.style={fnode accent, text width=30mm, minimum height=17mm, font=\footnotesize},
+  arr/.style={farr}
+]
+
+\node[constraint] (c1) {\textbf{制約1: 情報量の爆発}\\[1mm]
+  SEC提出書類、決算説明会トランスクリプト、アナリストレポート、ニュース、オルタナティブデータ、社内メモが人間のアナリストの処理能力を超過};
+\node[constraint, right=4mm of c1] (c2) {\textbf{制約2: 非構造化・半構造化データ}\\[1mm]
+  PDF、スキャン画像、ネストした表、自由記述テキストは伝統的な定量分析パイプラインに直接投入できない};
+
+\node[merge, below=9mm of c1.south, xshift=37mm] (llm) {LLM／AIエージェントが両制約を同時に解消しうる技術として浸透};
+
+\node[factor, below=8mm of llm, xshift=-50mm] (f1) {前処理};
+\node[factor, right=3mm of f1] (f2) {検索\\アーキテクチャ};
+\node[factor, right=3mm of f2] (f3) {シンボリック\\検証層};
+\node[factor, right=3mm of f3] (f4) {組織的な\\ガバナンス設計};
+
+\draw[arr] (c1.south) -- ++(0,-4mm) -| (llm.north);
+\draw[arr] (c2.south) -- ++(0,-4mm) -| (llm.north);
+\draw[arr] (llm.south) -- ($(f1.north)!0.5!(f4.north)$);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 二つの制約とLLM/AIエージェントの位置づけ}\ 情報量の爆発と非構造化データという二つの制約をLLM／AIエージェントが同時に解消しうる一方、実運用の成否は前処理・検索アーキテクチャ・シンボリック検証層・組織的ガバナンス設計という4つの要因に左右される。}
+
+本ホワイトペーパーは、この分野の一次情報を網羅的に精査し、「何が既に実運用に到達しているか」「どこに測定可能な効果があるか」「どこに未解決の課題が残るか」を、誇張や憶測を排して整理することを目的とする。
+
+\subsection{なぜ「いま」なのか――市場的背景}
+\label{sec:intro-market}
+
+生成AIの投資業界への浸透は、もはや一部の先進的なクオンツファンドに限られた現象ではない。2025年に相次いで公表された複数の独立した調査は、採用がすでに\textbf{ほぼ普遍的な水準}に達し、争点が「導入するか否か」から「どこまで運用の中核に据えるか」へと移行したことを一致して示している。McKinseyの年次調査『The State of AI』（2025年11月版、105か国・1,993名を対象に2025年6〜7月に実施）では、AIを少なくとも一つの業務機能で利用する組織は78\%に達し、AIエージェントを本番展開（scaling）している組織が23\%、実験段階が39\%と、エージェント技術が2025年最大のトレンドとして立ち上がったことが確認されている\cite{x01mckinsey2025stateofai}。買い手側に限れば採用率はさらに高い。AIMAの2025年調査（運用資産7,880億ドルを代表する運用会社150社を対象）ではファンドマネジャーの95\%がすでに生成AIを業務に用いており（2023年の86\%から上昇）、生成AIが投資意思決定でより大きな役割を果たすと見込む割合は2023年の20\%から58\%へと急増した\cite{x01aima2025}。EYの『GenAI in Wealth \& Asset Management Survey 2025』も、95\%の企業が複数ユースケースへ展開済み、78\%がエージェント型AIを検討中と報告している\cite{x01ey2025genai}。
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{買い手側・エンタープライズにおける生成AI採用の主要指標（2025年）}
+\label{tab:intro-adoption}
+\begin{tabular}{@{}p{34mm}p{58mm}p{34mm}@{}}
+\toprule
+\textbf{調査主体} & \textbf{主要な発見} & \textbf{対象・時期} \\
+\midrule
+McKinsey \cite{x01mckinsey2025stateofai} & AI利用組織78\%／エージェント本番展開23\%・実験39\%／高成果企業（EBIT寄与5\%超）は6\%のみ & 105か国・1,993名／2025年6〜7月 \\
+AIMA \cite{x01aima2025} & 生成AI利用95\%（'23年86\%）／投資判断での役割拡大を見込む58\%（'23年20\%） & 運用会社150社・7,880億ドル／2025年9月 \\
+EY \cite{x01ey2025genai} & 複数ユースケース展開済み95\%／エージェント型AI検討中78\%／実質的な事業インパクトを実感27\% & 資産・ウェルス運用会社／2025年9月 \\
+Coalition Greenwich \cite{altdata2025} & オルタナティブデータ支出の増額を計画する投資家63\% & 買い手側56社／2025年9〜10月 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+一方で、採用の普遍化は成果の普遍化を意味しない。同じMcKinsey調査は、企業レベルで何らかの財務的インパクトを報告した組織が39\%にとどまり、EBIT寄与5\%超の「高成果企業」はわずか6\%であることを示している\cite{x01mckinsey2025stateofai}。この「採用は進むが規模化した価値は捉えきれていない」というギャップこそが、本書が\S\ref{sec:intro-definition}で論じる\textbf{AI-Ready／AI-Nativeという概念区分}の実務的な出発点となる。
+
+市場規模の予測もまた、この時期の期待の急速な再評価を映し出している。Bloomberg Intelligenceの独自モデルは、生成AI市場が2022年の約400億ドルから2032年には1.3兆ドル（年率約43\%）へ拡大すると2023年に予測し、2026年の改訂では2.3兆ドルへと上方修正した\cite{x01bi2023genaimarket}。金融分野に限っても、McKinseyは生成AIが銀行業に年間2,000〜3,400億ドル（営業利益の9〜15\%相当）の価値をもたらしうると見積もり\cite{x01mckinsey2023banking}、AI全般の金融市場はMarketsandMarketsの推計で2024年の383.6億ドルから2030年には1,903.3億ドル（年率30.6\%）へ成長するとされる\cite{x01marketsandmarkets2024aifinance}。これらの数値は算定基準が調査機関ごとに異なるため額面比較には注意を要するが、いずれも二桁後半〜四十%台という高いCAGRで一致しており、投資判断・データ処理を担う中核業務が生成AIの主要な受益領域と目されている点が本書の関心と重なる。
+
+\subsection{「AI-Ready」と「AI-Native」――定義の明確化}
+\label{sec:intro-definition}
+
+本書のタイトルに含まれる二つの鍵概念は、しばしば混同されるが、対象も水準も異なる。両者を明示的に区別することが、本書全体の議論を貫く軸となる。
+
+\textbf{AI-Ready（AIレディ）}は、まず\emph{データ}に関する概念である。Gartnerの定義によれば、AI-Readyデータとは品質・網羅性・関連性・多様性・想定ユースケースへの整合性・倫理／ガバナンス上の健全性という要件を満たし、AIでの利用に適することが検証されたデータを指す。決定的に重要なのは、従来のデータ品質基準で「高品質」と判定されたデータが自動的にAI-Readyになるわけではないという点である\cite{x01gartner2025aiready}。Gartnerは、AI-Readyデータに支えられていないAIプロジェクトの60\%が2026年までに放棄されると予測しており\cite{x01gartner2025aiready}、さらに2026年の調査では、AIで成果を上げている組織はデータ品質・ガバナンス・人材・変革管理といった基盤領域に（売上比で）最大4倍多く投資し、成熟度の高い組織は最大65\%高い事業成果を得ていると報告している\cite{x01gartner2026foundations}。すなわち、成否を分けるのはモデルそのものよりも\textbf{データ基盤への投資の深さ}である。
+
+\textbf{AI-Native（AIネイティブ）}は、\emph{組織・システムのアーキテクチャ}に関する概念である。AIを既存の製品やワークフローに後付けした「AI-Enabled（AI対応）」との対比で語られ、最も簡潔な判定基準は「AIを取り除いたときにその機能が\emph{劣化}するにとどまるか、それとも\emph{完全に停止}するか」である\cite{x01crv2025ainative}。AI-Nativeなシステムは確率的な出力・反復・適応を前提に設計されるため、多段階の業務プロセスが単一のプロンプトとエージェントの推論列へ折り畳まれる。後付け型アーキテクチャの能力上限は固定されるのに対し、AI-Native型の上限はモデルの改良ごとに上昇するため、その差は3〜5年で埋め難いものになると論じられている\cite{x01crv2025ainative}。
+
+\begin{concept}{AI-Ready と AI-Native}
+「AI-Ready」と「AI-Native」は似た言葉だが層が違う。AI-Ready（AIレディ）はデータ層の状態を指し、品質・網羅性・メタデータ・ガバナンスが整い、AIが確実に読み解ける形になっていることを意味する。単なる「高品質データ」とは別物である。AI-Native（AIネイティブ）は組織・システムのアーキテクチャの話であり、AIを前提に設計され、AIを外すと機能そのものが止まる状態を指す。後付けでAIを足しただけの「AI-Enabled（AI対応）」との違いは、次の一問で見分けられる：「AIを取り除いたら、機能は劣化にとどまるか、それとも停止するか」。
+\begin{center}
+\begin{tikzpicture}[node distance=8mm, every node/.style={font=\small}]
+\node[fnode dark, text width=30mm] (sys) {対象システム};
+\node[fnode muted, above=9mm of sys, text width=30mm] (data) {データ層: AI-Ready\\（品質・網羅性・ガバナンス）};
+\node[fnode, right=24mm of sys, yshift=17mm, text width=34mm] (enabled) {AIを外す $\rightarrow$ \textbf{劣化}にとどまる\\＝AI-Enabled（後付け）};
+\node[fnode accent, right=24mm of sys, yshift=-17mm, text width=34mm] (native) {AIを外す $\rightarrow$ \textbf{停止}する\\＝AI-Native（設計層）};
+\draw[farr] (data) -- (sys);
+\draw[farr] (sys.east) -- (enabled.west);
+\draw[farr accent] (sys.east) -- (native.west);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 「AIを外すテスト」による直感的な判定}\ AIを取り除いたときに劣化で済むならAI-Enabled、停止するならAI-Nativeである。}
+このテストは、見た目にAIらしい機能があるかどうかではなく、AIが構造上どれだけ不可欠かを問う点が要である。
+\end{concept}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{AI-Ready と AI-Native の対比}
+\label{tab:intro-ready-native}
+\begin{tabular}{@{}p{26mm}p{57mm}p{57mm}@{}}
+\toprule
+ & \textbf{AI-Ready} & \textbf{AI-Native} \\
+\midrule
+主たる対象 & データ（および前処理・検索基盤） & 組織・システムのアーキテクチャ \\
+問い & このデータはAIが確実に利用できる形か & AIを外すと業務は停止するか、単に劣化するか \\
+成否の律速 & データ品質・ガバナンス・メタデータ・可観測性 \cite{x01gartner2025aiready} & 確率的出力を前提とした設計・エージェント化の深さ \cite{x01crv2025ainative} \\
+本書での対応 & 第\ref{sec:data-infra}部（データ基盤） & 第\ref{sec:ai-native-funds}部（AI-Nativeファンド）ほか \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{insight}{示唆: データ接続のコモディティ化と差別化の移動}
+Bloomberg・LSEG・FactSet・DaloopaがMCP（Model Context Protocol）サーバーを相次いで提供し\cite{factset_mcp_nd}、標準化されたデータ\emph{接続}の限界価値がゼロに近づくと、買い手側の持続的な差別化は「データを保有すること（AI-Readyの達成）」から「AI-Nativeなアーキテクチャでデータを解釈・文脈化し行動に結びつけること」へと移動する。実際、採用率が95\%に達した以上、採用それ自体はもはや差別化要因たりえない\cite{x01aima2025,x01ey2025genai}。ただしこれは仮説であり、反証材料も存在する。Citadelのケン・グリフィンは2025年10月時点で生成AIは生産性を高めるがアルファ創出には「力不足」と述べ、2026年半ばに評価を一変させた\cite{griffin2026}。AI-Nativeの優位は実在しうるが、その到来はベンダーの物語が示唆するよりも遅く、かつ不均等でありうる。
+\end{insight}
+
+\subsection{標準化とタイムライン――2023→2026の変曲点}
+\label{sec:intro-timeline}
+
+生成AIが投資業界で「実験」から「実装」へ移行した背景には、モデル能力の向上だけでなく、\textbf{データ接続の標準化}と\textbf{規制の明確化}という二つの制度的変化がある。とりわけAnthropicが2024年11月に公開したMCP（Model Context Protocol）は、AIエージェントとデータソース／ツールをつなぐ「N×M問題」を解消する共通規格として急速に普及し\cite{x01anthropic2024mcp}、OpenAIも2025年5月にResponses APIでリモートMCPサーバー対応を追加し、MCPをエージェント開発APIの標準的な道具立てへ組み込んだ\cite{x01openai2025responsesmcp}。2025年12月にはMCPがLinux Foundation傘下のAgentic AI Foundation（Anthropic・Block・OpenAIのプロジェクトを初期貢献とし、AWS・Bloomberg・Cloudflare・Google・Microsoft等が参加）へ寄贈され、ベンダー主導の仕様から中立的な共通インフラへと移行した\cite{x01mcp2026foundation}。この標準化こそが、\S\ref{sec:intro-definition}で述べた「データ接続のコモディティ化」の技術的な裏づけである。
+
+ただし、2025〜2026年の標準化はMCPだけで完結しない。Googleが2025年4月に発表したAgent2Agent（A2A）は、エージェント同士がベンダーやフレームワークをまたいで通信・情報交換・協調行動を行うためのプロトコルであり、50社超の技術・サービスパートナーとともに公表された\cite{x01google2025a2a}。さらに2025年9月のAgent Payments Protocol（AP2）は、A2AとMCPを拡張する形で、エージェントがユーザーの委任に基づいて支払いを開始する際の認可・真正性・責任分界を扱う\cite{x01google2025ap2}。Linux Foundationは2026年4月時点で、A2Aが150超の組織に支持され、Google・Microsoft・AWSの主要クラウドに深く統合され、金融サービスを含む複数業界で本番利用が始まったと発表している\cite{x01linuxfoundation2026a2a}。したがって、投資業界にとっての変曲点は「LLMが賢くなった」ことではなく、\textbf{データに触る、他のエージェントと協調する、経済行為を実行する}という三層の相互運用性が同時に整備され始めた点にある。
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{2024〜2026年に立ち上がったエージェント標準化スタック}
+\label{tab:intro-agent-standards}
+\begin{tabular}{@{}p{22mm}p{34mm}p{50mm}p{34mm}@{}}
+\toprule
+\textbf{層} & \textbf{代表標準} & \textbf{解く問題} & \textbf{金融での意味} \\
+\midrule
+データ／ツール接続 & MCP \cite{x01anthropic2024mcp,x01openai2025responsesmcp} & エージェントが外部データ、API、業務ツールへ共通インターフェースで接続する & 市場データ、文書、社内APIへの接続コストを低下させる \\
+エージェント間協調 & A2A \cite{x01google2025a2a,x01linuxfoundation2026a2a} & 異なるベンダー・フレームワークのエージェントが互いを発見し、タスクを委譲・調整する & リサーチ、リスク、コンプライアンスの複数エージェントを横断編成できる \\
+経済行為・支払い & AP2 \cite{x01google2025ap2,x01linuxfoundation2026a2a} & ユーザー委任、真正性、責任分界を保ちながらエージェント主導の支払いを扱う & 決済・証券・保険で、エージェントが「助言」から「執行」に近づく際の統制点になる \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{concept}{MCP（Model Context Protocol）}
+MCPとは、AIエージェントと外部のデータ源・ツールを繋ぐための共通規格（プロトコル）である。Anthropicが2024年11月に公開し\cite{x01anthropic2024mcp}、その後業界標準化が進んだ。素朴には、AIアプリ$M$個とデータ源$N$個を個別配線で繋ぐと最大$M\times N$本の専用コネクタが必要になり、組合せが増えるほど接続の管理が破綻する（「N×M問題」）。これは家電の電源プラグが会社ごとにバラバラだと変換器が無数に要るのと同じ状況である。MCPという共通の「差込口」を間に挟めば、AI側・データ側それぞれが一度MCPに対応するだけで済み、必要な接続本数は$N+M$へと激減する。金融領域ではBloomberg・LSEG・FactSet等が既にMCPサーバーを提供し始めており\cite{factset_mcp_nd}、データへの「接続」そのものがコモディティ化しつつある。
+\begin{center}
+\begin{tikzpicture}[
+  node distance=6mm,
+  every node/.style={font=\footnotesize},
+  aiN/.style={fnode blue, text width=16mm, minimum height=7mm},
+  dsN/.style={fnode muted, text width=16mm, minimum height=7mm},
+  hub/.style={fnode dark, text width=16mm, minimum height=9mm, font=\bfseries\footnotesize}
+]
+\node[fchip] (t1) {MCPなし：N\texttimes M本};
+\node[aiN, below=8mm of t1, xshift=-12mm] (a1) {AI1};
+\node[aiN, below=4mm of a1] (a2) {AI2};
+\node[aiN, below=4mm of a2] (a3) {AI3};
+\node[dsN, right=20mm of a2] (d1) {データ1};
+\node[dsN, above=4mm of d1] (d0) {データ2};
+\node[dsN, below=4mm of d1] (d2) {データ3};
+\foreach \a in {a1,a2,a3}{
+  \foreach \d in {d0,d1,d2}{
+    \draw[farr dash] (\a) -- (\d);
+  }
+}
+\node[fchip, right=42mm of t1] (t2) {MCPあり：N+M本};
+\node[aiN, below=8mm of t2, xshift=-12mm] (b1) {AI1};
+\node[aiN, below=4mm of b1] (b2) {AI2};
+\node[aiN, below=4mm of b2] (b3) {AI3};
+\node[hub, right=14mm of b2] (hub) {MCP};
+\node[dsN, right=14mm of hub, yshift=8mm] (e1) {データ2};
+\node[dsN, right=14mm of hub] (e2) {データ1};
+\node[dsN, right=14mm of hub, yshift=-8mm] (e3) {データ3};
+\draw[farr] (b1) -- (hub);
+\draw[farr] (b2) -- (hub);
+\draw[farr] (b3) -- (hub);
+\draw[farr blue] (hub) -- (e1);
+\draw[farr blue] (hub) -- (e2);
+\draw[farr blue] (hub) -- (e3);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: N×M問題の解消}\ 個別配線（左）では接続数が掛け算で増えるが、MCPという共通ハブ（右）を挟むと足し算で済む。}
+\end{concept}
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\footnotesize,
+  milestone/.style={fnode, align=left, text width=30mm, minimum height=20mm},
+  reg/.style={fnode accent, align=left, text width=30mm, minimum height=20mm},
+  arr/.style={farr}
+]
+\node[milestone] (m1) {\textbf{2023}\\[1mm]金融特化型LLMの登場（BloombergGPT）\cite{bloomberggpt2023}};
+\node[milestone, right=5mm of m1] (m2) {\textbf{2024.11}\\[1mm]MCP公開、データ接続の標準化が始動\cite{x01anthropic2024mcp}};
+\node[milestone, right=5mm of m2] (m3) {\textbf{2025}\\[1mm]A2A/AP2により協調・支払いの標準化も始動\cite{x01google2025a2a,x01google2025ap2}};
+\node[reg, right=5mm of m3] (m4) {\textbf{2026}\\[1mm]A2Aが150超組織へ拡大、AI規制も本格化\cite{x01linuxfoundation2026a2a,eba2025aiact}};
+
+\draw[arr] (m1.east) -- (m2.west);
+\draw[arr] (m2.east) -- (m3.west);
+\draw[arr] (m3.east) -- (m4.west);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 2023→2026の主要な変曲点}\ モデル能力の向上（金融特化型LLM）に、データ接続の標準化（MCP）と規制の明確化（EU AI Act）という制度的変化が重なり、投資業界は生成AIの実装フェーズへ移行した。金色のノードは規制上の節目を示す。}
+
+規制面では、EU AI Actの高リスク分類（与信スコアリング・保険料算定AI等）の完全適用が当初2026年8月2日に予定されていたが、Digital Omnibus（欧州議会承認2026年6月）により信用・保険AI義務の拘束的期限は2027年12月2日へ延期された\cite{eba2025aiact,x07digitalomnibus2026}。非準拠には最大3,000万ユーロまたは世界売上高6\%の罰金が科される点は変わらない。規制・ガバナンスは、これまでLLMコパイロットの本番投入を躊躇させてきた曖昧さを緩和する一方で、実装の遅速を左右する新たな変数として立ち現れている（詳細は第\ref{sec:cross-cutting}部）。
+
+\subsection{周辺分野から見た位置づけ：業界横断のAI移行と金融}
+\label{sec:intro-cross-domain}
+
+ここまで見てきた採用率・標準化のうねりは、投資運用業界に固有の現象ではない。むしろ金融は、IT・ソフトウェア産業を筆頭とする\textbf{経済全体のAI移行という、より大きな潮流の上に乗っている}。Stanford大学HAI（Human-Centered Artificial Intelligence Institute）の『2025 AI Index Report』によれば、少なくとも一つの業務機能でAIを利用する組織の割合は、業種を問わない経済全体の横断調査で2023年の55\%から2024年には78\%へ達しており\cite{y01stanfordhai2025aiindex}、この水準は本書\S\ref{sec:intro-market}で見た金融買い手側の高採用率（AIMA調査でファンドマネジャーの95\%\cite{x01aima2025}等）が確立する前後の時期に、業種を問わず既に到達していた基準点である。すなわち金融の高い採用率は、金融固有の突出した先進性というより、経済全体で既に進行していた拡散曲線に金融が追いついた結果と解釈する方が整合的である。本節では、AI-Ready／AI-Nativeという概念、そしてMCP等の標準化がいずれも金融発ではなく業界横断的に立ち上がった経緯を、金融のプロが自らの採用段階を測るための「ものさし」として提示する。
+
+\begin{casestudy}{ソフトウェア開発: AIツール普及曲線のペースセッター}
+生成AIの企業導入が最も早く・最も深く進んだ分野はソフトウェア開発である。GitHub Copilotは2025年7月に累計ユーザー数\textbf{2,000万人}を突破し（同年4月の1,500万人から3か月で500万人増）、\textbf{Fortune 100の90\%}が導入済みである\cite{y01techcrunch2025copilot20m}。競合のCursor（開発元Anysphere）は、2025年1月に年換算収益（ARR）\textbf{1億ドル}、6月に\textbf{5億ドル}、11月に\textbf{10億ドル}（同時に290億ドル評価額でシリーズDを実施）、2026年2〜3月には\textbf{20億ドル}へと、13か月で20倍という、Slack・Zoom・Snowflakeを上回るペースでの成長を遂げた\cite{y01techcrunch2025cursorarr,y01businesswire2025cursorseriesd}。Gartnerは、企業のソフトウェアエンジニアのうちAIコーディング支援ツールを利用する割合が、2023年初頭の10\%未満から2028年には75\%に達すると予測している\cite{y01gartner2024aicodeassist}。これらはいずれも金融とは無関係に進行した、AIネイティブなツール導入の教科書的な普及曲線である。
+\end{casestudy}
+
+\begin{insight}{金融への示唆: 自らの採用段階を外部のものさしで測る}
+ソフトウェア開発におけるCopilot／Cursorの普及曲線は、\S\ref{sec:intro-market}で見た金融買い手側の採用曲線（AIMA調査: 生成AI利用86\%→95\%、2023→2025年）と比較するための「外部のものさし」を提供する。ソフトウェア開発では、単なるツール導入率（3分の2の企業が生成AIツールを導入済み\cite{y01bain2025techreport}）と実際の生産性押し上げ効果には大きな差があり、基礎的なAIコーディング支援だけでは10〜15\%の生産性向上にとどまる一方、業務プロセス自体を再設計した企業では25〜30\%に達する\cite{y01bain2025techreport}。この「導入率と業務プロセス変革の間のギャップ」は、金融における「エージェント型AI本番展開23\%・実験段階39\%」というMcKinsey調査の構図（\S\ref{sec:intro-market}）と酷似しており、金融固有の課題ではなく、AIツール導入一般に共通する構造的な現象であることを示唆する。ソフトウェア開発が既に踏んだ「導入は容易だが、業務プロセスの再設計を伴わなければ効果は限定的」という段階を、金融も遅かれ早かれ通過することを見越した投資判断が求められる。
+\end{insight}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{業界横断で見た生成AI／AIエージェント普及状況（2023〜2026年）}
+\label{tab:intro-cross-domain-adoption}
+\begin{tabular}{@{}p{30mm}p{62mm}p{34mm}@{}}
+\toprule
+\textbf{分野} & \textbf{採用状況の指標} & \textbf{出典・時期} \\
+\midrule
+経済全体（業種横断） & 組織のAI利用率 55\%→78\%（2023→2024年） & Stanford AI Index \cite{y01stanfordhai2025aiindex} \\
+ソフトウェア開発（AIコーディング支援） & GitHub Copilot 累計2,000万ユーザー、Fortune 100の90\%が導入 & TechCrunch、2025年7月 \cite{y01techcrunch2025copilot20m} \\
+ソフトウェア開発（AIネイティブ新興企業） & Cursor/Anysphere: ARR 1億ドル→20億ドル（13か月） & TechCrunch/Business Wire、2025年1月〜2026年3月 \cite{y01techcrunch2025cursorarr,y01businesswire2025cursorseriesd} \\
+ソフトウェア産業（予測） & 企業ソフトウェアエンジニアのAIコード支援利用 10\%未満→75\%（2023→2028年予測） & Gartner、2024年4月 \cite{y01gartner2024aicodeassist} \\
+データ接続標準（MCP、業種横断） & Agentic AI Foundation設立会員に通信・小売・SaaS企業が多数（金融はBloombergのみ） & Linux Foundation、2025年12月 \cite{y01linuxfoundation2025aaif} \\
+データ接続標準（MCP、ソフトウェア産業） & ソフトウェア組織の41\%がMCPを限定的または本格的に本番運用 & Stacklok、2026年1月 \cite{y01stacklok2026mcpsoftware} \\
+資産運用・ヘッジファンド（金融、買い手側） & ファンドマネジャーの生成AI利用 86\%→95\%（2023→2025年） & AIMA、2025年9月 \cite{x01aima2025} \\
+\bottomrule
+\end{tabular}
+\end{table}
+{\small\color{brandgray}\textbf{図: 業界横断で見た生成AI／AIエージェント普及状況}\ 経済全体・ソフトウェア産業・データ接続標準・金融買い手側の採用指標を並べると、金融の高い採用率（86\%→95\%）は独立した現象ではなく、より大きな業界横断的な普及曲線の一部として位置づけられることが分かる。}
+
+\begin{casestudy}{MCP標準化の主導権: 金融発ではなく業界横断インフラとして立ち上がった}
+\S\ref{sec:intro-timeline}で見たMCPは、2025年12月にLinux Foundation傘下の新設「Agentic AI Foundation（AAIF）」へ寄贈された。プラチナ会員はAWS・Anthropic・Block・Bloomberg・Cloudflare・Google・Microsoft・OpenAIの8社、ゴールド会員にはCisco・Ericsson（通信）、Shopify（小売・EC）、Salesforce・SAP・Snowflake・Okta・Datadog・Twilio（エンタープライズSaaS）が名を連ねる\cite{y01linuxfoundation2025aaif}。金融固有の企業はBloombergのみであり、MCPが金融発の技術ではなく、通信・小売・SaaSを含む業界横断のインフラとして立ち上がったことを裏づける。さらにStacklokの2026年調査では、ソフトウェア組織の\textbf{41\%}が既にMCPサーバーを限定的または本格的に本番運用しており、同社は同時期に小売・金融サービス向けの同種調査も並行して公表している\cite{y01stacklok2026mcpsoftware}。
+\end{casestudy}
+
+\begin{insight}{金融への示唆: 接続層の標準化は「乗る」ものであり「作る」ものではない}
+金融データベンダー（Bloomberg・LSEG・FactSet・Daloopa）がMCPサーバーを提供し始めたことは（\S\ref{sec:intro-definition}）、金融が独自に接続標準を主導した結果ではなく、既に通信・小売・SaaS業界を巻き込んで確立された業界横断インフラに、後から乗った実装である。この事実は\S\ref{sec:intro-definition}で述べた「データ接続のコモディティ化」という示唆を補強する: 接続層の標準化競争において金融が独自の差別化を主張する余地は元々小さく、差別化の焦点は最初から解釈・オーケストレーション層に置くべきだったことになる。同時に、金融固有のガバナンス・監査要件（本節前段のEU AI Act等）は、業界横断インフラの上に金融だけが追加で積む「規制レイヤー」として理解するのが実務的である。
+\end{insight}
+
+ただし、金融が経済全体の潮流に単純に追随しているだけというわけでもない。同じMcKinsey調査は、AI導入によって人員を「純減」させると予想する回答者の割合が「変化なし」を上回る業種は他に見当たらない中で、\textbf{金融サービスだけが「人員純減」を「変化なし」より多く見込む唯一の業種}であったと報告している\cite{x01mckinsey2025stateofai}。これは、金融におけるAI導入が単なる生産性向上の一手段ではなく、業務構造そのものの再編を伴う変化として認識されていることを示唆しており、\S\ref{sec:llm-analysis}以降で論じる自動化の深さの議論に接続する。
+
+これらの観察から得られる一つの仮説は、金融は業界横断のAIツール・標準化の波に対しては「速い追随者（fast follower）」であり、先駆者ではないというものである。ソフトウェア開発・エンタープライズSaaSの採用曲線は金融に先行し、MCP・A2Aといった接続・協調標準も金融発ではなく業界横断で確立された後に金融へ波及した。ただしこの仮説には反証材料もある。同一期間に金融買い手側の生成AI利用率は86\%から95\%へ他業種平均を上回るペースで上昇しており（\S\ref{sec:intro-market}）、Bridgewater AIA Labsのように実運用資本で大規模な実績を残すAI-Nativeファンドは、他業種で同等の事例が確立する前から存在した（第\ref{sec:ai-native-funds}部）。したがって「fast follower」という位置づけは、接続・ツール標準といったインフラ層には当てはまるが、金融固有のアルファ創出アプリケーションには必ずしも当てはまらないと、限定的に理解すべきである。
+
+\subsection{調査手法}
+
+本書の元となったのは、学術研究（Foundations）・業界ニュース（Latest）・仮説的考察（Takes）の3種類、合計212件の一次情報である。各項目は実在する論文・公式発表・報道記事に基づいて収集され、以下の観点で精査・分類した。
+
+\begin{enumerate}
+  \item \textbf{テーマ分類}: 各項目を「AI-Ready金融データ基盤」「AI-Nativeヘッジファンド・投資会社」「投資意思決定のためのAIエージェント」「LLM／AIエージェントによる金融データ分析」の4テーマ（重複を許容）に整理した。
+  \item \textbf{事実確認の原則}: 企業名・論文名・数値・URLは原資料の記載をそのまま用い、本書側での推測・創作は行っていない。仮説的考察（Takes）に基づく記述は、本文中で「仮説」「Rationale」等と明示し、実証済みの事実と区別している。
+  \item \textbf{横断的パターンの抽出}: 個別事例をテーマごとに整理するだけでなく、複数の独立した研究・事例に共通して現れる構造的パターン（例: 検索アーキテクチャのボトルネック化、コスト・精度のトレードオフ、規制の非同期な進展）を横断的に抽出した。
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\small,
+  stage/.style={fnode, align=left, text width=37mm, minimum height=27mm},
+  stagelast/.style={fnode accent, align=left, text width=37mm, minimum height=27mm},
+  arr/.style={farr},
+  node distance=13mm
+]
+
+\node[stage] (src) {
+  \textbf{1. 一次情報の収集}\\[1.5mm]
+  \footnotesize
+  合計\textbf{212件}\\
+  ・学術研究（Foundations）\\
+  ・業界ニュース（Latest）\\
+  ・仮説的考察（Takes）
+};
+
+\node[stage, right=of src] (theme) {
+  \textbf{2. 4テーマへの分類}\\[1.5mm]
+  \footnotesize
+  ・AI-Ready金融データ基盤\\
+  ・AI-Nativeファンド\\
+  ・投資意思決定エージェント\\
+  ・LLMデータ分析
+};
+
+\node[stagelast, right=of theme] (cross) {
+  \textbf{3. 横断的パターン抽出}\\[1.5mm]
+  \footnotesize
+  検索ボトルネック化\\
+  コスト・精度トレードオフ\\
+  規制の非同期な進展\ 等
+};
+
+\draw[arr] (src.east) -- (theme.west);
+\draw[arr] (theme.east) -- (cross.west);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 本書の調査手法}\ 学術研究・業界ニュース・仮説的考察の3種類、合計212件の一次情報を4つのテーマに分類したうえで、個別事例を横断して繰り返し現れる構造的パターンを抽出した。第\ref{sec:data-infra}部から第\ref{sec:llm-analysis}部が「2」の各テーマに、第\ref{sec:cross-cutting}部が「3」に対応する。}
+
+本書の編集方針は、収集した212件をすべて等価に列挙することではない。個々の項目には検証の厚み・再現性・実運用への到達度に大きな差があるため、本書は\textbf{数の網羅性よりも、事例の質と検証可能性を優先}する。具体的には、（i）定量的な裏付けを伴う事例や、複数の独立した研究が同じ結論に収束している場合を重点的に取り上げ、単発的・宣伝色の強い発表は簡潔な言及にとどめる、（ii）実証済みの「事実」と、著者の解釈である「仮説（Takes）」を本文中で明確に区別し、後者は根拠と反証材料を併記する、という2点を徹底している。この方針は、生成AIをめぐる情報の多くが誇張されたマーケティング表現と厳密な実証研究の間を揺れ動いている現状に対する、本書なりの応答である。
+
+\subsection{対象範囲と限界}
+
+本書が扱う事例の多くは2025年後半から2026年前半にかけて公表されたものであり、生成AI・エージェント技術が投資業界で急速に実装フェーズへ移行した時期の「スナップショット」である。以下の点に留意されたい。
+
+\begin{itemize}
+  \item \textbf{ベンチマーク上の成果と実運用の成果は区別が必要}: 本書で紹介する精度・Sharpe比・コスト削減率などの数値は、多くの場合バックテストや限定的なパイロット環境で得られたものであり、複数年にわたる実市場での検証を経たものは一部（Bridgewater AIA Labs、Renaissance Technologies等の実運用ファンド）に限られる。
+  \item \textbf{再現性の限界}: 後述するとおり（\S\ref{sec:llm-analysis}）、LLMトレーディング研究の多くは取引コストのモデル化や時間整合的な評価プロトコルを欠いており、公表された「アウトパフォーム」を額面通りに受け取ることはできない。
+  \item \textbf{情報の非対称性}: 大手ヘッジファンドの多くは技術的詳細を非公開とする傾向が強く、本書で参照できるのは各社が意図的に公開した情報（公式ブログ、プレスリリース、幹部インタビュー）に限られる。したがって「公開されていない＝存在しない」ではなく、「公開されていない＝検証不能」と解釈すべきである。
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\small,
+  period/.style={fnode, text width=140mm, minimum height=11mm, font=\bfseries\small},
+  caution/.style={fnode accent, align=left, text width=44mm, minimum height=32mm, font=\footnotesize},
+  arr/.style={farr}
+]
+
+\node[period] (period) {対象期間: 2025年後半〜2026年前半（生成AI・エージェント技術が投資業界で実装フェーズへ移行した時期のスナップショット）};
+
+\node[caution, below=9mm of period.south, xshift=-48mm] (c1) {\textbf{(a) ベンチマーク\,vs.\,実運用}\\[1mm]
+  精度・Sharpe比・コスト削減率の多くはバックテストや限定的パイロットの数値。複数年の実市場検証を経たのは一部（Bridgewater AIA Labs、Renaissance Technologies等）に限られる};
+\node[caution, right=4mm of c1] (c2) {\textbf{(b) 再現性の限界}\\[1mm]
+  LLMトレーディング研究の多くは取引コストのモデル化や時間整合的な評価プロトコルを欠き、公表された「アウトパフォーム」を額面通りに受け取れない（\S\ref{sec:llm-analysis}）};
+\node[caution, right=4mm of c2] (c3) {\textbf{(c) 情報の非対称性}\\[1mm]
+  大手ヘッジファンドは技術詳細を非公開とする傾向が強く、参照できるのは意図的に公開された情報のみ。「非公開＝検証不能」と解釈すべき};
+
+\draw[arr] (period.south) -- ++(0,-4mm) -| (c1.north);
+\draw[arr] (period.south) -- (c2.north);
+\draw[arr] (period.south) -- ++(0,-4mm) -| (c3.north);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 本書の対象範囲と留意点}\ 2025年後半〜2026年前半のスナップショットである本書は、(a)ベンチマークと実運用の乖離、(b)再現性の限界、(c)情報の非対称性という3つの留意点を前提に読む必要がある。}

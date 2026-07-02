@@ -1,0 +1,135 @@
+\section{結論と提言}
+\label{sec:conclusion}
+
+\subsection{総括}
+
+440件を超える一次情報を精査した結果、金融×AIの現在地は「モデルの能力競争」から「データ基盤・検証層・ガバナンス設計の競争」へと重心を移しつつあることが明確になった。BloombergGPTのような巨大ドメイン特化モデルの登場から数年を経て、決定的な差を生んでいるのは以下の3層である。
+
+\begin{enumerate}
+  \item \textbf{前処理・検索アーキテクチャ層}: GPT-4oの精度が前処理の有無で56\%から76\%へ変わり\cite{multistructured2025}、Fin-RATEでは検索設計の違いが精度を23.91\%から1.27\%へ崩壊させる\cite{finrate2026}。モデルを差し替えるより先に、この層への投資対効果の方が大きい。
+  \item \textbf{シンボリック検証層}: AUDITFLOWの82\%→18\%の精度崩壊が象徴するように\cite{auditflow2026}、LLM単体は正確な会計演算・数値照合を安定して行えない。記号的検証とLLMの意味理解を組み合わせるハイブリッド設計が、実運用可否の分岐点になっている。
+  \item \textbf{ガバナンス・監査可能性層}: Bridgewater AIA Labsのように実資本を運用する事例が存在する一方\cite{bridgewater_aialabs_nd}、DeepFund\cite{deepfund2025}やPortBench\cite{portbench2026}のように独立検証ではフロンティアモデルでも純損失・崩壊的ドローダウンを記録する事例が同時に存在する。この差を分けるのは、タスクスコープの厳密さ、人間レビューの保持、監査可能な意思決定記録の有無である。
+\end{enumerate}
+
+この3層は独立した並列要件ではなく、下から積み上がる前提条件の連鎖である。前処理・検索が崩れれば、その上のシンボリック検証もガバナンスも機能する土台を失う。
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\small,
+  layerbox/.style={text width=11.6cm, align=left, minimum height=19mm},
+  l1/.style={fnode, layerbox},
+  l2/.style={fnode blue, layerbox},
+  l3/.style={fnode accent, layerbox},
+  arr/.style={farr}
+]
+
+\node[l1] (l1) at (0,0) {%
+  \textbf{層1\ 前処理・検索アーキテクチャ層}\\[1mm]
+  \footnotesize GPT-4o精度\ \textbf{56\%→76\%}（前処理の有無）\cite{multistructured2025}\ ／\ Fin-RATE企業横断比較\ \textbf{23.91\%→1.27\%}（検索設計の失敗）\cite{finrate2026}
+};
+
+\node[l2, above=7mm of l1] (l2) {%
+  \textbf{層2\ シンボリック検証層}\\[1mm]
+  \footnotesize AUDITFLOW精度\ \textbf{82\%→18\%}（シンボリック検証の有無）\cite{auditflow2026}
+};
+
+\node[l3, above=7mm of l2] (l3) {%
+  \textbf{層3\ ガバナンス・監査可能性層}\\[1mm]
+  \footnotesize Bridgewater AIA Labsの実運用継続\cite{bridgewater_aialabs_nd}\ vs.\ DeepFund\cite{deepfund2025}・PortBench\cite{portbench2026}の独立検証における純損失・崩壊的ドローダウン
+};
+
+\node[above=6mm of l3, align=center, text width=11.6cm, font=\bfseries] (headline) {実運用の成否はこの3層の質で決まる};
+
+\draw[arr] (headline.south) -- (l3.north);
+\draw[arr] (l1.north) -- (l2.south);
+\draw[arr] (l2.north) -- (l3.south);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 3層が積み上がって初めて実運用に到達する}\ 各層は、その上の層が実運用で信頼できる結果を出すための前提条件である。前処理・検索アーキテクチャ層（\S\ref{sec:data-infra}）が崩れればシンボリック検証層（\S\ref{sec:llm-analysis}）は機能する土台を失い、検証層が崩れればガバナンス・監査可能性層（\S\ref{sec:cross-cutting}）は形式だけのものになる。}
+
+\subsection{実務者への示唆}
+
+\begin{itemize}
+  \item \textbf{ベンチマークのスコアだけで導入判断をしない}: 公表された精度・Sharpe比は、評価プロトコルの時間整合性・取引コストモデル化・匿名化の厳密さに大きく依存する。Look-Ahead-Bench\cite{lookaheadbench2026}やKTD-Fin\cite{fromknowingtodoing2026}、77件の系統的レビュー\cite{agentictrading2026}が示すとおり、「高スコア」は必ずしも「実運用で機能する」ことを意味しない。
+  \item \textbf{コスト・精度のパレートフロンティアを意識する}: 最高精度のアーキテクチャが最善の選択とは限らない。階層型supervisor-workerアーキテクチャが反射型自己修正アーキテクチャの効果の89\%を60\%のコストで実現する例のように\cite{benchmarkingmultiagent2026}、規模に応じたアーキテクチャ選択がTCOを左右する。
+  \item \textbf{データ接続よりデータの解釈・活用に投資する}: MCP標準化によりデータ接続そのものはコモディティ化に向かっている\cite{factset_mcp_nd}。差別化はオーケストレーション・ドメイン特化の前処理・監査可能性に移行しつつある。
+  \item \textbf{エージェント標準をガバナンス設計として扱う}: MCP、A2A、AP2は便利な連携仕様ではなく、外部データ接続・エージェント間協調・委任された決済行為の権限証跡を定義する運用基盤である\cite{x01openai2025responsesmcp,x01google2025a2a,x01google2025ap2,x01linuxfoundation2026a2a}。金融機関はこれらを技術選定ではなく監査・権限管理・ベンダー集中リスクの設計問題として評価すべきである。
+  \item \textbf{規制の非同期な進展を前提に設計する}: EU AI Act\cite{eba2025aiact}、SR 11-7の置き換え\cite{databricksndmodelrisk}、シャドーAIの開示義務化\cite{wsgrndshadowai}など、地域・分野によって規制の速度と厳格さが異なる。グローバルに展開するシステムほど、最も厳格な規制水準を基準に設計することが結果的にコストを下げる。
+  \item \textbf{検証層に棄権・反事実・因果を組み込む}: FinChain\cite{x05finchain2025}、GBFR\cite{x05gbfr2026}、FinCARE\cite{x07fincare2025}が示すように、今後の実務ベンチマークは「正答率」だけでなく、計算経路の検証、安全な回答拒否、反事実サンプル、因果根拠を含むべきである。誤答を減らすだけでなく、答えてはいけない状況を検知する能力が金融AIの実装条件になる。
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\small,
+  recbox/.style={text width=7.3cm, align=left, minimum height=25mm},
+  r1/.style={fnode, recbox},
+  r2/.style={fnode blue, recbox},
+  r3/.style={fnode accent, recbox},
+  r4/.style={fnode muted, recbox}
+]
+\node[r1] (b1) at (0,0) {\textbf{評価を疑う}\\[1mm]\footnotesize ベンチマークスコアは評価プロトコルの時間整合性・取引コストモデル化に依存する。「高スコア」は「実運用で機能する」を意味しない。};
+\node[r2, right=5mm of b1] (b2) {\textbf{コストを最適化する}\\[1mm]\footnotesize 最高精度が最善とは限らない。階層型アーキテクチャは反射型の効果の89\%を60\%のコストで実現しうる。};
+\node[r3, below=5mm of b1] (b3) {\textbf{投資の重心を移す}\\[1mm]\footnotesize データ接続はMCP標準化でコモディティ化へ向かう。差別化はオーケストレーション・前処理・監査可能性に移行する。};
+\node[r4, below=5mm of b2] (b4) {\textbf{規制を先取りする}\\[1mm]\footnotesize 規制の速度は地域・分野で異なる。最も厳格な水準を基準に設計すれば結果的にコストを下げる。};
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 実務者への4つの行動指針}\ 上記4項目の提言を、評価の疑い方・コスト設計・投資の重心・規制対応という4つの観点に整理したもの。いずれも本文で述べた具体的な事例・数値に基づく。}
+
+\subsection{研究者への示唆}
+
+本書で整理した未解決の課題（\S\ref{sec:open-gaps}）のうち、特に投資対効果が高いと考えられる研究方向は以下の3点である。
+
+\begin{enumerate}
+  \item \textbf{エンドツーエンド・point-in-time評価基盤の構築}: データ取り込みから投資意思決定までを一気通貫で、かつ時間整合性を保証した形で評価できるオープンなベンチマークは、業界全体の「アルファの誇張」問題を是正する基盤となる。
+  \item \textbf{非英語・非米国基準への拡張}: CLEF-2026 FinMMEval\cite{finmmeval2026}が端緒を開いたように、日本語・IFRS・中国会計基準等への評価スイートの拡張は、グローバル投資運用における構造的な死角を埋める。
+  \item \textbf{規制監査証跡への標準マッピング}: モデルレベルの説明可能性研究を、MiFID II・SEC受託者責任・EU AI Act・Basel IRBといった具体的な規制要件にマッピングする標準の確立は、AI-Native投資システムの実運用展開を大きく後押しする。
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\small,
+  numcirc/.style={draw=fignavy, fill=fignavy, text=white, figshadow, circle, font=\bfseries,
+    minimum size=7mm, inner sep=0pt},
+  priobox/.style={text width=13.0cm, align=left, minimum height=15mm, font=\footnotesize},
+  p1/.style={fnode, priobox},
+  p2/.style={fnode blue, priobox},
+  p3/.style={fnode accent, priobox}
+]
+\node[p1] (b1) at (0,0) {\textbf{\normalsize エンドツーエンド・point-in-time評価基盤の構築}\\[1mm] データ取り込みから投資意思決定までを一気通貫・時間整合的に評価するオープンなベンチマーク。第\ref{sec:open-gaps}部「エージェント・意思決定」の課題に対応。};
+\node[numcirc, left=3mm of b1] (c1) {1};
+
+\node[p2, below=5mm of b1] (b2) {\textbf{\normalsize 非英語・非米国基準への拡張}\\[1mm] CLEF-2026 FinMMEval\cite{finmmeval2026}に続き、日本語・IFRS・中国会計基準等への評価スイート拡張。第\ref{sec:open-gaps}部「データ基盤・文書処理」の課題に対応。};
+\node[numcirc, left=3mm of b2] (c2) {2};
+
+\node[p3, below=5mm of b2] (b3) {\textbf{\normalsize 規制監査証跡への標準マッピング}\\[1mm] モデルレベルの説明可能性研究とMiFID II・SEC受託者責任・EU AI Act・Basel IRBを結ぶ標準の確立。第\ref{sec:open-gaps}部「システミックリスク・規制」の課題に対応。};
+\node[numcirc, left=3mm of b3] (c3) {3};
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 投資対効果が高い3つの研究方向}\ 第\ref{sec:open-gaps}部で整理した未解決の課題のうち、特に優先度が高いと考えられる3方向と、それぞれが対応する課題カテゴリ。}
+
+\subsection{むすび}
+
+金融データを「AI-ready」にする取り組みと、投資運用を「AI-native」にする取り組みは、しばしば別々の技術トレンドとして語られるが、本書が精査した一次情報は、この二つが不可分であることを繰り返し示している。Bridgewater\cite{bridgewater_aialabs_nd}、Renaissance\cite{institutionalinvestor2025renaissance}、QRT\cite{bloomberg_qube2026}のような実運用に到達した事例は、いずれも高度なデータ基盤への長年の投資を土台にしている。逆に言えば、データ基盤への投資を伴わない「AIエージェント導入」は、DeepFund\cite{deepfund2025}やBankerToolBench\cite{bankertoolbench2026}が示すような性能ギャップに直面するリスクが高い。今後数年の競争優位は、最先端のモデルを最初に採用した企業ではなく、データ基盤・検証層・ガバナンスの三位一体を最も着実に構築した企業にもたらされる可能性が高い。この3層は一度構築して終わりではなく、規制の非同期な進展や評価手法の進化に合わせて継続的に更新すべき動的な基盤である。そしてこの3層は金融固有の発明ではない。文書AI・自律エージェント評価・LLM忠実性はいずれもリーガル・医療・ソフトウェア開発など周辺分野の方が先行しており（\S\ref{sec:cross-cutting-crossdomain}）、金融は成熟した設計・評価手法を「速い追随者」として借用できる立場にある。一方で、評価汚染・エージェント安全性・基盤モデル集中といった汎用AIの未解決課題は、実資本と執行権限を扱う金融でこそ他業界に先んじて最も鋭く顕在化する。金融が自前で確立せざるを得ない特異点は、会計数値の記号的検証と規制密度への対応という2点に絞られる。本書が精査した440件を超える一次情報が示す最大の教訓は、AIモデル自体の進歩を待つことではなく、その進歩を確実な意思決定へと変換する3層の質を、今この瞬間から着実に積み上げることの価値である。
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\small,
+  pathbox/.style={text width=7.0cm, align=center, minimum height=13mm},
+  outbox/.style={text width=7.0cm, align=left, minimum height=20mm, font=\footnotesize},
+  goodpath/.style={fnode, pathbox},
+  badpath/.style={fnode muted, pathbox},
+  goodout/.style={fnode blue, outbox},
+  badout/.style={fnode accent, outbox},
+  arr/.style={farr}
+]
+\node[goodpath] (g1) {\textbf{データ基盤・検証層・\\ガバナンスへの長年の投資}};
+\node[badpath, right=8mm of g1] (b1) {\textbf{データ基盤投資を伴わない\\AIエージェント導入}};
+
+\node[goodout, below=8mm of g1] (g2) {Bridgewater AIA Labs\cite{bridgewater_aialabs_nd}・Renaissance\cite{institutionalinvestor2025renaissance}・QRT\cite{bloomberg_qube2026}のように\textbf{実運用に到達}し、実績あるリターンを継続};
+\node[badout, below=8mm of b1] (b2) {DeepFund\cite{deepfund2025}・BankerToolBench\cite{bankertoolbench2026}が示すような\textbf{性能ギャップに直面するリスクが高い}};
+
+\draw[arr] (g1) -- (g2);
+\draw[arr] (b1) -- (b2);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: データ基盤投資の有無で分かれる明暗}\ 本文で挙げた実運用到達事例（左）と性能ギャップに直面した独立検証事例（右）は、いずれもデータ基盤・検証層・ガバナンスへの投資の有無という同じ分岐点に起因する。}

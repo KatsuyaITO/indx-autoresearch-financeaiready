@@ -1,0 +1,604 @@
+\section{AI-Ready金融データ基盤}
+\label{sec:data-infra}
+
+\subsection{課題の本質: モデルではなくデータが律速する}
+
+金融データをLLM／AIエージェントが確実に利用できる形式へ変換する取り組みは、本書が精査した212件のうち最大の比重を占めるテーマである。共通して浮かび上がるのは、「フロンティアモデルの能力」よりも「文書準備・前処理・検索アーキテクチャ」がボトルネックになっているという構図である。
+
+\begin{casestudy}{FinanceBench: 企業導入の最低ラインを可視化した基準ベンチマーク}
+上場企業の開示資料から作成された10,231問のQAベンチマークにおいて、GPT-4-Turbo＋検索は\textbf{81\%の質問で誤答または回答拒否}となった。マルチエージェントRAGを用いても精度は56\%が上限であり、企業が財務QAシステムを導入する前に越えるべき最低ラインを定量的に示した。（出典: \cite{financebench2023}）
+\end{casestudy}
+
+\begin{casestudy}{多構造金融文書の理解可能性: 前処理が精度を決める}
+GPT-4oはネストした表を含む金融PDFに対して前処理なしでは\textbf{56\%}の精度に留まるが、産業用途＋オープンソースの前処理パイプラインを組み合わせるとGPT-4は\textbf{76\%}まで改善する。モデル能力ではなく文書準備こそが鍵であることを直接示した。（出典: \cite{multistructured2025}）
+\end{casestudy}
+
+\begin{insight}{示唆}
+「モデルを高性能なものに差し替える」だけでは精度は頭打ちになる。実務上のROIは、OCR・レイアウト認識・チャンキング・メタデータ付与といった前処理層への投資に強く依存する。
+\end{insight}
+
+本節全体を貫く実証パターンとして、モデル自体を変えずに周辺のアーキテクチャ層だけを着脱した3つの独立した研究が、いずれも精度を劇的に変動させている。
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    ybar,
+    bar width=16pt,
+    width=0.85\textwidth,
+    height=6cm,
+    ymin=0, ymax=95,
+    ylabel={精度（\%）},
+    ylabel style={font=\small},
+    symbolic x coords={前処理パイプライン,シンボリック検証層,企業横断検索},
+    xtick=data,
+    x tick label style={font=\small},
+    y tick label style={font=\small},
+    legend style={at={(0.5,-0.28)}, anchor=north, legend columns=2, font=\small, draw=none},
+    nodes near coords,
+    nodes near coords style={font=\scriptsize},
+    ymajorgrids=true,
+    major grid style={draw=figlight},
+    axis line style={draw=figgray},
+    tick align=outside,
+    enlarge x limits=0.3,
+]
+\addplot[fill=figblue, draw=fignavy] coordinates {(前処理パイプライン,76) (シンボリック検証層,82) (企業横断検索,23.91)};
+\addplot[fill=figaccent, draw=fignavy] coordinates {(前処理パイプライン,56) (シンボリック検証層,18) (企業横断検索,1.27)};
+\legend{適切なアーキテクチャあり,なし／崩壊}
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+{\small \textbf{図: アーキテクチャ投資の有無が精度を左右する三事例。}前処理パイプライン（GPT-4o、\cite{multistructured2025}）、シンボリック検証層（AUDITFLOW、\cite{auditflow2026}）、企業横断の階層的検索（Fin-RATE、\cite{finrate2026}）のいずれも、モデル自体は同一のままアーキテクチャ層の有無だけで精度が大きく変動している。「モデル選びよりアーキテクチャ」が本節を貫く中心テーゼである。}
+
+\subsection{ドキュメントインテリジェンスと前処理パイプライン}
+
+金融文書は表・脚注・多言語混在・レイアウト崩れが常態であり、LLMに投入する前段の抽出・構造化工程の質がそのまま下流タスクの精度上限を規定する。
+
+\begin{concept}{データ抽出と前処理パイプライン}
+PDFやスキャン画像のまま渡された金融文書は、LLMにとって「読める」形をしていない。前処理パイプラインとは、生文書から機械可読なデータを取り出す一連の工程を指す。OCR（文字を画像から読み取る技術）でテキスト化し、レイアウト解析でどこが見出し・本文・表かを判定し、VLM（画像と文章を同時に理解できるモデル）で図表を解釈し、入れ子になった表や単位・注記を含む数値を正規化する。いわば「手書きの領収書の束を、そのまま会計ソフトに読み込ませられる電子データへ整える下ごしらえ」であり、この下ごしらえが雑だと、どれほど優秀な調理人（LLM）でも良い料理は作れない。
+\begin{center}
+\begin{tikzpicture}[node distance=8mm, every node/.style={font=\small},
+  stg/.style={fnode, text width=22mm, align=center}]
+\node[fnode muted, text width=22mm] (raw) {生文書\\(PDF・画像・表)};
+\node[stg, right=10mm of raw] (ocr) {OCR\\レイアウト解析};
+\node[stg, right=10mm of ocr] (vlm) {VLM抽出\\テーブル認識};
+\node[fnode blue, right=10mm of vlm, text width=24mm] (struct) {構造化データ\\(JSON/整形表)};
+\draw[farr] (raw) -- (ocr);
+\draw[farr] (ocr) -- (vlm);
+\draw[farr] (vlm) -- (struct);
+\node[fnode accent, below=10mm of vlm, text width=30mm] (llm) {LLM／RAGへ投入};
+\draw[farr accent] (struct.south) -- ++(0,-3mm) -| (llm.north);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 前処理パイプラインの基本フロー}\ 生文書はOCR・レイアウト解析・VLM抽出を経て構造化データへ変換され、初めてLLM／RAGが安定して利用できる形になる。}
+\end{concept}
+
+\begin{itemize}
+  \item \textbf{産業KYCワークフロー向け多段階抽出パイプライン}: 画像前処理→多言語OCR→ハイブリッドページレベル検索→VLM抽出の4段階システムを120件の実運用KYC文書に適用し、\textbf{精度87.27\%}を達成。アブレーション分析ではページレベル検索が支配的要因であり、特に非英語財務諸表で効果が顕著だった。（\cite{multistageextraction2026}）
+  \item \textbf{本番運用のマイクロサービス型OCR+LLMパイプライン}: 毎時数千件のマルチページ文書を処理する実運用アーキテクチャでは、エンドツーエンドのボトルネックはLLM推論ではなく\textbf{OCRのレイテンシ}であり、システムの飽和点を決めるのはワーカー数ではなくGPU容量であることが判明した。（\cite{documentai2026}）
+  \item \textbf{DataClawBench}: 企業・産業・政策ドメインにまたがる492件のマルチステップ分析タスク、206万レコードをノイズ除去せずそのまま用いたエージェントベンチマーク。現行LLMエージェントは探索を増やしても正答に確実に結びつかず、ベンチマーク精度と実運用の“汚い”データとの間に根本的なギャップがあることを示した。（\cite{dataclawbench2026}）
+  \item \textbf{連邦準備制度理事会（FRB）のRAG実証研究}: G-SIB（グローバルなシステム上重要な銀行）の開示文書数千ページからの情報抽出において、対話的なRAG利用が人手のみのベースラインに対し抽出速度を最大\textbf{10倍}に加速し精度も改善、1プロジェクトあたり最大\textbf{268時間}の注釈作業を節約できることを統制実験で示した。中央銀行における前処理・抽出支援の実証事例として重要。（\cite{fedreserverag2025}）
+  \item \textbf{MacroLens}: 米国株4,416銘柄（2021〜2026年）を対象に、4,680万件のXBRL会計エントリ、約29.6万件のSECファイリング、53のマクロ経済指標、21.5万件超のニュース記事を統合したマルチタスク・ベンチマーク。実データでLLMを評価する際、時間ゲーティング・報告遅延・レジームリーク（regime leakage）が体系的な失敗モードになることを明らかにした。（\cite{macrolens2026}）
+  \item \textbf{長文コンテキスト化（DocFinQA）}: FinQAの7,437問に文書全体のコンテキストを付与し、平均文脈長を700語未満から\textbf{約12.3万語}へ拡張した長文脈金融推論データセット。財務プロフェッショナルが実際に扱うのは数百ページの文書であるという前提を反映しており、検索型QAパイプライン・長文脈LLMのいずれも最長文書で顕著に性能が劣化することを示した。抜粋前提の既存ベンチマークが実運用の難度を過小評価していることを定量化した事例である（ACL 2024、\cite{x02docfinqa2024}）。
+  \item \textbf{その他の応用}: 200ページ超の政府財政PDFに階層型LLMパイプラインと財政表の合計値構造を数値検証機構として活用し研究可能なDBへ変換する事例（\cite{fiscaldocs2025}）、決算コールのトランスクリプトから階層的トピック分類を抽出し戦略優先事項の四半期変化を追跡するAgentic手法（SIGIR 2025、\cite{earningscalls2025}）など、前処理パイプラインの応用範囲は拡大している。
+\end{itemize}
+
+\begin{casestudy}{FinChart-Bench: チャート画像理解は依然として構造的な弱点}
+金融文書の情報はテキストと表だけでなく\textbf{チャート画像}にも埋め込まれている。実世界の金融チャートに特化した初のベンチマークFinChart-Bench（2015〜2024年のBloombergニュース・企業プレゼン資料由来の1,200枚のチャート画像、真偽・多肢選択・自由記述の\textbf{7,016問}）で、\textbf{25種類の最新の視覚言語モデル（LVLM）}を評価した結果、(1)オープンソースとクローズドの性能差が縮小している一方、(2)同一ファミリーの新しいモデルでむしろ性能が\textbf{劣化}する事例があり、(3)空間推論・指示追従に重大な限界があること、そして(4)LVLM自身を自動評価器として使うには信頼性が不足することが示された。テキスト・表・チャートの三モダリティを横断する前処理設計が、金融ドキュメントインテリジェンスの次の課題であることを裏づける（\cite{x02finchartbench2025}）。
+\end{casestudy}
+
+\begin{center}
+\begin{tikzpicture}[
+  stage/.style={fnode, text width=2.9cm, minimum height=2.0cm, font=\footnotesize},
+  result/.style={fnode accent, text width=13.6cm, minimum height=1.3cm, font=\small},
+  arr/.style={farr}
+]
+\node[stage] (s1) at (0,0) {① 画像前処理};
+\node[stage] (s2) [right=5mm of s1] {② 多言語OCR};
+\node[stage] (s3) [right=5mm of s2] {③ ハイブリッド\\ページレベル検索};
+\node[stage] (s4) [right=5mm of s3] {④ VLM抽出};
+\draw[arr] (s1) -- (s2);
+\draw[arr] (s2) -- (s3);
+\draw[arr] (s3) -- (s4);
+\node[fit=(s1)(s4), inner sep=0pt] (row) {};
+\node[result, below=7mm of row] (res) {実運用KYC文書120件で\textbf{精度87.27\%}を達成。アブレーションでは③ページレベル検索が支配的要因（特に非英語財務諸表で顕著）};
+\draw[arr] (row.south) -- (res.north);
+\end{tikzpicture}
+\end{center}
+
+{\small\color{brandgray}\textbf{図: 産業KYCワークフロー向け4段階抽出パイプライン}\ 画像前処理からVLM抽出までの4段階を経て精度87.27\%を達成し、ページレベル検索が精度を左右する支配的要因であることが判明した（\cite{multistageextraction2026}）。}
+
+\subsection{RAGアーキテクチャの進化: フラット検索から階層型・グラフ型へ}
+
+RAG（検索拡張生成）は金融文書QAの標準的アプローチだが、単純なベクトル類似度検索（flat dense retrieval）では企業横断・期間横断のタスクで性能が崩壊することが繰り返し確認されている。
+
+\begin{concept}{RAGと検索アーキテクチャ}
+RAG（Retrieval-Augmented Generation、検索拡張生成）とは、質問に関連する文書の断片をあらかじめ検索してLLMに手渡してから回答させる仕組みである。LLMの記憶だけに頼ると古い情報や捏造（ハルシネーション）が混じるため、「回答の前に必ず該当ページを開いて確認させる、根拠付きのオープンブック試験」に近い。検索方式にも段階がある。フラット検索は全文書を一つの巨大な本棚から探すため、似た企業名や年度の資料を取り違えやすい。階層型検索はまず「企業」「年度」で書棚を仕分けてから探すため精度が上がる。グラフ型検索はエンティティ間の関係を辿る地図を使い、複数ステップの推論を要する質問にも対応できる。
+\begin{center}
+\begin{tikzpicture}[node distance=6mm, every node/.style={font=\small}]
+\node[fnode] (q) {質問};
+\node[fnode blue, right=9mm of q, text width=24mm] (r) {関連文書を検索};
+\node[fnode accent, right=9mm of r, text width=20mm] (g) {文脈＋LLM};
+\node[fnode dark, right=9mm of g, text width=22mm] (a) {根拠付き回答};
+\draw[farr] (q) -- (r);
+\draw[farr] (r) -- (g);
+\draw[farr] (g) -- (a);
+\node[fnode muted, below=10mm of q, text width=20mm, xshift=6mm] (flat) {フラット\\全文書を一括検索};
+\node[fnode muted, right=6mm of flat, text width=20mm] (hier) {階層型\\企業/年度で仕分け};
+\node[fnode muted, right=6mm of hier, text width=20mm] (graph) {グラフ型\\関係を辿る};
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: RAGの基本フローと検索方式の違い}\ 質問に対し関連文書を検索し文脈として渡す基本フロー（上段）と、フラット・階層型・グラフ型という3つの検索方式の違い（下段）。}
+\end{concept}
+
+\begin{casestudy}{Fin-RATEベンチマーク: 検索失敗が精度崩壊の主因}
+Goldman Sachs\ +\ Yaleによる17モデル評価で、企業横断比較タスクにおいてファインチューン済み金融LLMの精度が\textbf{23.91\%から1.27\%}へ崩壊し、時系列トラッキングでも\textbf{18.6ポイント}低下することが確認された。専門家パネルは「ボトルネックは検索失敗であり生成品質ではない」「企業・年度で事前にバケット化する階層的検索が結果を劇的に改善する」と結論している。\cite{finrate2026}
+\end{casestudy}
+
+\begin{casestudy}{FinReflectKG-MultiHop: ナレッジグラフ検索の優位性}
+S\&P 100の10-Kから構築した1,750万トリプレットの知識グラフを用いたKGガイド検索は、フラット検索に対して\textbf{正答率約24\%向上、トークン使用量約84.5\%削減}を達成した（ICAIF 2025）。\cite{finreflectkg2025}
+\end{casestudy}
+
+その他、検索アーキテクチャに関する主要な研究・実装のうち、特筆すべき成果を挙げる。
+
+\begin{itemize}
+  \item \textbf{FinSage}: マルチモーダル前処理・ハイブリッドスパース密検索・DPOチューニングによるリランキングを組み合わせたマルチアスペクトRAG。財務提出書類QAで\textbf{再現率92.51\%、ベースライン比精度24.06\%改善}を達成。単純なテキストのみRAGはFinanceBenchで19\%に留まる一方、マルチエージェントRAGは56\%を記録した。（\cite{finsage2025}）
+  \item \textbf{MimirRAG}: テーブル認識型チャンキングとメタデータ抽出を組み込んだマルチエージェントRAGで、FinanceBenchにおいて\textbf{89.3\%}の精度を達成。（\cite{mimirrag2026}）
+  \item \textbf{HybridRAG}: ナレッジグラフ検索（KG-RAG）とベクトル検索（VectorRAG）を統合したハイブリッド手法。決算コールのトランスクリプトを対象に、検索精度・回答品質の両面でいずれの単独手法をも一貫して上回ることを示し、異種金融文書向けハイブリッドRAGの原型となった。（\cite{hybridrag2024}）
+  \item \textbf{PDF解析・チャンキングの実証評価}: 複数のPDFパーサとチャンク重複戦略を、FinanceBenchおよび新規ベンチマークTableQuest上で体系的に比較し、表・数式・文書構造を忠実に保持するRAGパイプラインの実務指針を導出した。前処理段の選択がそのまま下流QA精度を左右することを追試している。（\cite{pdfparsingrag2026}）
+  \item \textbf{BM25対密検索のベンチマーク}: テキストと表が混在する文書の金融QAクエリ23,088件を対象とした2026年のベンチマークでは、BM25単体がRecall@20を除く全指標で最新の密検索を上回った。検索失敗の\textbf{73\%}は表構造の不整合に起因し、HyDEのようなクエリ拡張はLLMが架空の数値を生成するため逆に性能を悪化させる。密検索を安全な既定値とみなす業界の通念に反証を突きつけている。（\cite{bm25hybrid2026}）
+  \item \textbf{金融QA向けRAG検索戦略の最適化}: 3段階RAG（事前検索・ハイブリッド密＋疎検索・後処理再ランキング）がFinanceBench、FinQA、TATQAなど7つの金融QAデータセットで精度を大きく改善する再現可能な設計図を提示（ICLR 2025ワークショップ）。（\cite{ragretrieval2025}）
+  \item \textbf{SMARTFinRAG}: 検索・生成コンポーネントを実行時に交換可能なモジュール型オープンソースRAGプラットフォーム。モデル自体を固定してもRAGの構成要素選択だけで性能に大きな差が出ることを実証し、「モデルよりコンポーネント選択」というアーキテクチャ優位のテーゼを補強する。（\cite{smartfinrag2025}）
+  \item \textbf{T\textsuperscript{2}-RAGBench}: テキストと表が混在する実文書に対する\textbf{32,908件}の問い–文脈–解答トリプルからなるRAG評価ベンチマーク。既存データセットの多くが正解文脈を明示的に与える「Oracle設定」であるのに対し、本ベンチマークはモデルにまず正しい文脈を\textbf{検索}させたうえで数値推論を要求する。既存データセットを文脈非依存の形式へ変換し（専門家検証で91.3\%が文脈非依存）、データ汚染を排除することで、検索段を含めた現実的なRAG性能を測れるようにした（EACL 2026、\cite{x02t2ragbench2026}）。
+  \item \textbf{HiREC（階層的検索＋エビデンス精選）}: 標準化された開示文書に対するオープンドメイン金融QA向けに、階層的検索と生成前のエビデンス精選（evidence curation）を組み合わせ、無関係な文脈を削減する手法。専用ベンチマークLOFin-benchを併せて提案し、長文の標準化文書で検索・QA双方の性能を改善した。「モデル規模ではなく検索アーキテクチャがオープンドメインQAの律速」という本節のテーゼを補強する（\cite{x02hirec2025}）。
+  \item \textbf{メタデータ駆動RAG（contextual chunks）}: FinanceBench上でLLM生成メタデータを活用する多段RAGを構築し、最大の精度向上は再ランカーやクエリ拡張ではなく\textbf{チャンクにメタデータをテキストごと埋め込む「文脈化チャンク」}から得られることを実証。強力な再ランカーは精度に必須だが、自作のメタデータ再ランカーが商用品より費用対効果に優れる点も示した（\cite{x02metadatarag2025}）。
+  \item \textbf{検索パラダイムの再考（サーベイ）}: 金融ドメインでは古典的なベクトル類似度RAGが、エージェント型・非ベクトル型の推論システムへ移行しつつあるとし、密検索・エージェント判断型検索・SQL／グラフ等の代替機構を切り分けるタクソノミを提示した（\cite{x02rethinkretrieval2025}）。
+  \item その他、実務家の略語・簡潔表現を反映した5,703件のクエリ三つ組\textbf{FinDER}（\cite{finder2025}）、クエリ再構成・クロスエンコーダ再ランキングを組み込んだ\textbf{Fintech向けAgentic RAG}（\cite{ragfintech2025}）、NASDAQファンダメンタルズで前処理・照会層を追加し精度78.6\%を達成した\textbf{LLM-RAG金融データ分析システム}（\cite{finllmrag2025}）など、モジュール構成を競う実装が相次いでいる。
+\end{itemize}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{金融RAG／QAベンチマークの比較（本節で参照する主要データセット）}
+\label{tab:finrag-benchmarks}
+\begin{tabularx}{\textwidth}{@{}l r l X@{}}
+\toprule
+\textbf{ベンチマーク} & \textbf{規模} & \textbf{焦点} & \textbf{中心的な知見} \\
+\midrule
+FinanceBench \cite{financebench2023} & 10,231問 & 開示資料QA & GPT-4-Turbo＋検索でも81\%が誤答・拒否 \\
+FinQA拡張・DocFinQA \cite{x02docfinqa2024} & 7,437問 & 長文脈推論 & 平均12.3万語、最長文書で性能劣化 \\
+Fin-RATE \cite{finrate2026} & 17モデル評価 & 企業横断・時系列 & 検索失敗で精度23.91→1.27\%へ崩壊 \\
+T\textsuperscript{2}-RAGBench \cite{x02t2ragbench2026} & 32,908トリプル & テキスト＋表検索 & Oracle文脈を排除、汚染なしの現実的評価 \\
+FinChart-Bench \cite{x02finchartbench2025} & 7,016問 & チャート画像理解 & 25 LVLMで空間推論・指示追従に限界 \\
+FinBalance \cite{x02finbalance2026} & 710レコード & 多文書照合 & 最良モデルでも貸借一致は46\%止まり \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+{\small\color{brandgray}\textbf{表\ref{tab:finrag-benchmarks}について:}\ いずれのベンチマークも、モデル自体の性能ではなく検索段・前処理段・数値照合段の設計が精度上限を規定することを、異なる切り口から繰り返し示している。}
+
+\begin{insight}{仮説（Takes）: GraphRAGがフラットRAGを置き換える}
+KG-based検索の優位性を示す複数の実証結果を根拠に、知識グラフ拡張検索（GraphRAG）が今後2〜3年でエンタープライズ金融AIにおける企業横断・縦断タスクの標準アーキテクチャとなるという仮説が提示されている。ただしグラフ構築コストとエンティティ抽出パイプラインの整備負担、および事前定義タクソノミが新規のクロスドメインクエリを捕捉できないリスクが反証材料として指摘されている。
+\end{insight}
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\small,
+  oldbox/.style={fnode muted, text width=6.4cm, align=left, minimum height=4.4cm, font=\footnotesize},
+  newbox/.style={fnode blue, text width=6.4cm, align=left, minimum height=4.4cm, font=\footnotesize},
+  arr/.style={farr accent}
+]
+\node[oldbox] (flat) at (0,0) {
+  \textbf{フラット密検索（Flat Dense Retrieval）}\\[2mm]
+  全文書を単一ベクトル空間で類似度検索\\[2mm]
+  企業横断比較タスク: 精度\textbf{23.91\%\,→\,1.27\%}に崩壊\\[1mm]
+  時系列トラッキング: \textbf{-18.6pt}\ \cite{finrate2026}
+};
+\node[newbox, right=10mm of flat] (hier) {
+  \textbf{階層型・グラフ型検索}\\[2mm]
+  企業・年度で事前バケット化＋KGガイド検索\\[2mm]
+  KG検索（FinReflectKG）: 正答率\textbf{約+24\%}\\トークン使用量\textbf{約-84.5\%}\ \cite{finreflectkg2025}
+};
+\draw[arr] (flat.east) -- (hier.west) node[midway, above=1mm, font=\footnotesize\bfseries, color=figaccent] {アーキテクチャ進化};
+\end{tikzpicture}
+\end{center}
+
+{\small\color{brandgray}\textbf{図: フラット検索から階層型・グラフ型検索への進化}\ 同一のクエリ・モデル条件下でも、検索アーキテクチャの選択だけでFin-RATEでは精度が崩壊し、FinReflectKG-MultiHopのKGガイド検索では逆に精度・効率とも改善する。}
+
+\subsection{埋め込みモデルとベクトル検索: 汎用埋め込みの限界とドメイン適応}
+
+RAGの検索精度は最終的に埋め込みモデルの表現力に依存する。ところが、汎用テキスト埋め込みは金融特有の語彙・数値表現・文脈で体系的に劣化することが複数の研究で示され、ドメイン適応済み埋め込みの重要性が浮き彫りになっている。
+
+\begin{concept}{埋め込みとベクトル検索}
+埋め込み（embedding）とは、文章を「意味を数値で表した座標点」に変換する技術である。意味が近い文同士は座標空間上でも近い位置に置かれる仕組みで、いわば「意味を地図上の緯度経度に変換する」作業といえる。ベクトル検索は、質問文を同じ座標に変換し、最も近い場所にある文書を探し出す（最近傍探索）ことでRAGの土台を支えている。ただし汎用の埋め込みモデルは、決算用語や数値表現・単位といった金融特有の語彙を「意味の近さ」として正しく捉えられないことが多く、専門分野向けに再調整（ドメイン適応）したモデルが必要になる。
+\begin{center}
+\begin{tikzpicture}[font=\small]
+\node[fnode, text width=20mm] (text) at (0,0) {テキスト};
+\node[fnode blue, text width=22mm] (emb) at (3.3,0) {埋め込み\\モデル};
+\node[fnode muted, minimum width=36mm, minimum height=28mm,
+  label={[font=\footnotesize\color{brandgray}]above:ベクトル空間（意味の地図）}] (space) at (8.7,0) {};
+\draw[farr] (text) -- (emb);
+\draw[farr] (emb) -- (space.west);
+\fill[figgray] (7.7,0.6) circle (1.4pt) node[above=0.4mm, font=\scriptsize] {文書};
+\fill[figgray] (9.6,0.7) circle (1.4pt) node[above=0.4mm, font=\scriptsize] {文書};
+\fill[figgray] (9.5,-0.7) circle (1.4pt) node[below=0.4mm, font=\scriptsize] {文書};
+\fill[figaccent] (8.4,-0.2) circle (1.9pt) node[below=0.5mm, font=\scriptsize, text=figaccent] {クエリ};
+\draw[farr accent] (8.4,-0.2) -- (7.7,0.6);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 埋め込みとベクトル検索の仕組み}\ テキストを埋め込みモデルでベクトル空間上の点に変換し、クエリに最も近い点（文書）を検索する。}
+\end{concept}
+
+\begin{casestudy}{FinMTEB: 汎用ベンチマークの成績は金融タスクを予測しない}
+64個の金融ドメイン特化データセット・7タスク（英中両言語、金融ニュース・年次報告書・ESGレポート・規制提出書類・決算コール）で15種類の埋め込みモデルを評価した結果、(1)汎用埋め込みベンチマークの成績は金融ドメインタスクの成績と\textbf{相関が弱く}、(2)ドメイン適応モデルが一貫して汎用モデルを上回り、(3)金融の意味的類似度（STS）タスクでは\textbf{単純なBag-of-Wordsが高度な密埋め込みを上回る}という反直感的な結果が得られた。ペルソナベースの合成データで訓練した金融特化モデルFin-E5は平均\textbf{0.6767}でSOTAを達成し、商用モデルをも凌駕した（EMNLP 2025、\cite{x02finmteb2025}）。
+\end{casestudy}
+
+\begin{casestudy}{BAM埋め込み: ドメイン適応がRecall@1を大きく引き上げる}
+金融文書は一般テキストとは語彙分布が大きく異なるため埋め込みも適応が必要だとする研究では、1,430万件のクエリ–パッセージ対でファインチューンしたBAM埋め込みが、保留テストセットでRecall@1\ \textbf{62.8\%}を達成した（OpenAIの最良汎用埋め込みは39.2\%）。FinanceBench上のQA精度も\textbf{8\%}改善しており、検索段の埋め込み選択がRAG全体の精度上限を直接押し上げることを定量的に示した（EMNLP 2024、\cite{x02bamembeddings2024}）。
+\end{casestudy}
+
+\begin{insight}{示唆: 埋め込み層は「静かな律速」}
+検索アーキテクチャの議論はチャンキングや再ランキングに集中しがちだが、その土台となる埋め込みモデルのドメイン適応度こそが検索品質の下限を決める。汎用ベンチマークのスコアで埋め込みを選定すると金融タスクでの実効性能を見誤りやすく、金融STSではBoWのような素朴な手法が密埋め込みを上回る領域さえ残る。埋め込み層は表面に現れにくい「静かな律速」として、前処理・再ランキングと並ぶ投資対象と位置づけるべきである。
+\end{insight}
+
+\subsection{財務知識グラフ: 検索を超えた推論の足場}
+
+知識グラフはRAGの検索精度改善だけでなく、エンティティ間関係を明示的に保持することでマルチホップ推論・信用リスク評価・投資判断の足場としても機能し始めている。
+
+\begin{concept}{ナレッジグラフ（知識グラフ）}
+ナレッジグラフとは、企業・人物・製品といった「モノ（エンティティ）」を点（ノード）、モノ同士の関係を線（エッジ）で表したデータ構造である。最小単位は「主語―述語―目的語」の三つ組（トリプレット）で、例えば「A社―供給する―B社」のように表現する。表やベクトル検索が「一つの文書の中身」を扱うのに対し、ナレッジグラフは関係そのものを明示的に持つため、「A社のサプライヤーの競合はどこか」のように複数のリンクをたどるマルチホップ推論が可能になる。いわば「人名と会社名だけの名簿」ではなく「誰と誰がどうつながっているかを描いた相関図」である。
+\begin{center}
+\begin{tikzpicture}[node distance=13mm, every node/.style={font=\small}]
+\node[fnode dark, text width=16mm] (a) {A社};
+\node[fnode, above right=10mm and 20mm of a, text width=16mm] (ceo) {CEO};
+\node[fnode blue, below right=10mm and 20mm of a, text width=16mm] (supplier) {サプライヤーC};
+\node[fnode accent, right=32mm of a, text width=18mm] (rival) {競合B社};
+\draw[farr] (a) -- node[midway, above, font=\scriptsize] {率いる} (ceo);
+\draw[farr] (a) -- node[midway, below, font=\scriptsize] {供給} (supplier);
+\draw[farr accent] (supplier) -- node[midway, below, font=\scriptsize] {供給} (rival);
+\draw[farr dash] (a) -- node[midway, above, font=\scriptsize] {競合} (rival);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: ナレッジグラフとマルチホップ推論}\ A社からサプライヤーCを経て競合B社へ至る経路（濃い矢印）のように、複数のエッジをたどることで「サプライヤーの競合」といった多段の問いに答えられる。}
+\end{concept}
+
+\begin{itemize}
+  \item \textbf{FinDKG}: 金融ニュース・開示文書から動的知識グラフを構築するICKG（ファインチューン済みLLM生成器）、オープンソースデータセット、KGTransformer（アテンション型GNN）を提案。リンク予測で優れた性能を示し、実運用のテーマ型ETFを上回る投資成果を記録（ACM ICAIF 2024）。（\cite{findkg2024}）
+  \item \textbf{FinKG-News}: ニュース中心の金融知識グラフを用いて根拠付き信用リスクレポートを生成。ベースライン比で\textbf{品質19〜34\%向上}を達成する一方、自動ハルシネーション検出は信頼性不足であり専門家レビューの必要性を明確に指摘した。（\cite{creditrisk2026}）
+  \item \textbf{Agentic GraphRAG}: フラットなベクトルRAGをNeo4jナレッジグラフに置き換え、スイス商業登記の7年分のデータから構築。分析エージェントがグラフ上をクエリし、フラットRAGベースラインを一貫して上回る。（\cite{agenticgraphrag2026}）
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[
+  src/.style={fnode muted, text width=2.4cm, minimum height=1.3cm, font=\scriptsize},
+  kg/.style={draw=fignavy, line width=0.8pt, fill=brandlight, figshadow, circle, minimum size=24mm, font=\small\bfseries, align=center, inner sep=1mm},
+  outbox/.style={fnode blue, text width=5.6cm, align=left, minimum height=1.5cm, font=\scriptsize},
+  arr/.style={farr}
+]
+\node[src] (news) at (0,2.4) {ニュース};
+\node[src] (filing) at (0,0) {開示文書};
+\node[src] (registry) at (0,-2.4) {商業登記\\データ};
+\node[kg] (kg) at (4.0,0) {財務\\知識\\グラフ};
+\node[outbox] (findkg) at (10.2,2.4) {\textbf{FinDKG}: リンク予測に優れ、テーマ型ETFを上回る投資成果\ \cite{findkg2024}};
+\node[outbox] (finkgnews) at (10.2,0) {\textbf{FinKG-News}: 根拠付き信用リスクレポートの品質\textbf{+19〜34\%}\ \cite{creditrisk2026}};
+\node[outbox] (agentic) at (10.2,-2.4) {\textbf{Agentic GraphRAG}: Neo4j上のクエリでフラットRAGを一貫して上回る\ \cite{agenticgraphrag2026}};
+
+\draw[arr] (news) -- (kg);
+\draw[arr] (filing) -- (kg);
+\draw[arr] (registry) -- (kg);
+\draw[arr] (kg) -- (findkg);
+\draw[arr] (kg) -- (finkgnews);
+\draw[arr] (kg) -- (agentic);
+\end{tikzpicture}
+\end{center}
+
+{\small\color{brandgray}\textbf{図: 財務知識グラフのデータフローと応用}\ ニュース・開示文書・登記データを統合した知識グラフが、リンク予測、信用リスク評価、分析エージェントのクエリ基盤という3つの異なる用途で検索を超えた推論の足場として機能する。}
+
+\subsection{数値精度とシンボリック検証: LLM単体の限界}
+
+複数の独立した研究が、LLM単体では正確な会計演算・数値照合を安定して行えないことを示している。この弱点を補うシンボリック検証層の導入が、実運用可否を分ける分岐点になりつつある。
+
+\begin{concept}{ハルシネーションと忠実性}
+ハルシネーションとは、LLMがもっともらしい文章や数値を、根拠がないまま作り出してしまう現象である。文章の要約なら多少の言い回しの違いは許容されるが、金融では「売上高を1桁間違える」「存在しない条項を引用する」といった誤りが致命的な損失につながりかねない。忠実性（faithfulness）とは、出力が実際の根拠（検索した文書や計算結果）にどれだけ忠実かを表す指標であり、文章が流暢で自信ありげに見えることと、内容が正確であることは別物である。この弱点を補うのがシンボリック検証層——数式や会計規則に基づいて機械的に計算・照合し直す仕組みで、いわば「作文の採点」とは別に「電卓で検算する係」を置くようなものである。
+\begin{center}
+\begin{tikzpicture}[node distance=10mm, every node/.style={font=\small}]
+\node[fnode, text width=30mm] (llm) {LLMのそれらしい出力};
+\node[fnode accent, right=16mm of llm, text width=30mm] (check) {検証層\\数値照合・根拠チェック};
+\node[fnode blue, above right=10mm and 12mm of check, text width=22mm] (ok) {合格→採用};
+\node[fnode muted, below right=10mm and 12mm of check, text width=22mm] (ng) {不一致→差し戻し};
+\draw[farr] (llm) -- (check);
+\draw[farr dash] (check) -- (ok);
+\draw[farr dash] (check) -- (ng);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: シンボリック検証層による忠実性チェック}\ LLMの出力を数値照合・根拠チェックにかけ、合格したものだけを採用し不一致は差し戻す。}
+\end{concept}
+
+\begin{casestudy}{AUDITFLOW: シンボリック検証層がなければ精度は崩壊する}
+米国GAAPタクソノミとXBRL提出事実に基づく監査検証環境で、2ジュニア＋1シニアのマルチエージェント監査フレームワークからシンボリック検証層を除去すると、精度は\textbf{82\%から18\%}へ崩壊した。LLM単体では信頼できる監査検証に不十分であることを定量的に実証した。\cite{auditflow2026}
+\end{casestudy}
+
+\begin{casestudy}{FinVerBench: 数値の丸め処理だけで再現率が21ポイント低下}
+14種類のLLMをSEC 10-Kの財務諸表検証タスクで評価した結果、現実的な数値の丸め処理を行っただけで最良モデルの再現率が\textbf{100\%から79\%}へ低下した。14モデル中9モデルは、誤りのないクリーンな財務諸表に対して\textbf{95〜100\%という高い偽陽性率}を示した。モデル間の性能差より前処理（数値表記の正規化）による差の方が大きいことを示す一方、過度な正規化は契約条項の閾値判定を覆すリスクもあり、規制・契約上の閾値近傍では人間レビューが必要と結論している。\cite{finverbench2026}
+\end{casestudy}
+
+\begin{itemize}
+  \item \textbf{FinGround}: 原子的claim検証による金融ハルシネーション検出の3段階パイプライン。既存の検出器は意味的類似性に依存するため金融文書の計算誤りの\textbf{43\%を見逃す}ことを実証。GPT-4o比で\textbf{ハルシネーション率78\%削減}を達成し、蒸留版8Bモデルは1クエリあたり約0.003ドルで稼働する。4週間のアナリストパイロットで実運用適性を検証済み。（\cite{finground2026}）
+  \item \textbf{FinSheet-Bench}: プライベートエクイティ・ファンドのスプレッドシートを対象にした合成ベンチマーク。最良モデル（Gemini 3.1 Pro）は単純ファイルで82\%だが、大規模マルチファンド構造では\textbf{49\%}まで急落し、文書理解と決定的計算の分離の必要性を示唆。（\cite{finsheetbench2026}）
+  \item \textbf{Finch}: Enronアーカイブと金融機関（2000〜2025年）から収集した1,710個のスプレッドシート（2,700万セル）、384タスク、172の複合ワークフローからなる会計・財務ベンチマーク。最良のGPT-5.1 Proでも平均16.8分のエージェント作業を経て\textbf{ワークフローの38.4\%}しか通過できず、文書理解層と決定的計算エンジンの分離という設計課題を改めて裏づけた。（\cite{finchbench2025}）
+  \item \textbf{FinBalance}: ソース文書束を出典付きの仕訳と貸借対照表へ照合させる多文書会計照合ベンチマーク（710レコード、8業種・3期間種別・5難易度、23種の不整合コード）。最良モデルでも\textbf{貸借一致は正答率46\%}に止まり、6モデル中4モデルが自らの仕訳から導かれる貸借対照表と報告値との間に\textbf{26〜41ポイント}の乖離（集約失敗）を示した。さらに勘定科目・金額が正しい仕訳の\textbf{52\%が誤った出典文書を引用}しており、文書理解層と決定的な会計計算エンジンを分離すべきという設計課題を多文書設定で改めて裏づけた（\cite{x02finbalance2026}）。
+  \item \textbf{MMFCTUB}: 信用ドメインの5種類の表タイプにまたがる7,600件超のサンプルからなるマルチモーダル信用表理解ベンチマーク。表を跨いだ構造理解・ドメイン知識の適用・数値推論をプロプライエタリ／オープンソース双方のマルチモーダルLLMで評価し、構造化された信用データに対する推論能力の弱点を可視化した。（\cite{mmfctub2026}）
+  \item \textbf{FinTagging}: XBRLタグ付け財務情報抽出を数値抽出（FinNI）と概念リンク（FinCL、1万以上のUS GAAP概念空間）に分解して評価。LLMは生テキスト抽出では強いが、細粒度の会計タクソノミへの概念整合は\textbf{約17\%の精度}に留まり、AI-readiness上の重大なギャップとして繰り返し指摘されている。（\cite{fintagging2025}）
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\small,
+  layerbad/.style={draw=figgray, thick, rounded corners, fill=figlight, text width=4.8cm, align=center, minimum height=1.8cm, inner sep=2mm, font=\footnotesize},
+  layer/.style={draw=figblue, thick, rounded corners, fill=white, text width=4.8cm, align=center, minimum height=1.8cm, inner sep=2mm, font=\footnotesize},
+  layertop/.style={draw=figaccent, thick, rounded corners, fill=brandlight, text width=4.8cm, align=center, minimum height=1.6cm, inner sep=2mm, font=\footnotesize},
+  lbl/.style={font=\footnotesize\bfseries}
+]
+\node[layerbad] (bad) at (0,0) {2ジュニア＋1シニアの\\マルチエージェント\\監査フレームワーク};
+\node[lbl, color=figgray, above=2mm of bad] {LLM単体（検証層なし）};
+\node[lbl, color=figaccent, below=2mm of bad] {精度\ \textbf{18\%}};
+
+\node[layer] (good1) at (8.2,0) {2ジュニア＋1シニアの\\マルチエージェント\\監査フレームワーク};
+\node[layertop, above=2mm of good1] (good2) {シンボリック検証層\\(GAAPタクソノミ／XBRL照合)};
+\node[lbl, color=fignavy, above=2mm of good2] {LLM\ +\ シンボリック検証};
+\node[lbl, color=figblue, below=2mm of good1] {精度\ \textbf{82\%}};
+\end{tikzpicture}
+\end{center}
+
+{\small\color{brandgray}\textbf{図: シンボリック検証層の有無による精度差（AUDITFLOW）}\ 同一のマルチエージェント監査フレームワークからシンボリック検証層を除去するだけで精度が82\%から18\%へ崩壊し、LLM単体では信頼できる数値照合に不十分であることを示す（\cite{auditflow2026}）。}
+
+\subsection{大規模データプロバイダーのAI-Ready化とMCP標準化}
+
+大手金融データプロバイダーは、自社の情報資産をLLM・エージェントから直接利用可能な形へ再構築する取り組みを2025〜2026年にかけて加速させている。
+
+\begin{casestudy}{FactSet \texttimes\ Snowflake Cortex: エンタープライズ規模のAI-readyコーパス}
+FactSetは、グローバル規制開示・決算コール・StreetAccountニュースを標準化・ベクトル化・強化し、Snowflake Cortex Knowledge Extension経由でAWS/Azure/Databricks環境から利用可能なAI-readyコーパスを提供。セマンティック検索とエージェント型モニタリングを実現している。\cite{factset_snowflake2025}
+\end{casestudy}
+
+\begin{casestudy}{MCP標準化: データ接続のコモディティ化}
+2025〜2026年にBloomberg（ASKB）、FactSet、LSEG/Microsoft、Daloopa、Moody's、S\&P Globalが相次いでMCP（Model Context Protocol）またはMCP互換のエージェント接続を提供開始した。Bloomberg ASKBは数億件規模の文書、800以上のリサーチ提供元、Bloomberg Intelligence等の独自調査に根拠づけて応答し、データ分析時にはBQLコードを提示してExcelやBQuantへ接続できる\cite{x02bloombergai2026}。LSEG/Microsoftは33ペタバイト超のAI-readyコンテンツとタクソノミをMicrosoft 365 Copilot/Copilot Studioに接続し、LSEG管理MCPサーバーで段階的に提供する計画を公表した\cite{x02lsegmicrosoft2025}。標準化されたプロトコルでAIエージェントが構造化金融データにクエリできるようになると、データ接続性そのものの限界価値はゼロに近づき、差別化はデータの解釈・文脈化・活用へシフトするという仮説が提示されている。（出典: \cite{factset_mcp_nd,x02moodysmcp2026,x02spglobalmcp2026}）
+\end{casestudy}
+
+\begin{itemize}
+  \item \textbf{SageX AI}: NY拠点のスタートアップが、リサーチレポート・決算トランスクリプト・開示資料・メール・オルタナティブデータなど1万種類以上の文書フォーマットを構造化情報に変換する継続型AIデータ変換レイヤーを発表。エンタープライズのデータ処理コストを\textbf{80〜90\%削減}、ノーコードで1日以内に導入可能と主張（2026年4月）。
+  \item \textbf{Two Sigma「データをコードとして扱う」＋「Semantic Types」}: データパイプライン自体にバージョン管理・CI/CD・テスト規律を適用する取り組みと、システム間のデータ統合・発見・検証を改善するセマンティックメタデータ型の提案を並行させ、下流のML/LLMシステムが金融データを利用可能にするための基盤整備を進めている。
+  \item \textbf{Point72 CSP（Composable Stream Processing）オープンソース化}: ヘッジファンドが社内のストリーム処理フレームワークを初のオープンソースプロジェクトとしてGitHubで公開した異例の事例。同社が持続的な競争優位をデータ配管ではなくAI/MLモデルの質と人材に見出していることを示唆する。
+  \item \textbf{ドイツ連邦銀行（Bundesbank）}: 長文の二言語証券目論見書に対する担保適格性チェックを生成AIパイプラインで自動化し、実運用環境で文書レベル精度最大\textbf{91\%}を達成。中央銀行における実装事例として重要。（\cite{llmeligibilitycriteria2026}）
+  \item \textbf{S\&P Global「Kensho LLM-ready API」（ベータ）}: S\&P Capital IQ Financials・Compustat・市場データを、Claude／GPT／Geminiなどのモデルを介して自然言語でクエリ可能にするAPI（2024年11月オープンベータ）。生成された関数呼び出しの監査証跡（audit trail）を残し、結果の追跡可能性を担保する。テキスト入出力のLLMと、表形式で高度に関係的な金融データとの構造的ミスマッチを埋める試みである。（\cite{kenshoapi2024}）
+  \item \textbf{Benzinga}: リアルタイムニュース・SECファイリング・決算データ・アナリスト見解・株価イベントを対象としたAPI群を、LLM学習パイプラインとRAG本番システム向けに明示的に拡張。AIネイティブなライセンス枠組みと多言語データセットを追加し、金融AI専用のデータレイヤーとして自らを位置づけた（2026年5月）。（\cite{benzingaai2026}）
+  \item \textbf{Morgan Stanley（MCP開放）}: 大手ウォール街銀行として初めて、S\&P 500の約40\%・\$1.2兆の資産をカバーする株式報酬管理プラットフォーム（ShareWorks・Equity Edge）を、AnthropicのMCP経由で外部の法人AIエージェントに開放。人手を介さずデータ取得やレポート生成を実行できるようにした（2026年6月）。（\cite{morganstanleymcp2026}）
+  \item \textbf{FactSet「Portfolio Analytics MCP」}: 事前計算・ガバナンス済みのパフォーマンス・アトリビューション・リスク分析を、データパイプラインの再構築なしにクライアントのプライベート環境内でLLM／エージェント型ワークフローに開放するMCPサーバーを限定リリース。発表を受けFDS株は約11\%上昇し、MCP対応が市場からも評価される段階に入ったことを示した。（\cite{factset_portfolio_mcp2026}）
+  \item \textbf{Moody's「GenAI-Ready Data」MCPサーバー}: 信用格付・企業ファンダメンタルズ・エンティティ連関・市場指標といった自社データと分析ツールを、MCP経由でLLM／エージェントに開放（エンドポイント \texttt{api.moodys.com/genai-ready-data}）。MCPのOAuth仕様を実装し、全てのやり取りを認証・ログ記録・エンタープライズデータポリシー準拠とする、規制業界向けの堅牢なMCP実装である。（\cite{x02moodysmcp2026}）
+  \item \textbf{S\&P Global「ChatGPT向けアプリ＋MCPコネクタ」}: ライセンス済みのS\&Pデータに根拠づけて複雑な財務質問に回答する「検証済みS\&P Global MCPコネクタ」をChatGPT上のアプリとして提供（2026年2月）。並行してDatabricks MarketplaceにもMCPサーバーを公開し、顧客が自社データ／AIワークフローとS\&Pの金融・コモディティ情報を接続できるようにした。「検証済みコネクタ」「ライセンスデータ根拠付け」を前面に出した点が特徴。（\cite{x02spglobalmcp2026}）
+\end{itemize}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{主要データプロバイダーのAI-ready接続戦略}
+\label{tab:mcp-provider-strategy}
+\begin{tabularx}{\textwidth}{@{}l l X X@{}}
+\toprule
+\textbf{提供者} & \textbf{接続面} & \textbf{AI-ready化の焦点} & \textbf{示唆} \\
+\midrule
+Bloomberg & ASKB／BQL & 数億件の文書、800以上のリサーチ提供元、BQLコード提示\cite{x02bloombergai2026} & 端末内の独自データを、根拠付き回答と再利用可能な分析コードへ変換する \\
+LSEG/Microsoft & LSEG管理MCP & 33ペタバイト超のAI-readyコンテンツとタクソノミをCopilot Studioへ接続\cite{x02lsegmicrosoft2025} & データカタログ、権限、低コードエージェント構築が一体化する \\
+FactSet & MCP／Portfolio Analytics MCP & 事前計算済み・承認済みのパフォーマンス、アトリビューション、リスク分析を自然言語で提供\cite{factset_portfolio_mcp2026} & 生成AIの自由回答ではなく、book-of-recordの分析結果へ誘導する \\
+Daloopa & MCP構造化DB & 500問の金融検索で構造化DB追加により89〜91\%へ収束\cite{x02daloopabench2026,x02finretrieval2026} & モデル差よりツール・データ構造の差が精度を支配する \\
+Moody's／S\&P & MCP／ChatGPTアプリ & 信用格付・企業データ・コモディティ情報を認証・ログ付きで接続\cite{x02moodysmcp2026,x02spglobalmcp2026} & 金融データ接続は監査証跡とライセンス統制を前提に標準化される \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{casestudy}{Daloopa: 構造化データがエージェントの検索精度を最大71ポイント押し上げる}
+Daloopaのベンチマーク報告（2026年2月10日）は、500件の実務的な財務質問を3種類のエージェント構成——OpenAI Agents SDK、Anthropic Agent SDK、Google ADK——で評価した。公開Webソースの代わりに\textbf{監査可能な構造化金融データベース}を参照させると、精度は\textbf{89〜91\%}へ収束し、Claude Opus構成ではWeb検索のみの19.8〜20\%から構造化API利用時の90.8〜91\%へ改善した。arXiv版FinRetrievalは14構成の応答・ツール呼び出しトレースを公開し、地域差5.6ポイントの一因がモデル能力ではなく会計年度命名規則にあることも示した\cite{x02finretrieval2026}。同社の基盤は5,000社超の上場企業についてSECファイリング・プレスリリース・投資家プレゼン・トランスクリプトを出典追跡付きで構造化し、99\%超の精度・3\%未満のハルシネーション率を主張する。エージェント型金融AIにおいて「構造化データがWebスクレイピングに勝る」というテーゼを定量化した事例である。（\cite{x02daloopabench2026,x02finretrieval2026}）
+\end{casestudy}
+
+\begin{center}
+\begin{tikzpicture}[
+  prov/.style={fnode, text width=4.0cm, align=left, minimum height=1.5cm, font=\scriptsize},
+  hub/.style={fnode accent, text width=2.4cm, minimum height=2.4cm, font=\small\bfseries},
+  agentn/.style={fnode blue, text width=2.6cm, minimum height=2.4cm, font=\small},
+  arr/.style={farr}
+]
+\node[prov] (bbg) at (0,3) {Bloomberg\\ASKB／BQL};
+\node[prov] (fds) at (0,1) {FactSet\\MCP／Portfolio Analytics};
+\node[prov] (lseg) at (0,-1) {LSEG/Microsoft\\33ペタバイトのカタログ};
+\node[prov] (daloopa) at (0,-3) {Daloopa\\M365 Copilotコネクタ};
+\node[hub] (mcp) at (5.6,0) {MCP\\標準\\プロトコル};
+\node[agentn] (agents) at (9.6,0) {AI\\エージェント};
+
+\draw[arr] (bbg.east) -- (mcp.west);
+\draw[arr] (fds.east) -- (mcp.west);
+\draw[arr] (lseg.east) -- (mcp.west);
+\draw[arr] (daloopa.east) -- (mcp.west);
+\draw[arr] (mcp.east) -- (agents.west);
+\end{tikzpicture}
+\end{center}
+
+{\small\color{brandgray}\textbf{図: MCP標準化によるデータ接続のコモディティ化}\ 2025〜2026年に主要プロバイダーが相次いでMCPサーバーまたはMCP互換のエージェント接続を提供し、AIエージェントが標準プロトコル経由で構造化金融データにクエリできるようになりつつある（\cite{factset_mcp_nd,x02bloombergai2026,x02lsegmicrosoft2025,x02daloopabench2026}）。}
+
+\subsection{大規模オープンコーパスと財務基盤モデル}
+
+\begin{itemize}
+  \item \textbf{BloombergGPT}: Bloombergが3630億トークンの金融コーパス＋3450億トークンの一般コーパスで学習した500億パラメータモデル。金融特化事前学習が金融NLPベンチマークで汎用モデルを大きく上回ることを実証し、ドメイン特化LLMの原型を確立した。（\cite{bloomberggpt2023}）
+  \item \textbf{Stanford EDGAR Filings Dataset (SEFD)}: スタンフォード大学が公開した1,520億トークン規模のSECファイリング・オープンコーパス（MultiMarkdown形式に変換）。LLM事前学習と長文脈金融推論ベンチマーク向けの大規模AI-readyインフラ資源。（\cite{stanfordedgar2026}）
+  \item \textbf{Kronos}: 45取引所・120億件超のローソク足レコードで事前学習した金融市場専用の基盤モデル。専用のマーケット・トークナイザにより、既存の時系列基盤モデルに対して価格予測・ボラティリティ予測タスクで\textbf{93\%の性能改善}（AAAI 2026）。（\cite{kronos2025}）
+  \item \textbf{時系列基盤モデルの金融タスクへの適用}: 汎用予測向けに設計された事前学習済み時系列基盤モデル（TimesFM・Chronos・TTM）を金融固有タスクで評価する動きが加速している。TimesFMをバリュー・アット・リスク（VaR）推定に初めて適用した研究では複数のテール分位で最良〜準最良の成績を示す一方、高リスク用途でのハルシネーションリスクが指摘され（\cite{tsfmvar2024}）、TTM・Chronosを米国債利回り・通貨ボラティリティ・株式スプレッドで検証した研究では、データが限られる状況で\textbf{25〜50\%}高精度、かつ専門特化モデルに追いつくのに必要な履歴が\textbf{3〜10年}少なくて済むと報告された。ただし多くのタスクでは依然として専門特化モデルがゼロショットの基盤モデルに匹敵ないし凌駕しており、金融特有の非定常性に合わせたファインチューニングの必要性が示唆される（\cite{tsfmmultivariate2025}）。
+  \item \textbf{Open FinLLM Leaderboard}: Linux Foundation・Hugging Faceと提携したコミュニティ型リーダーボード。36データセット・24タスク（情報抽出、QA、リスク管理、予測、意思決定）を横断し、「financial AI readiness」を単一タスクスコアではなく総合力として評価する枠組みを提示。（\cite{finllmleaderboard2025}）
+  \item \textbf{その他の基盤モデル}: 180万件のロイター記事とFinancial PhraseBankで事前学習し財務センチメント分類のデファクトベースラインとなった\textbf{FinBERT}（\cite{finbert2020}）、テキストのみのFinGPT/BloombergGPTを超え市場データ・マクロ指標・決算音声・画像・動画を統合処理するマルチモーダル基盤モデルの動向を整理したコロンビア大学SecureFinAI Labの\textbf{MFFMサーベイ}（ACM ICAIF 2024、\cite{mffm2025}）など、周辺領域の整備も進む。
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\small,
+  card/.style={fnode, align=left, text width=3.2cm, minimum height=3.8cm, font=\footnotesize},
+  card2/.style={fnode blue, align=left, text width=3.2cm, minimum height=3.8cm, font=\footnotesize},
+  node distance=3mm
+]
+\node[card] (bgpt) {\textbf{BloombergGPT}\\[1.5mm] 500億パラメータ\\金融コーパス3630億トークン\\+一般コーパス3450億トークン\\ドメイン特化LLMの原型};
+\node[card2, right=of bgpt] (sefd) {\textbf{Stanford SEFD}\\[1.5mm] SECファイリング\\\textbf{1,520億トークン}の\\オープンコーパス\\長文脈金融推論向け};
+\node[card, right=of sefd] (kronos) {\textbf{Kronos}\\[1.5mm] 45取引所\\\textbf{120億件超}の\\ローソク足レコード\\予測精度\textbf{93\%改善}};
+\node[card2, right=of kronos] (finbert) {\textbf{FinBERT}\\[1.5mm] ロイター記事\\180万件\\Financial PhraseBank\\センチメント分類の\\デファクト標準};
+\end{tikzpicture}
+\end{center}
+
+{\small\color{brandgray}\textbf{図: 大規模オープンコーパス・財務基盤モデルの規模比較}\ 学習トークン数・レコード数の規模でみると、テキスト系（BloombergGPT\cite{bloomberggpt2023}・Stanford SEFD\cite{stanfordedgar2026}・FinBERT\cite{finbert2020}）と市場データ系（Kronos\cite{kronos2025}）の両輪でAI-readyコーパスの整備が進んでいる。}
+
+\subsection{多言語・ESG・規制文書のカバレッジギャップ}
+
+英語・米国基準に最適化されたパイプラインは、グローバルな投資運用にとって構造的な死角となりうる。
+
+\begin{itemize}
+  \item \textbf{CLEF-2026 FinMMEval}: 金融LLMの初のマルチリンガル・マルチモーダル評価フレームワーク。既存の金融ベンチマークがほぼ英語中心であることを指摘。東京証券取引所の企業開示の\textbf{75\%超が日本語のみ}で公開されており、EU企業もCSRD義務化の開示を現地語で公開しているため、英語中心のAIパイプラインには大きなカバレッジの死角がある。（\cite{finmmeval2026}）
+  \item \textbf{ESGReveal}: RAG拡張LLMによるESGレポート構造化抽出フレームワーク。HKEX（香港取引所）166社のESGレポートで、抽出精度\textbf{76.9\%}、開示分析精度\textbf{83.7\%}を達成。（\cite{esgreveal2023}）
+  \item \textbf{EulerESG}: デュアルチャネル検索によりSASB整合の指標テーブルで平均精度最大\textbf{0.95}を達成する一方、EU Taxonomy整合の前向き（forward-looking）KPI抽出では精度が大幅に低いという構造的なギャップが指摘されている。米国中心の枠組みに基づく自動ESGスコアが、EUのESGスクリーニングファンドの資本配分に既に影響している点が論点。（\cite{eulereesg2025}）
+  \item \textbf{ComplianceNLP}: ナレッジグラフ拡張RAGによる規制コンプライアンスAI。本番環境4か月間の実運用でアナリスト効率\textbf{3.1倍向上}、再現率\textbf{96\%}、適合率\textbf{90.7\%}を達成した、金融コンプライアンスAIとして最も強力な本番検証済み実績の一つ。（\cite{compliancenlp2026}）
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\small,
+  gbox/.style={fnode, align=left, text width=4.5cm, minimum height=4.4cm, font=\footnotesize},
+  gbox2/.style={fnode blue, align=left, text width=4.5cm, minimum height=4.4cm, font=\footnotesize},
+  gbox3/.style={fnode accent, align=left, text width=4.5cm, minimum height=4.4cm, font=\footnotesize},
+  node distance=4mm
+]
+\node[gbox] (lang) {
+  \textbf{①言語カバレッジ}\\[1.5mm]
+  東証上場企業開示の\\\textbf{75\%超が日本語のみ}\\
+  EU企業もCSRD開示を\\現地語で公開\\[1mm]
+  → 英語中心パイプラインの\\構造的な死角\ \cite{finmmeval2026}
+};
+\node[gbox2, right=of lang] (esg) {
+  \textbf{②ESG抽出精度}\\[1.5mm]
+  ESGReveal（HKEX 166社）:\\抽出\textbf{76.9\%}／\\開示分析\textbf{83.7\%}\ \cite{esgreveal2023}\\[1mm]
+  EulerESG: SASB整合\textbf{最大0.95}も\\EU Taxonomy前向きKPIは急落\ \cite{eulereesg2025}
+};
+\node[gbox3, right=of esg] (comp) {
+  \textbf{③規制コンプライアンス}\\[1.5mm]
+  ComplianceNLP\\（本番環境4か月）:\\
+  効率\textbf{3.1倍}\\再現率\textbf{96\%}\\適合率\textbf{90.7\%}\ \cite{compliancenlp2026}
+};
+\end{tikzpicture}
+\end{center}
+
+{\small\color{brandgray}\textbf{図: 多言語・ESG・規制文書のカバレッジギャップ地図}\ 言語・ESG・規制コンプライアンスの各領域で達成済みの精度・実績と、非英語圏や新規タクソノミへ拡張した際に残る構造的ギャップを並置した。}
+
+\subsection{プライバシー保護協調学習とデータガバナンス}
+
+機密性の高い顧客データを機関横断で共有できないという制約は、金融AIのAI-Ready化におけるもう一つの構造的障壁である。生データを移動させずに勾配更新だけを協調させる連合学習（federated learning）や、データソースの取捨選択・メタデータ整備といったガバナンス層の設計が、モデル選び以上に実運用の可否を左右し始めている。
+
+\begin{itemize}
+  \item \textbf{連合学習による金融セキュリティ（サーベイ）}: デジタル金融における連合学習の応用を規制上の露出度で分類し、不正検知・ポートフォリオ最適化・信用モデリングを対象に、差分プライバシーや秘密計算（MPC）といった防御策をコンプライアンス要件へ対応づけた包括的サーベイ（IEEE GCAIoT 2025採録）。（\cite{federatedlearning2025}）
+  \item \textbf{連合学習による金融予測}: 市場方向の二値分類を対象としたプライバシー保護型の連合LSTMが、現実的な非IIDデータと差分プライバシー制約の下で、中央集約学習と同等の精度を達成しつつ単一機関モデルを大きく上回ることを実証した（2025年9月）。（\cite{fedforecasting2025}）
+  \item \textbf{The Challenger: 新データソースへの切替判断}: 新しいデータソースが既存モデルの退役を正当化する条件を、経済的・統計的に統合した枠組みで定式化。閉形式の切替ルールと先読み型の逐次方策がオラクル性能に迫ることを実際の信用スコアリングデータで検証し、オルタナティブデータ採用の意思決定に定量的な基準を与えた（2025年12月）。（\cite{challenger2025}）
+  \item \textbf{合成金融データのプライバシー・トレードオフの計測}: 6つの金融データセット（1千〜15万サンプル、少数派クラス比6.68〜30\%）で合成データ生成器を、データ品質・下流有用性（XGBoost分類）・プライバシー（メンバーシップ推論攻撃、最近傍距離）の3軸で評価。TabDiffは列形状で品質\textbf{0.96超}を示す一方、DP-TVAEは深刻なモード崩壊を起こし少数派クラスの表現を\textbf{0\%}まで消失させる場合があった。メンバーシップ推論の成功率は0.5前後（ランダム推測水準）で、プライバシー評価自体が信頼できないことが多いと指摘。クラスバランス調整は下流精度を最大\textbf{49.6\%}改善した（ACM Web Conference 2026、\cite{x02synthprivacy2026}）。差分プライバシーが希少・高シグナルの少数派パターンを不均衡に破壊するという本節の懸念（\cite{dpsynthetic2026}）を実証データで裏づける。
+\end{itemize}
+
+\begin{insight}{仮説（Takes）: ガバナンス層こそが精度の律速}
+差分プライバシーを合成データに適用する際、プライバシー予算$\varepsilon \le 2$ではダウンストリームの精度劣化が顕著になるという仮説が提示されている。金融取引データは相手方・期間で著しく不均質であり、DPノイズが不正取引系列や信用悪化シグナルといった希少だが高シグナルの少数派パターンを不均衡に破壊するためである（\cite{dpsynthetic2026}）。同様に、エンタープライズのNL2SQLが本番水準（精度80\%超）に届かない主因はモデル規模ではなくメタデータ文書の不足だとする見方もある。最新LLMはSpider 1.0のような整備済みベンチマークで85〜91\%を達成する一方、簡潔で社内造語的な列名に意味注釈が伴わない実際の金融データベースでは10〜20\%まで崩落する。業務用語集・テーブル関係グラフ・オントロジタグでスキーマ文脈を補強したFI-NL2PY2SQLは、それだけでF1を\textbf{3.7〜6.3ポイント}改善しており、律速がメタデータ品質にあることを示唆する（\cite{nl2sqlmetadata2025}）。
+\end{insight}
+
+本節で確認した3つの潮流——フラット検索から階層型・グラフ型RAGへの進化、シンボリック検証層によるLLM単体の限界の補完、大手データプロバイダーによるMCP標準化——は、独立に見えて同じ方向を指している。データ接続そのものはコモディティ化しつつある一方、企業横断・言語横断で崩壊しない検索・検証アーキテクチャの設計は、今なお差別化の源泉であり続けている。
+
+\subsection{周辺分野の文書AIから借りる：リーガル・医療・開発現場の到達点}
+
+「非構造化文書をAIが確実に使える形へ変換する」という本節の課題は、金融に固有のものではない。契約書レビュー、電子カルテからの情報抽出、ソフトウェア開発現場のコードベース検索、企業横断の社内文書検索——いずれも同種の壁（フラット検索の限界・汎用埋め込みの機能不全・チャンキング設計の失敗）に突き当たり、同種の解法（構造を意識したチャンキング・ドメイン適応埋め込み・グラフ型検索）へ収束してきた。以下では、これらの周辺分野のうち\textbf{金融側が実際に転用・警戒すべき知見}のみを厳選して取り上げる。並べること自体を目的とせず、すべて金融への示唆に着地させる。
+
+\textbf{①リーガル：契約書は金融文書と同じ「入れ子構造＋高い正確性要求」を持つ}
+
+契約書レビューは、EDGARの開示資料と同じ文書群（SEC提出書類に添付された契約）を対象にしながら、金融のQAベンチマークにはない「条項単位の構造化抽出」というタスク設計を10年以上かけて磨いてきた分野である。The Atticus Projectの法律専門家が510件の商業契約に41種類の条項カテゴリを付与したCUAD（13,000件超の注釈、NeurIPS 2021）が標準ベンチマークの原型となり、ContractEval（19モデル評価、CUADテストセット4,128件・102契約）やACORD（契約条項の精緻な検索データセット、114クエリ・12.6万件超のクエリ―条項ペア）へと発展してきた。（\cite{y02cuad2021,y02contracteval2025,y02acord2025}）
+
+\begin{casestudy}{LegalOn 2026年契約レビューベンチマーク: アーキテクチャがモデルに勝る}
+LegalOn Technologiesが2026年6月3日に公表したベンチマークでは、Anthropic・Google・OpenAIの汎用フロンティアモデルを含む11モデルを、21件の精密なガイドラインに基づく契約条項3,282件のペア比較でLegalOnの専用パイプラインと比較した。独立した審査者は、テストしたすべての条項タイプでLegalOnのレビューを汎用モデルより高品質と評価し、例えばトリプルネットリースの譲渡条項では最良の汎用モデル（GPT-5）に対して\textbf{3.8倍}の頻度で高評価を得た。処理時間もLegalOnの\textbf{2.3秒}に対しClaude Opus 4.6は\textbf{40.4秒}を要した。同社の結論は「契約レビューの精度を左右するのは、フロンティアモデルの生の能力ではなくガイドライン連動型パイプラインという設計そのものである」というものである。（\cite{y02legalonbench2026}）
+\end{casestudy}
+
+\begin{insight}{金融への示唆}
+これは本節が繰り返し示してきた「モデルよりアーキテクチャ」というテーゼ（AUDITFLOWのシンボリック検証層、Fin-RATEの検索失敗）と完全に同型の結論を、リーガルという全く独立した分野が導き出したものである。与信契約・ISDAマスター契約・目論見書の条項チェックにも、汎用チャットボットではなく、ガイドライン library と検索を密結合させた狭いパイプラインを優先投資すべきという教訓がそのまま転用できる。
+\end{insight}
+
+\begin{casestudy}{MLEB: 汎用埋め込みのランキング逆転はリーガルにも存在する}
+Isaacusが公開したMassive Legal Embedding Benchmark（MLEB、10データセット・6法域・5文書種別・3タスク種別）では、汎用埋め込みベンチマーク（MTEB）で1位のGemini Embeddingがリーガル特化のMLEBでは\textbf{7位}に後退し、MTEBで23位のVoyage 3.5がMLEBでは\textbf{3位}に浮上する逆転現象が確認された。リーガル特化埋め込みのKanon 2 Embedder（NDCG@10\ \textbf{86.03}）は、汎用埋め込みのGemini Embedding（80.90）やOpenAI Text Embedding 3 Large（78.91）を\textbf{5〜12ポイント}上回る。同社のLegal RAG Benchでも、Kanon 2は主要フロンティアモデル・埋め込みに対し平均\textbf{17ポイント}の精度向上（Text Embedding 3 Large比では正答率+17.5・検索精度+34ポイント）を示した。ベンチマーク設計では章・節の階層構造を保った上で512トークン単位の意味的チャンキングを行っており、「条項こそがリーガル推論の最小単位である」という原則を明示している。（\cite{y02mleb2025,y02legalragbench2026}）
+\end{casestudy}
+
+\begin{insight}{金融への示唆}
+「汎用埋め込みベンチマークの順位がドメイン性能を予測しない」というFinMTEBの知見（本節既出）と、MLEBのGemini逆転現象はほぼ同一の構造を示している。独立した2つの専門分野が同じ結論に達したことは、これが金融固有の癖ではなく専門テキスト全般に共通する構造的性質であることを裏づける。また「条項が最小単位」という発想は、金融文書における「表の行・脚注のペアこそが最小単位であり、固定トークン長のチャンキングでは崩れる」という、本節既出のBM25対密検索ベンチマークの知見（検索失敗の73\%が表構造の不整合に起因）と直接呼応する。
+\end{insight}
+
+\textbf{②医療：構造化スキーマがあっても、AIエージェントはそれを使いこなせるとは限らない}
+
+電子カルテ・臨床ノートは、金融文書と同様に「自由記述テキストの中に構造化されるべき情報が埋め込まれている」典型例である。
+
+\begin{casestudy}{CLEAR: エンティティ主導検索がベクトル検索と全文投入の両方に勝る}
+スタンフォード大学のLopez・Swaminathanらが npj Digital Medicine（2025年1月）に発表したClinical Entity Augmented Retrieval（CLEAR）は、6種類のLLM・2万件の臨床ノート・18種類の抽出変数を対象に、(1)臨床エンティティ抽出に基づく検索、(2)通常の埋め込みRAG、(3)全文をそのままコンテキストに投入、の3手法を比較した。平均F1スコアはCLEARが\textbf{0.90}、埋め込みRAGが0.86、全文投入が0.79であり、入力トークン数は全文投入比\textbf{81\%減}・埋め込みRAG比\textbf{71\%減}、処理時間も1ノートあたり4.95秒（埋め込みRAGは17.41秒、全文投入は20.08秒）と、精度・コストの両面で優位性を示した。（\cite{y02clear2025}）
+\end{casestudy}
+
+\begin{casestudy}{FHIR-AgentBench: 標準化されたスキーマでもエージェントは苦戦する}
+米国の21st Century Cures Act最終規則により、2021年以降すべての認定EHRシステムはHL7 FHIR標準に基づくAPIの提供を義務付けられている。にもかかわらずFHIR-AgentBench（2,931件の実臨床質問をFHIR構造化データに紐づけたベンチマーク）は、直接API呼び出しか専用ツールか、単一ターンか複数ターンか、自然言語かコード生成かといった条件を変えても、現行のLLMエージェントがFHIRのリソースベースのスキーマを確実に検索・推論できないことを示した。（\cite{y02fhiragentbench2025}）
+\end{casestudy}
+
+\begin{insight}{金融への示唆}
+CLEARの「エンティティ主導検索」は、本節が示すフラット・階層型・グラフ型に続く\textbf{第4の検索様式}として、企業名・勘定科目コード・XBRLコンセプトタグ・カウンターパーティIDといった構造化エンティティを先に抽出してから検索する層を、金融RAGにも追加投資する余地を示唆する。一方でFHIR-AgentBenchは、MCP・XBRLのような標準化されたスキーマを整備すればエージェントの信頼性が自動的に解決するという楽観論への強い警鐘である。医療がFHIRという政府義務化された成熟した標準の上ですら苦戦している以上、金融もMCP標準化（本節既出）を「データ接続の解決」で終わらせず、「XBRL-AgentBench」に相当するエージェント評価基盤への投資を並行させる必要がある。
+\end{insight}
+
+\textbf{③ソフトウェア開発：関係性に依存するタスクはベクトル類似度では解けない}
+
+コードベース検索は、単一ファイルの類似度検索では「この関数を呼び出しているすべての箇所」のような多段階の関係性クエリに答えられないという、金融の企業横断検索と同型の壁に直面してきた分野である。
+
+\begin{casestudy}{CodexGraph・Sourcegraph Cody: グラフ構造とエンタープライズ規模の実運用}
+CodexGraph（2024年8月、arXiv:2408.03910）は、コードリポジトリの構造（関数・クラス・呼び出し／インポート関係）から抽出したグラフデータベースをLLMエージェントに接続し、埋め込み類似度検索の代わりに構造化グラフクエリでコードを探索させる。著者らは、埋め込み類似度検索が多段階の関係性クエリで再現率が低下することを課題として挙げ、CrossCodeEval・SWE-bench・EvoCodeBenchで既存手法に対する優位性を確認した。実運用面では、Sourcegraph Codyが企業の全リポジトリ・全コードホストを継続的に再インデックスし、ローカルファイル・リポジトリ全体・リモート他リポジトリの文脈をロールベースアクセス制御付きで横断検索できるアーキテクチャを、\textbf{30万件超のリポジトリ}・90GB超のモノレポを持つ顧客で実運用していると公表している。（\cite{y02codexgraph2024,y02sourcegraphcody2024}）
+\end{casestudy}
+
+\begin{insight}{金融への示唆}
+「意味的類似度だけでは構造的な関係性を捉えられない」というCodexGraphの指摘は、Fin-RATEの検索崩壊やFinReflectKG-MultiHopのKG検索優位性（本節既出）と全く独立に、別分野が同じ結論へ到達した点で説得力を増す。Sourcegraph Codyの実運用規模はさらに、金融機関の内部文書量をはるかに上回るスケールで階層的検索基盤が本番稼働している既成事実を示す。特に転用価値が高いのは、\textbf{アクセス制御を検索層の後付けフィルタではなく一級市民として設計する}という点であり、顧客の守秘義務・インサイダー情報の遮断（チャイニーズウォール）といった多エンティティ・多法域の権限制約を持つ金融RAGにそのまま応用できる設計思想である。
+\end{insight}
+
+\textbf{④企業横断検索：グラフ＋RAGは金融外で既に大規模商用化されている}
+
+エンタープライズ検索は、金融が用いるGraphRAG系アーキテクチャの技術的起源であると同時に、それが金融の外側で既に大規模な商業的成功を収めていることを示す領域でもある。
+
+\begin{casestudy}{Glean: ナレッジグラフ＋RAGが年間経常収益2億ドルに到達}
+企業内検索・AIエージェント基盤のGleanは、組織のコンテンツ・人物・やり取りからナレッジグラフを構築し、その上にRAGを重ねて出典付きの回答を返すアーキテクチャで、2025年1月期に年間経常収益\textbf{1億ドル}を突破した後、2025年12月には\textbf{2億ドル}に到達（9か月で倍増）。同時期に立ち上げたGlean Agentsは、数か月で年間\textbf{1億件超}のエージェントアクションを処理する規模に達している。Wellington Managementが主導する1.5億ドルのシリーズFで評価額は72億ドルに達した。（\cite{y02glean2025}）
+\end{casestudy}
+
+Gleanが用いるグラフ＋RAGアーキテクチャの技術的起源は、Microsoft ResearchのEdgeらが2024年に発表した「From Local to Global」論文（GraphRAG）に遡る。エンティティ知識グラフを構築した上でコミュニティ（関連エンティティ群）ごとの要約を事前生成し、「このデータセット全体の主要テーマは何か」といった大域的な問いにmap-reduce方式で答える手法であり、約100万トークン規模のデータセットで従来の平坦なRAGに対し回答の網羅性・多様性を大きく改善することを示した。（\cite{y02graphrag2024}）
+
+\begin{insight}{金融への示唆}
+Gleanは、金融の開示資料のように整形されクリーンな文書群ではなく、社内チケット・チャット・Wikiのような雑多な文書を対象に、グラフ＋RAGが年間2億ドル規模の商用実績を築けることを実証した——本節が示すFinReflectKG-MultiHopやAgentic GraphRAG（いずれも既出）の優位性が、金融の整った文書だからこそ成立する特殊事情ではないことを裏づける。またGraphRAGの原論文が想定する「大域的な意味把握」の問いは、個別文書QA（FinanceBenchが典型）では測れない「今四半期、与信ファイル全体を横断してどのようなリスクテーマが浮上しているか」といったポートフォリオ横断の問いにこそ活きる。金融機関が社内RAGの内製・外部調達を判断する際、GleanのようなドメインニュートラルなグラフRAG基盤は、金融特化ベンダーと比較検討すべき現実的な選択肢になっている。
+\end{insight}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{周辺分野の文書AI到達点と金融への転用可能性}
+\label{tab:crossdomain-docai}
+\begin{tabularx}{\textwidth}{@{}
+  >{\raggedright\arraybackslash}p{1.5cm}
+  >{\raggedright\arraybackslash\hsize=1.30\hsize}X
+  >{\raggedright\arraybackslash\hsize=0.70\hsize}X
+  >{\raggedright\arraybackslash\hsize=1.00\hsize}X @{}}
+\toprule
+\textbf{分野} & \textbf{検索・埋め込みの到達点} & \textbf{最小単位（チャンキング）} & \textbf{金融への転用点} \\
+\midrule
+リーガル & ドメイン適応埋め込みが汎用比\,5〜12pt優位（MLEB）\cite{y02mleb2025} & 条項（clause） & 与信契約・ISDA条項抽出への専用パイプライン投資 \\
+医療 & エンティティ主導検索がRAG・全文比で高精度・低コスト（CLEAR）\cite{y02clear2025} & 臨床エンティティ言及 & 企業名・勘定科目・XBRLタグ主導の検索層追加 \\
+開発現場 & グラフDBが埋め込み類似度の多段階関係性クエリを代替（CodexGraph）\cite{y02codexgraph2024} & 関数・クラス・呼び出し関係 & アクセス制御を検索層の一級市民として設計 \\
+企業検索 & ナレッジグラフ＋RAGが年間2億ドル規模で商用実証（Glean）\cite{y02glean2025} & エンティティ・コミュニティ要約 & 大域的・ポートフォリオ横断の問いへの応用 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+{\small\color{brandgray}\textbf{表\ref{tab:crossdomain-docai}について:}\ いずれの分野も、金融がFin-RATE・FinMTEB・FinReflectKG-MultiHopで独自に発見してきた知見（検索アーキテクチャの重要性、ドメイン適応埋め込み、チャンキング単位の設計）と構造的に同型の結論に達している。}
+
+\begin{insight}{仮説（Takes）: 金融の文書AIは「特殊」ではなく「後発」である}
+リーガル・医療・開発現場・企業検索という4つの独立した分野が、金融と同じ3段階の解法——構造を意識したチャンキング、ドメイン適応埋め込み、グラフ型検索——へ収束している事実は、金融の文書AI課題が独自に困難なのではなく、他分野が既にベンチマーク済み・商用実証済みの「標準レシピ」の採用において1〜2年遅れている可能性を示唆する。Gleanの年間2億ドルのARRやSourcegraphの30万件超リポジトリでの実運用は、このレシピが金融の文書量をはるかに超える規模で既に量産段階にあることを示す。
+
+ただし反証材料もある。4分野を通じて調査した限り、いずれも金融のAUDITFLOW・FinVerBenchが示すような「数値・会計演算の忠実性」を検証する層を持たない。契約条項の有無、臨床エンティティの存在、コード関数の呼び出し関係はいずれも真偽・存在の判定問題であるのに対し、金融は「貸借が一致するか」「注記の単位換算が正しいか」という決定的な数値検証を必要とする。したがって、\textbf{検索層のレシピは借用できる一方、数値検証層は金融が独自に構築し続けなければならない}可能性が高い。
+\end{insight}

@@ -1,0 +1,259 @@
+\section{横断的な考察と示唆}
+\label{sec:cross-cutting}
+
+個別の技術・事例を超えて、複数の独立した研究・企業動向が同じ構造的パターンを指し示している。本節ではそれらを4つの視点――価値の所在、コスト構造、システミックリスク、規制と人材――から統合する。データ接続そのものの価値が失われるほどコスト構造の巧拙が問われ、コスト最適化が進むほど自律性の広がりがシステミックリスクという別の軸で再評価され、そのリスクへの対応速度は規制当局と人材市場の反応速度に規定される、という一本の因果の鎖として読むことができる。
+
+\subsection{データ接続のコモディティ化と価値の移動}
+
+\S\ref{sec:data-infra}で見たとおり、Bloomberg・LSEG・FactSet・DaloopaがそろってMCPサーバーを提供し始めたことで、構造化金融データへの標準化された接続そのものは急速にコモディティ化しつつある。この動きは、投資AI市場における価値の所在を再定義しつつある。
+
+\begin{center}
+\begin{tikzpicture}[
+  layer/.style={fnode, text width=9.6cm, minimum height=1.5cm},
+  toplayer/.style={fnode accent, text width=9.6cm, minimum height=1.7cm},
+  arr/.style={farr blue}
+]
+\node[layer] (l1) at (0,0)
+  {\textbf{データ接続層（コモディティ化）}\\Bloomberg・LSEG・FactSet・DaloopaがMCPサーバーを提供、標準化された接続の限界価値はゼロへ近づく};
+\node[layer] (l2) at (0,2.15)
+  {\textbf{抽出・構造化パイプライン}\\プロンプト設計・ドメインファインチューニング・出力正規化};
+\node[toplayer] (l3) at (0,4.55)
+  {\textbf{垂直特化型プラットフォーム}\\Hebbia: 年間処理4,700万→10億ページ（約2,000\%成長）\\仮説: 水平的LLM API統合比 1席あたり3〜5倍の収益};
+
+\draw[arr] (l1.north) -- (l2.south);
+\draw[arr] (l2.north) -- (l3.south);
+
+\draw[farr accent, ultra thick] (5.4,-0.75) -- (5.4,5.3);
+\node[rotate=90, anchor=south, font=\scriptsize, color=figblue] at (5.4,2.3) {価値の移動};
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: データ接続のコモディティ化と価値の移動}\ 標準化された生データ接続の限界価値がゼロへ近づく一方、抽出・構造化を経て、ドメイン特化・監査可能性を備えた垂直プラットフォーム層に価値が移動しつつある。}
+
+\begin{insight}{仮説: 垂直特化型プラットフォームの収益優位}
+Hebbia（Matrix）は年間処理ページ数を4,700万から10億へ拡大させ（約2,000\%成長）、KKR・MetLife・Centerview Partnersを顧客に、PEデューデリジェンス・M\&Aで案件あたり20〜40時間の削減を実現している。Morgan StanleyはGPT-4＋Whisperの社内展開に深いカスタム統合を要したが、アドバイザー採用率98\%超、週15時間の削減という具体的なROIを達成した。この対比から、「垂直特化型金融AIプラットフォームは、水平的なLLM API統合よりもエンタープライズ1席あたり3〜5倍高い収益を稼ぐ」という仮説が提示されている。オーケストレーション・ドメイン特化文書解析・監査可能性・コンプライアンス統制が、生モデルへのアクセスよりも持続的な差別化要因になりつつあるという見立てである。一方で、大規模機関（Morgan Stanley、JPMorgan規模）は内製化によって垂直プラットフォームの機能を再現しうる点、Microsoft CopilotやSalesforceのバンドルが配荷面で優位に立ちうる点が反証材料として挙げられている。
+\end{insight}
+
+代替データ市場も同様の力学に直面していると業界筋では語られている。市場規模は年間70億ドル、投資運用会社の67\%が既に代替データを利用しているといった数字が広く引用されているが、本書が精査した一次資料の範囲ではこれらの数値の直接的な典拠を確認できておらず、仮説的な参考値として扱う必要がある。ただし「生データの独占期間が数年から数カ月へ短縮している」という方向性自体は、上記のMCP標準化の趨勢と整合的である。今後のアルファ創出は、データアクセスそのものよりも、パイプラインの抽出・構造化能力（プロンプト設計、ドメインファインチューニング、出力正規化）に依存するという見方が強まっている。データそのものの希少性が失われるほど、次に問われるのはそのデータを処理するアーキテクチャのコスト構造である。
+
+\begin{insight}{示唆: 標準化は「接続」から「協調・権限・監査」へ拡張している}
+2025〜2026年の新しい標準化の焦点は、単に金融データへ接続するMCPだけではない。OpenAI Responses APIのremote MCP対応はモデルから外部データ・ツールへの接続を製品機能に組み込み\cite{x01openai2025responsesmcp}、Google A2Aは異なるベンダーのエージェント間協調を標準化し\cite{x01google2025a2a}、AP2はエージェントがユーザーの委任に基づいて支払いを起票・実行する際の権限証跡を標準化しようとしている\cite{x01google2025ap2}。Linux FoundationでA2Aが150超の組織へ広がったこと\cite{x01linuxfoundation2026a2a}を踏まえると、金融AIの差別化は「どのデータにつながるか」だけでなく、「どのエージェントと協調し、どの権限で行動し、その証跡をどう監査するか」へ移動している。
+\end{insight}
+
+\subsection{コストとアーキテクチャの経済学}
+
+垂直プラットフォームの優位性が処理能力の巧拙に由来するとすれば、その巧拙は最終的にアーキテクチャ選択のコスト対効果として定量化できる。
+
+\begin{casestudy}{階層型 vs 反射型アーキテクチャ: 精度とコストのパレートフロンティア}
+SECファイリング抽出のベンチマークで、反射型自己修正アーキテクチャ（Claude 3.5 Sonnet）はF1 0.943を達成する一方、文書あたり\textbf{\$0.430}のコストを要した。階層型supervisor-workerアーキテクチャはF1 0.929（反射型の効果の89\%）を\textbf{\$0.261}（60\%のコスト）で達成し、セマンティックキャッシュ・モデルルーティング・適応的リトライを加えた最適化版はF1 0.924を\textbf{\$0.148}/文書で実現した。100万文書規模の処理では\$430,000対\$148,000、\textbf{\$282,000}のコスト差に相当する。この差はリーダーボード上の精度比較には現れない。（出典: \cite{benchmarkingmultiagent2026}）
+\end{casestudy}
+
+3つのアーキテクチャを精度とコストの2軸に置くと、パレートフロンティアの形状がこの非対称性をより直接的に示す。反射型からのわずかな精度改善（+0.019）を得るために、コストはほぼ3倍に跳ね上がっている。
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.82\textwidth,
+    height=6.2cm,
+    xlabel={コスト（\$／文書）},
+    ylabel={F1スコア},
+    xlabel style={font=\small},
+    ylabel style={font=\small},
+    x tick label style={font=\small},
+    y tick label style={font=\small},
+    xmin=0.05, xmax=0.52,
+    ymin=0.900, ymax=0.960,
+    ymajorgrids=true, xmajorgrids=true,
+    major grid style={draw=figlight},
+    axis line style={draw=figgray},
+    tick align=outside,
+    legend style={at={(0.5,-0.30)}, anchor=north, legend columns=2, font=\small, draw=none},
+]
+\addplot[figblue, thick, dashed, mark=none] coordinates {(0.148,0.924) (0.261,0.929) (0.430,0.943)};
+\addlegendentry{パレートフロンティア}
+\addplot[only marks, mark=*, mark size=2.6pt, color=fignavy] coordinates {(0.148,0.924) (0.261,0.929) (0.430,0.943)};
+\addlegendentry{アーキテクチャ}
+\node[anchor=north, font=\scriptsize, text=fignavy] at (axis cs:0.148,0.9215) {最適化階層型（\$0.148）};
+\node[anchor=south, font=\scriptsize, text=fignavy] at (axis cs:0.261,0.9315) {階層型supervisor-worker（\$0.261）};
+\node[anchor=south, font=\scriptsize, text=fignavy] at (axis cs:0.430,0.9455) {反射型自己修正（\$0.430）};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+{\small \textbf{図: 精度とコストのパレートフロンティア（SECファイリング抽出ベンチマーク）。}反射型自己修正アーキテクチャはF1 0.943を\$0.430/文書で達成する一方、最適化された階層型supervisor-workerアーキテクチャはF1 0.924を\$0.148/文書、コスト約3分の1で実現する。精度の限界的な改善に対しコストが不釣り合いに増加する関係が、リーダーボード上の精度比較だけでは見えない調達判断の落とし穴を可視化している。（出典: \cite{benchmarkingmultiagent2026}）}
+
+同様の経済性の議論はインフラ選択にも及ぶ。業界筋の試算では、オンプレミスLLMは2025年時点でAPIよりトークンあたり約18倍安価だったが、直近でAPI価格が約80\%下落し単価優位は縮小しているとされる。この単価比較そのものは本書が精査した一次資料では裏付けが取れておらず、仮説的な参考値として扱う必要があるが、DORA（2025年1月施行）、GDPR第46条、EU AI ActのGPAI義務がデータ主権要件を恒常化させていることは制度的な事実であり（\cite{eba2025aiact}）、コストではなくコンプライアンスが今後のオンプレミス投資判断の主因になるという仮説が提示されている。コスト最適化それ自体が新たなガバナンス上の論点を生む――アーキテクチャの経済合理性は、次に見る自律性の広がりというもう一つの軸で再評価されることになる。
+
+\subsection{システミックリスクとガバナンス}
+
+AIエージェントが投資判断・執行を担う範囲が広がるにつれ、個社の性能評価だけでなく、市場全体への波及効果を問う研究が増えている。コスト最適化の帰結として広く配備されたアーキテクチャが、今度は市場構造そのものに影響を及ぼしうるという逆説である。
+
+\begin{casestudy}{AIモノカルチャーのシステミックリスク}
+performative prediction（予測が市場自体を変化させる）、algorithmic herding（アルゴリズム的群集行動）、cognitive dependency（認知的依存）の3チャネルを統合したモデルを、2013〜2024年の10,957マネジャー・9,950万件のSEC 13Fホールディングスで較正した研究では、AI浸透度が高いほどテールロス増幅が\textbf{18〜54\%}、市場の厚み（depth）が導入シェアの増加に伴い凸的に減少することが確認された。（出典: \cite{aisystemicrisk2026}）
+\end{casestudy}
+
+\begin{center}
+\begin{tikzpicture}[
+  node distance=6mm and 5mm,
+  main/.style={fnode, text width=6.2cm, minimum height=1.3cm},
+  channel/.style={fnode blue, text width=3.5cm, minimum height=1.7cm, font=\footnotesize},
+  outcome/.style={fnode accent, text width=8cm, minimum height=1.5cm},
+  arr/.style={farr blue}
+]
+\node[main] (start) {\textbf{AI浸透度の上昇}\\（同一基盤モデルへの依存拡大）};
+\node[channel, below=of start, xshift=-4.0cm] (perf) {performative prediction\\（予測が市場自体を変化させる）};
+\node[channel, below=of start] (herd) {algorithmic herding\\（アルゴリズム的群集行動）};
+\node[channel, below=of start, xshift=4.0cm] (cog) {cognitive dependency\\（認知的依存）};
+\node[outcome, below=13mm of herd] (out)
+  {\textbf{システミックリスクの増幅}\\テールロス増幅 \textbf{18〜54\%}／市場の厚み（depth）は導入シェア増加に伴い凸的に減少};
+
+\draw[arr] (start) -- (perf);
+\draw[arr] (start) -- (herd);
+\draw[arr] (start) -- (cog);
+\draw[arr] (perf) -- (out);
+\draw[arr] (herd) -- (out);
+\draw[arr] (cog) -- (out);
+
+\draw[farr dash, rounded corners=8pt] (out.east) -- ++(4,0) |- (start.east);
+\node[anchor=west, font=\scriptsize, color=figgray, text width=2.6cm, align=left]
+  at (8.3,-2.5)
+  {同一モデル更新が数千のエージェントへ同時到達（LLM Output Drift）→相関的ポジショニング};
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: AI浸透によるシステミックリスク増幅ループ}\ performative prediction・algorithmic herding・cognitive dependencyの3チャネルを通じ、AI浸透度の上昇がテールロス増幅・市場の厚みの低下に波及する。同一基盤モデルの更新が数千のエージェントへ同時到達すると、相関的ポジショニングを介してさらなる浸透へフィードバックしうる。（出典: \cite{aisystemicrisk2026}）}
+
+Hui Gong氏の四層エージェントアーキテクチャ論（データ知覚→推論→戦略→執行）とAgent-Financial-Market Modelは、システミックリスクが生のAIモデル能力そのものよりも、エージェントの自律性の深さ・執行の結合度・監督可能性が機関間でどう分布・ガバナンスされるかに依存すると主張している（\cite{aiagentsfinmarkets2026}）。同時に、LLM Output Drift研究は、モデル更新がプロバイダ間で顕著な行動の不整合を金融ワークフローにもたらすことを示している。業界調査では2026年第1四半期時点で中堅〜大手ヘッジファンドの47\%超が本番環境で生成AIを少なくとも1つ導入済みとされるが、この普及率の数値も本書が確認した一次資料では追跡できておらず、仮説的な参考値にとどまる。それでもなお方向性としては、同一の基盤モデル更新が数千のアナリスト・自律トレーディングエージェントに同時到達した場合、相関的なポジショニング変化という新たなシステミックチャネルが生じうるという仮説につながる。
+
+決済インフラという別の切り口からも、同様のガバナンス上の緊張が指摘されている。
+
+\begin{casestudy}{IMF: エージェント型AIによる決済インフラの再編}
+IMFは2026年4月のノートで、決済領域におけるエージェント型AIに対する\textbf{三層のガバナンス枠組み}を提唱した。その核心は、確率的に意思決定するAIと、認可（authorization）・決済（settlement）・コンプライアンスにおいて決定論的な正確性を要求する決済インフラとの間の根本的な緊張にある。エージェントが自律的に支払いを起票・実行する範囲が広がるほど、「おおむね正しい」確率的判断と「常に正しい」ことを前提に設計された台帳・清算システムとの整合をどう取るかが、システミックな論点として立ち上がる。（出典: IMF \cite{imfpayments2026}）
+\end{casestudy}
+
+金融AIの信頼性そのものを攻撃面から体系化する動きも進んでいる。Zengら（2026）のサーベイは、金融AIライフサイクル全体の敵対的攻撃面――データ・モデルポイズニング、意思決定境界における敵対的摂動、LLM介在ワークフローへのプロンプトインジェクション、ディープフェイクによるKYC突破――を整理し、規制下の金融機関での本番展開を志向した初のセキュリティタクソノミを提示している（\cite{trustworthyfintech2026}）。前述のLLM Output Driftと同様、これらは同一の脆弱性・攻撃が多数のエージェントへ同時に波及しうる構造的リスクとして、システミックリスクとガバナンスの議論に組み込む必要がある。こうしたシステミックリスクへの懸念は、当然ながら規制当局がどの速度・どの粒度で対応するかという制度的な変数と切り離せない。
+
+\subsection{規制の非対称な進展}
+
+規制は地域・分野によって非対称に進展しており、これが実装スピードとコンプライアンスコストの両方を左右する変数になりつつある。
+
+\begin{itemize}
+  \item \textbf{EU AI Act}: 与信スコアリングAIと保険リスク価格算定AIはAnnex III上の高リスクシステムに明示的に分類され、非準拠には最大\textbf{3,000万ユーロまたは世界売上高の6\%}の罰金が科される。完全適用開始期限は当初2026年8月2日とされていたが、Digital Omnibus（欧州議会承認2026年6月16日）により信用・保険AI義務の拘束的期限は\textbf{2027年12月2日}へ約16カ月延期された\cite{x07digitalomnibus2026}。期限の後ろ倒しは準備時間を与える一方、規制不確実性を延伸させ、欧州大手金融機関にAIベンダー監査を義務付ける調達力学が生じる時期を後ろにずらす（詳細は\S\ref{sec:open-gaps}）。（出典: EBA \cite{eba2025aiact}、\cite{x07digitalomnibus2026}）
+  \item \textbf{SR 11-7の置き換え}: 米連邦銀行監督当局の画一的なモデル検証枠組みSR 11-7は2026年4月17日にリスク階層型・原則ベースのガイダンスへ置き換えられ、低重要度モデルへの比例的統制を導入した。業界関係者は、従来の曖昧さこそがLLMコパイロットの本番投入を躊躇させてきた主因だったと証言している。（出典: \cite{databricksndmodelrisk}）
+  \item \textbf{シャドーAIによる初のSEC Form 8-K開示}: 2026年5月、CB Financial Servicesが従業員による未承認AIアプリ経由の非公開顧客データ流出を理由に、外部攻撃者ではなく内部のシャドーAI利用でItem 1.05に基づく初のForm 8-Kを提出した。シャドーAI誤用が技術ポリシー問題から取締役会レベルの開示義務へ格上げされたことを示す。（出典: \cite{wsgrndshadowai}）
+  \item \textbf{M\&Aデューデリジェンスへの浸透}: Bainの2026年M\&Aレポートによれば、戦略的ディールメーカーの\textbf{5件に1件}がAI関連懸念により案件から撤退し、\textbf{58\%のM\&Aデューデリジェンスワークフロー}が既に生成AIをこれらの懸念の発見に使用しているとされる（この数値は本書が確認した一次資料への遡及ができておらず、仮説的な参考値として扱う）。
+  \item \textbf{データ主権・GDPR対応}: 合成金融QAデータで学習した小型モデルが専門家（CFA/CPA水準）注釈データ学習モデルと同等性能を達成しうるという研究成果（ACL 2025 FinNLPワークショップ）は、GDPR・MiFID II・Basel IIIのデータ居住性制約下で金融機関が域内でファインチューニングを行う経路として位置づけられている（\cite{aclfinnlp2025synthetic}）。ただし合成データが生成元モデルのバイアス・誤りをそのまま継承しうる点、ECB・FCA・Fedのモデルリスク管理ガイダンスが人間キュレーション済みデータの追跡可能性を要求しうる点が留保されている。
+\end{itemize}
+
+3つの規制イベントを時系列に並べると、それぞれ異なる法域・異なる主体（米連邦銀行監督当局、SEC開示制度、EU AI Act）が数カ月の間隔でほぼ独立に動いていることが分かる。これは各国・各規制体系が足並みを揃えて進んでいるのではなく、非同期に規制の網が狭まっていることを意味し、グローバルに事業を展開する金融機関ほど複数の規制サイクルへ同時対応するコストを負うことになる。
+
+\begin{center}
+\begin{tikzpicture}[
+  every node/.style={font=\small},
+  axisline/.style={farr, draw=fignavy, thick},
+  evtdot/.style={circle, fill=figaccent, draw=fignavy, thick, minimum size=6pt, inner sep=0pt, figshadow}
+]
+\draw[axisline] (0,0) -- (10.6,0);
+\node[anchor=west, font=\scriptsize, color=figgray] at (10.6,0.05) {2026→27年};
+
+\coordinate (sr117) at (3.4,0);
+\draw[fignavy, thick] (sr117) ++(0,-0.12) -- ++(0,0.12);
+\node[evtdot] at (sr117) {};
+\node[align=center, text width=3.1cm, anchor=south, font=\scriptsize] at ($(sr117)+(0,0.6)$) {\textbf{2026-04-17}\\SR 11-7 がリスク階層型ガイダンスへ置換};
+
+\coordinate (shadowai) at (4.6,0);
+\draw[fignavy, thick] (shadowai) ++(0,-0.12) -- ++(0,0.12);
+\node[evtdot] at (shadowai) {};
+\node[align=center, text width=3.1cm, anchor=north, font=\scriptsize] at ($(shadowai)+(0,-0.6)$) {\textbf{2026-05}\\シャドーAI起因の初のForm 8-K（CB Financial Services）};
+
+\coordinate (euaiact) at (7.9,0);
+\draw[fignavy, thick] (euaiact) ++(0,-0.12) -- ++(0,0.12);
+\node[evtdot] at (euaiact) {};
+\node[align=center, text width=3.4cm, anchor=south, font=\scriptsize] at ($(euaiact)+(0,0.6)$) {\textbf{2026-08-02→2027-12-02}\\EU AI Act 高リスク分類（信用・保険AI）の完全適用がDigital Omnibusで延期};
+\end{tikzpicture}
+\end{center}
+{\small \textbf{図: 規制の非同期な進展タイムライン（2026年）。}米国のモデルリスク管理枠組みの刷新（SR 11-7置換）、シャドーAI利用に対する開示義務の実例化（初のForm 8-K）、EU AI Actの高リスク分類の完全適用（Digital Omnibusにより2026-08-02から2027-12-02へ延期）が、異なる法域・異なる主体からほぼ独立に到来している。規制は足並みを揃えるのではなく、非同期に――かつ期限自体も動きながら――網を狭めている。（出典: \cite{databricksndmodelrisk}、\cite{wsgrndshadowai}、\cite{eba2025aiact}、\cite{x07digitalomnibus2026}）}
+
+\begin{insight}{示唆: エンタープライズGenAI導入の高い失敗率}
+2025年に金融業界のエンタープライズGenAIパイロットの\textbf{95\%}がP\&Lへの測定可能な影響を出せなかったとの調査があり、AIプロジェクト時間の\textbf{60〜70\%}がデータ準備に費やされているとの別の業界調査もある。これは\S\ref{sec:data-infra}で確認したデータ基盤の未成熟さと整合的であり、モデル選定よりもデータ・前処理層への投資が投資対効果を左右することを重ねて示唆している。ただしこの数値は仮説的考察（Takes）の中で引用されたものであり、一次の実証研究として確認されたものではない点に留意が必要である。
+\end{insight}
+
+\begin{insight}{示唆: 精度・コンプライアンス・説明可能性のトリレンマ}
+Eviteら（2026）は20名の金融プロフェッショナルへのインタビューに基づき、従来の「精度対解釈可能性」という二項対立の枠組みを退け、\textbf{精度・コンプライアンス・説明可能性}の三者からなるトリレンマを提示した。このうち精度とコンプライアンスは交渉の余地のない衛生要因（hygiene factor）であり、両者を満たすことは前提条件にすぎない。実際の導入可否を左右するゲートウェイは残る一つ――説明可能性（ease of understanding）――だという。上で見た規制の非対称な進展が精度・コンプライアンスを「守って当然」の下限として恒常化させるほど、金融機関の差別化と採用の分かれ目は説明可能性の設計に移っていくという含意である。（出典: \cite{fintrilemma2026}）
+\end{insight}
+
+\begin{insight}{仮説: エージェント型AIによる継続的資本ストレステスト（Takes）}
+日次・リアルタイムの資本ストレステストを担うエージェント型AIフレームワークは、四半期ごとのDFAST/CCARの結果に\textbf{4〜6週間先行}して資本ストレスの兆候を検知できる、という仮説がある。HSBC・Citi・UBS・DBS・INGなど複数の大手行はリスク機能へのAIエージェント導入で20〜40\%のコスト削減を報告しており、マクロシナリオ生成・資本シミュレーション・モデル検証・監査証跡の維持を継続的にオーケストレーションする能力面のボトルネックはすでに小さいという見立てである。真の制約はむしろ規制当局の事前承認にあり、四半期バッチ提出と人間による検証（human-attested models）を前提に書かれた既存のDFAST/CCARガイダンスが、継続的に更新されるエージェント生成出力を想定していない点にあるとされる。ただし正常な市場変動下での偽陽性がアラート疲れを招き、規制の門戸が開く前に技術が放棄されるという反証リスクも指摘されている。これは仮説的考察（Takes）であり、実証されたものではない。
+\end{insight}
+
+規制・コンプライアンス要件の高度化とパイロット導入の高い失敗率は、最終的に金融機関がAI活用の担い手にどのようなスキルセットを求めるかという人材戦略にも波及する。
+
+\subsection{人材と労働市場への影響}
+
+\begin{itemize}
+  \item PwCの2026年AI Jobs Barometerによれば、金融アナリストはAIへの露出度\textbf{50\%}だが適応力は\textbf{99\%}とリスク職種中最高水準の耐性を示す一方、AIを導入した財務部門の\textbf{84\%}は職務再設計を行っていない（この調査結果は本書が確認した一次資料への遡及ができておらず、仮説的な参考値として扱う）。カバレッジ拡大（1アナリストあたりの監視対象企業・セクター・リスク要因を増やす）という活用余地が構造的に未活用であることを示唆する。
+  \item \S\ref{sec:ai-native-funds}で見たとおり、Point72/Cubist（Quant Academy・複数拠点のGenAIハッカソン）、Man AHL（Oxford-Man Instituteとの連携で2016年以降19名のML研究者を追加）、QRT（2026年設立のQRT Labsで英3大学に70名超の若手研究者へ資金提供）など、大手クオンツファンドは社内研修と大学連携の両輪でAI人材パイプラインを組織的に構築しつつあり、これが業界標準になりつつある。
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    xbar,
+    width=0.85\textwidth,
+    height=4.6cm,
+    bar width=7mm,
+    xmin=0, xmax=108,
+    xlabel={\%},
+    xlabel style={font=\small},
+    ytick={1,2,3},
+    yticklabels={職務再設計未実施の財務部門,適応力,AIへの露出度},
+    ymin=0.4, ymax=3.6,
+    y tick label style={font=\small},
+    x tick label style={font=\small},
+    nodes near coords,
+    nodes near coords style={font=\small, color=fignavy},
+    axis line style={draw=figgray},
+    tick align=outside,
+    ymajorgrids=false, xmajorgrids=true,
+    major grid style={draw=figlight},
+]
+\addplot[fill=figblue, draw=fignavy, bar shift=0pt] coordinates {(50,3) (99,2)};
+\addplot[fill=figaccent, draw=fignavy, bar shift=0pt] coordinates {(84,1)};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 金融アナリストのAI露出度・適応力とその活用の遅れ}\ PwC 2026 AI Jobs Barometerによれば、金融アナリストはAIへの露出度50\%に対し適応力99\%とリスク職種中最高水準の耐性を示す一方、AIを導入した財務部門の84\%は職務再設計を行っていない――カバレッジ拡大の余地が構造的に未活用であることを示す（仮説的な参考値）。}
+
+\subsection{周辺分野との対比が示す普遍性と金融の特異性}
+\label{sec:cross-cutting-crossdomain}
+
+本書の各本論部には、金融以外の分野で同型の技術・課題がどこまで進んでいるかを対比する記述を加えた（\S\ref{sec:intro-cross-domain}、\S\ref{sec:data-infra}、\S\ref{sec:ai-native-funds-crossdomain}、\S\ref{sec:investment-agents-crossdomain}、\S\ref{sec:llm-analysis}、\S\ref{sec:cross-domain-gaps}）。それらを束ねると、金融AIのスタックの大半は業界横断で共有される「普遍的な部分」と、金融にしか存在しない「特異な部分」に分離できる。読者が金融のプロである以上、周辺分野の事例は網羅ではなく、\emph{借用できる設計}か\emph{先取りすべきリスク}のいずれかに翻訳できるものだけを残した。
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.0cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{レイヤー／課題} & \textbf{周辺分野の先行例} & \textbf{金融への含意（借用か警戒か）} \\
+\midrule
+データ基盤・文書AI &
+リーガル契約解析（CUAD\cite{y02cuad2021}）、GraphRAG\cite{y02graphrag2024}、エンタープライズ検索（Glean\cite{y02glean2025}） &
+階層型・グラフ型検索は\textbf{借用可}。ただしネスト表の会計数値照合に相当する検証課題は他分野に先行例が乏しい。 \\
+自律エージェント評価 &
+SWE-bench Verified\cite{y04swebenchverified2024}等による厳密な閉検証と自律度の段階付け &
+DD・執行への「証拠の階梯（evidence ladder）」設計を\textbf{借用可}。 \\
+LLMの忠実性 &
+医療（Med-PaLM 2\cite{y05medpalm2_2025}）・法律（法的ハルシネーションの実証\cite{y05dahl2024legalfictions}）の忠実性研究 &
+評価手法・棄権設計は\textbf{借用可}。ただし法律のような訴訟起因の是正ループは金融に薄く、自前の検証層で代替する必要。 \\
+組織のAI-native化 &
+ソフトウェア開発・コンサル・ERPの中央プラットフォーム型\cite{y03mckinsey2026sevenoperatingtruths} &
+人材パイプラインとbuild-vs-buyの型は\textbf{転用可}。 \\
+汎用AIの未解決課題 &
+評価クライシス、algorithmic monoculture\cite{y07monoculture2022}、水平的規制\cite{y07euaiacthorizontal} &
+金融固有ではないが、実資本・執行権限ゆえ金融で最も\textbf{先鋭化（警戒）}。 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+{\small\color{brandgray}\textbf{表: 周辺分野で先行する「普遍的な部分」と、金融に固有な「特異な部分」}\ 各本論部の対比記述を横断的に整理した。技術スタックの多くは他分野から借用できる一方、会計数値の記号的照合と規制密度に由来する要件は金融に固有である。}
+
+\begin{insight}{示唆: 金融は「速い追随者」であると同時に「最速のストレステスト領域」}
+周辺分野との対比は、金融が二重の非対称なポジションにあることを示す。技術面では、文書AI・自律エージェント評価・LLM忠実性のいずれも金融より成熟した先行分野が存在し、金融は\textbf{速い追随者}として設計・評価手法を借用できる立場にある。一方でガバナンス面では、実資本の毀損・執行/決済権限・13F型の公開可測性・既存の規制密度ゆえに、評価汚染・エージェント安全性・モデル集中といった\emph{汎用AIの未解決課題}が他業界に先んじて金融で顕在化する。したがって合理的な戦略は、借りられる技術は周辺分野の成熟を待って借用しつつ、ガバナンス・検証層では自ら先頭で問題に直面することを織り込む――という層ごとに異なる時間軸の使い分けになる。ただし「数値の記号的検証」だけは他分野に十分な先行例がなく、金融が自前で確立せざるを得ない特異点である点に留意が必要である。
+\end{insight}
+
+コストの経済学、システミックリスク、規制、人材という4つの視点は独立した論点ではなく、データ接続のコモディティ化を起点に相互に波及する一つの構造を成している。加えて、上で見た周辺分野との対比は、この構造の大半が金融固有ではなく業界横断で共有されること、そして金融の特異性が数値検証と規制密度という2点に凝縮されることを示している。次節（第\ref{sec:open-gaps}部）では、この構造の中でなお実証が追いついていない研究・実装上のギャップを整理する。

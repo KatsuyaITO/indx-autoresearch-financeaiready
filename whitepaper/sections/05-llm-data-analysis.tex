@@ -1,0 +1,556 @@
+\section{LLM／AIエージェントによる金融データ分析}
+\label{sec:llm-analysis}
+
+本節では、AIが財務データを抽出・要約・分類・構造化・比較・推論する事例を、構造化・非構造化データの両方にわたって整理する。特にアルファ生成領域では、公表された成果の再現性・頑健性に関する重要な警鐘が複数の独立研究から挙がっている。
+
+\subsection{テキストからの情報抽出と構造化}
+
+決算資料や適時開示のような非構造化テキストから、意味のあるシグナルや特徴量を抽出・構造化する取り組みは、後段のアルファ生成やリスク管理の入り口として位置づけられる。
+
+\begin{itemize}
+  \item \textbf{From Text to Alpha}: コンテキストを保持した文脈対応スパン抽出により、連続する開示文書間の意味的シフト（経営陣が重視する指標の変化）を追跡。キーワードベースラインに対し\textbf{2倍のリスク調整後アルファ}を達成した。（出典: \cite{texttoalpha2025}）
+  \item \textbf{Two Sigmaの社内手法・論考}: レジームモデリング（ガウス混合モデルで市場を4レジームに分類、著者Alex Botte, Doris Bao）\cite{twosigmandregimemodeling}、インフレテーマ・ポートフォリオ構築（LightGBM活用、著者Simon Lau, Alex Botte）\cite{twosigmandinflationportfolio}、そして「モデルは怠惰であり人間の判断なしでは体系的にバイアスのある結果を生みうる」との論考（著者Claudia Perlich）\cite{twosigmandintuition}という3本の社内発信は、いずれも単独では際立つ定量成果を伴わないものの、統計モデル活用と人間の監督を組み合わせる一貫した設計思想を映し出している。
+  \item \textbf{Fund2Persona}: ファンドの開示文書・保有銘柄の推移・運用者コメンタリーにLLMのファイナンシャルアドバイザー・ペルソナを接地させるフレームワーク。actor（生成）・scorer（評価）・patcher（修正）のエージェント的ループで、実開示に根拠を持つAIネイティブな投資助言をスケーラブルに提供する。（出典: \cite{fund2persona2026}）
+  \item \textbf{FinDocMRE（VLMによるチャート画像の直接読解）}: ローソク足・テクニカル指標オーバーレイ・収益ウォーターフォール・マルチパネルダッシュボードといった金融チャートは、空間配置・色・軸スケールに意味を埋め込むため、OCRによる線形化ではその情報が失われる。文書レベルの金融マルチモーダル推論を評価するベンチマークとして、VLMを画像へ直接適用する方式とOCR＋LLMパイプラインを比較する枠組みが提案されている。（出典: \cite{findocmre2026}）
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[
+  doc/.style={fnode, text width=6.6cm, minimum height=1.2cm, font=\small},
+  base/.style={fnode muted, text width=3.8cm, minimum height=1.6cm, font=\footnotesize},
+  hi/.style={fnode blue, text width=4.8cm, minimum height=1.6cm, font=\footnotesize},
+  outbox/.style={fnode accent, text width=8.2cm, minimum height=1.2cm, font=\small},
+  arr/.style={farr blue},
+  darr/.style={farr dash},
+]
+\node[doc] (doc) at (5.0,3.0) {決算資料・適時開示\\（非構造化テキスト）};
+\node[base] (kw) at (1.8,0.6) {① キーワード\\ベースライン\\\textcolor{figgray}{基準アルファ ×1}};
+\node[hi] (ctx) at (7.6,0.6) {② コンテキスト対応スパン抽出\\(From Text to Alpha)\\\textbf{リスク調整後アルファ ×2}};
+\node[outbox] (out) at (5.0,-1.9) {構造化シグナル・特徴量 → 下流のアルファ生成・リスク管理へ};
+\draw[darr] (doc) -- (kw);
+\draw[arr] (doc) -- (ctx);
+\draw[darr] (kw) -- (out);
+\draw[arr] (ctx) -- (out);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 非構造化テキストからの情報抽出パイプライン}\ 決算資料・適時開示テキストにコンテキスト対応スパン抽出（From Text to Alpha）を適用すると、キーワードベースラインに対し\textbf{2倍のリスク調整後アルファ}を達成し、構造化シグナルとして下流のアルファ生成・リスク管理へ供される。}
+
+\subsection{固有表現抽出・XBRLタグ付け・センチメント分類: 構造化タスクにおける小型モデルの底力}
+
+抽出・分類のように出力空間が明確に定義された「構造化タスク」では、汎用フロンティアLLMのプロンプティングよりも、ドメインでファインチューンした小型モデルの方がなお高精度である場合が多い。この非直感的な事実は、LLM活用の設計判断（どこにフロンティアモデルを投入し、どこに軽量モデルを据えるか）を左右する。
+
+\begin{itemize}
+  \item \textbf{固有表現抽出（NER）}: FiNER-ORD（手作業で注釈付けした金融ニュース記事201本）を用いた評価では、ファインチューン済みのBERT／RoBERTaが加重F値\textbf{約0.88}を達成するのに対し、少数ショットの最良LLMはGemini \textbf{0.8368}、GPT-4o \textbf{0.8203}にとどまる。LLMは文脈依存の分類やドメイン固有の固有名詞（例: 「Google Maps」を組織として誤タグ付け）で系統的に誤りやすい。構造化抽出では、プロンプトされたフロンティアLLMよりも小型のファインチューンモデルが依然優位でありうることを示す。（出典: \cite{x05finerord2025}）
+  \item \textbf{XBRLタグ付け（FinTagging）}: 財務情報を約\textbf{14,000概念}のUS-GAAPタクソノミへ標準化するタグ付けベンチマーク。財務事実の抽出自体はF値\textbf{約72\%}に達するものの、抽出した事実を巨大なタクソノミへ正しく紐付ける「概念リンキング」が律速要因であり、iXBRL規制報告の自動化における真のボトルネックはファクト抽出ではなく概念照合であることを示唆する。（出典: \cite{x05fintagging2025}）
+  \item \textbf{センチメント分類（FinGPT）}: オープンソースのFinGPT（AI4Finance）はv3系列をニュース・ツイートのセンチメントデータにLoRAでファインチューンし、多くの金融センチメントベンチマークで低コストながら最良スコアを報告する。閉じたフロンティアモデルや計算資源を要するBloombergGPT型の対極として、安価に適応可能なオープンソース・ドメインモデルの実用性を示す。（出典: \cite{x05fingpt2023}）
+\end{itemize}
+
+\subsection{要約と情報忠実度: 圧縮が意思決定を歪めるリスク}
+
+LLMによる要約は情報量を圧縮する裏側で、投資判断上重要な詳細を意図せず切り捨てるリスクを伴う。
+
+\begin{casestudy}{When Summaries Distort Decisions: 「情報忠実度」という新しい評価軸}
+LLMによる金融文書の要約は、意思決定上重要な詳細を体系的に欠落させうる。本論文は「情報忠実度（information fidelity）」という指標を導入し、複数の圧縮バリアントを生成して原文と相互チェックするAgentic Context Compressionを提案する。AI圧縮された金融データを投資判断に用いる際の安全性を高める枠組みとして位置づけられる。（出典: \cite{summariesdistort2026}）
+\end{casestudy}
+
+\begin{center}
+\begin{tikzpicture}[
+  doc/.style={fnode, text width=7.0cm, minimum height=1.1cm, font=\small},
+  proc/.style={fnode blue, text width=7.5cm, minimum height=1.1cm, font=\small},
+  var/.style={fnode muted, text width=2.6cm, minimum height=1.0cm, font=\footnotesize},
+  chk/.style={fnode accent, text width=7.5cm, minimum height=1.1cm, font=\small},
+  good/.style={fnode blue, text width=4.4cm, minimum height=1.4cm, font=\footnotesize},
+  bad/.style={draw=red!60!black, fill=red!6, figshadow, rounded corners=4pt, line width=0.7pt, text width=4.8cm, align=center, minimum height=1.4cm, font=\footnotesize, inner sep=2mm},
+  arr/.style={farr blue},
+]
+\node[doc] (orig) at (5.2,5.2) {原文書（決算資料・開示文書）};
+\node[proc] (comp) at (5.2,3.5) {圧縮：複数の要約バリアントを生成\\(Agentic Context Compression)};
+\node[var] (va) at (1.8,1.7) {バリアントA};
+\node[var] (vb) at (5.2,1.7) {バリアントB};
+\node[var] (vc) at (8.6,1.7) {バリアントC};
+\node[chk] (chk) at (5.2,-0.2) {原文との相互チェック → 情報忠実度スコア算出};
+\node[good] (good) at (2.2,-2.3) {忠実な要約\\→ 投資判断に使用可};
+\node[bad] (bad) at (8.4,-2.3) {重要な詳細の欠落を検知\\→ 意思決定を歪めるリスク};
+\draw[arr] (orig) -- (comp);
+\draw[arr] (comp) -- (va);
+\draw[arr] (comp) -- (vb);
+\draw[arr] (comp) -- (vc);
+\draw[arr] (va) -- (chk);
+\draw[arr] (vb) -- (chk);
+\draw[arr] (vc) -- (chk);
+\draw[arr] (chk) -- (good);
+\draw[arr, red!60!black] (chk) -- (bad);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 要約圧縮と情報忠実度検証のフロー}\ Agentic Context Compressionは原文書から複数の要約バリアントを生成し原文と相互チェックすることで「情報忠実度」を算出し、意思決定を歪めかねない重要な詳細の欠落を検知する枠組みである。}
+
+\subsection{財務推論ベンチマーク: 数値・多段・企業横断}
+\label{subsec:reasoning-bench}
+
+抽出・要約が「テキストから何を読み取るか」であるのに対し、推論は「読み取った数値をどう計算・比較・統合するか」を問う。この領域は、金融QAにおけるLLMの能力と限界を最も鋭く可視化する。基礎ベンチマークであるFinQA（決算報告書2,789件・8,281問、各問に実行可能な推論プログラムを注釈）とその対話拡張ConvFinQA（多ターンで前問の実体・期間・計算結果を暗黙参照）は、いずれも「事前学習済みモデルは多段の数値推論において専門家人間に遠く及ばない」ことを最初に定量化した\cite{x05finqa2021,x05convfinqa2022}。
+
+\begin{casestudy}{FinanceQA: 試験に受かっても実務では6割落とす}
+CFA試験のような選択式では高得点を出すモデルも、実務のアナリスト業務では大きく躓く。FinanceQAはハンドスプレッド（財務諸表の手作業展開）、会計慣行の適用、仮定生成を要する多段タスクという現実的なワークフローでLLMを評価し、現行モデルが現実的タスクの\textbf{約60\%を誤答}（正答率約40\%）することを示した。金融機関が要求する厳格な精度に達しておらず、OpenAIのファインチューンでも改善は限定的であった。標準化された試験の成功が、仮定に満ちた実務作業へは転移しないことを明らかにする。（出典: \cite{x05financeqa2025}）
+\end{casestudy}
+
+\begin{casestudy}{FinReflectKG-MultiHop: 企業横断・年度またぎで崩れる多段推論}
+企業横断・年度またぎのグラウンデッドな多段推論を測る555問のベンチマーク（文書内48.7\%・同一企業の年度またぎ41.6\%・同一年度の企業横断9.7\%）。年度またぎの問い（LLM-Judge \textbf{6.72}）が、文書内（\textbf{7.47}）や企業横断（7.12）より難しく、時間的整合と用語の変遷が主因とされる。重要な発見は、知識グラフに紐付けた根拠（KG-linked evidence）がページウィンドウ検索に対し正答性を\textbf{約24\%}改善しつつトークンを\textbf{約84.5\%削減}した点であり、企業横断・長期の財務推論を律速するのはモデル規模ではなく検索アーキテクチャであることを裏付ける。（出典: \cite{x05finreflectkg2025}）
+\end{casestudy}
+
+決算報告書のテキスト・表・チャートを横断して三段の証跡を連鎖させるFCMR（Financial Cross-Modal Multi-hop Reasoning、ACL 2025）は、必要なホップ数が増えるほど最先端マルチモーダルLLMでも性能が単調に劣化し、ハルシネーションと誤りの伝播が主要な失敗モードであることを示した\cite{x05fcmr2025}。一方、標準化された試験ドメインでは進歩も著しい。CFA Level IIIに23モデルを投入した包括的評価では、フロンティア推論モデル（o4-mini \textbf{79.1\%}、Gemini 2.5 Flash \textbf{77.3\%}）が合格閾値の約63\%を明確に上回った。ただし選択式では71〜75\%に集中する一方、分析・統合・戦略的思考を要する記述式では性能の分散が大きく、ごく一部のモデルしか高得点を得られない\cite{x05cfa3eval2025}。試験の合否と実務の信頼性の乖離が、FinanceQAの結果と符合する。
+
+\subsection{ドメイン特化型金融LLM: 規模ではなくタスク形状が勝敗を分ける}
+
+金融ドメインに特化したモデル群――FinBERT（金融テキスト分類の先駆）\cite{finbert2020}、BloombergGPT（金融コーパスで事前学習した500億パラメータモデル）\cite{bloomberggpt2023}、FinGPT（安価なLoRA適応）\cite{x05fingpt2023}――は、汎用フロンティアモデルの台頭を受けて存在意義を問われてきた。しかし近年の証拠は、専門特化型小型モデルと汎用巨大モデルの優劣が「規模」ではなく「タスク形状」で決まることを示している。
+
+\begin{concept}{ドメイン特化型金融LLM}
+汎用LLM（何でもこなす巨大モデル）をそのまま金融タスクに投入しても、専門用語や独特な数値表現でつまずくことがある。そこで金融データを使って「適応」させる主な手段が三つある。継続事前学習は金融コーパスをそのまま追加で読ませる方法、ファインチューニングは正解付きデータで重みを調整する方法、LoRAは少数の追加パラメータだけを低コストで学習する方法である。いわば「万能選手を専門競技のために追加合宿させる」作業に近い。FinBERT・BloombergGPT・FinGPTはこの適応の代表例であり、勝敗を分けるのはモデルの大きさそのものではなく、解くべきタスクの形状に適応が合っているかどうかである。
+\begin{center}
+\begin{tikzpicture}[
+  gen/.style={fnode muted, text width=2.6cm, minimum height=1.3cm, font=\footnotesize, align=center},
+  adapt/.style={fnode blue, text width=3.4cm, minimum height=1.7cm, font=\footnotesize, align=center},
+  spec/.style={fnode accent, text width=2.8cm, minimum height=1.5cm, font=\footnotesize, align=center},
+  small/.style={fnode blue, text width=3.4cm, minimum height=1.2cm, font=\footnotesize, align=center},
+  big/.style={fnode muted, text width=3.4cm, minimum height=1.2cm, font=\footnotesize, align=center},
+  arr/.style={farr blue},
+]
+\node[gen] (g) at (0,2.2) {汎用LLM\\（何でもこなす\\巨大モデル）};
+\node[adapt] (a) at (3.9,2.2) {適応\\継続事前学習／\\ファインチューニング／LoRA};
+\node[spec] (s) at (8.0,2.2) {金融特化LLM\\FinBERT・\\BloombergGPT・FinGPT};
+\node[small] (sm) at (1.9,-1.1) {小型特化モデル\\(NER: BERT-FT 約0.88)};
+\node[big] (bg) at (8.0,-1.1) {巨大汎用モデル\\(NER: GPT-4o 約0.82)};
+\draw[arr] (g) -- (a);
+\draw[arr] (a) -- (s);
+\draw[farr accent] (sm) -- node[midway, above, font=\scriptsize, text=figaccent, align=center] {特定タスクでは\\小型が上回る} (bg);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 汎用LLMの金融特化適応と規模逆転}\ 継続事前学習・ファインチューニング・LoRAで汎用LLMを金融特化LLMへ適応させるフロー（上段）と、固有表現抽出のような構造化タスクでは小型特化モデルが巨大汎用モデルを上回りうる例（下段）。}
+\end{concept}
+
+\begin{casestudy}{Fin-R1: 強化学習で7Bが671Bに肉薄する}
+Fin-R1はQwen2.5-7B-Instructを基盤に、約60,091件のCoTサンプルでのSFTとGRPO強化学習（ルールベースの形式・正確性報酬）を組み合わせた70億パラメータの財務推論モデル。FinQA \textbf{76.0}、ConvFinQA \textbf{85.0}、5ベンチマーク平均\textbf{75.2}で総合2位につけ、DeepSeek-R1-Distill-Llama-70Bを8.7ポイント上回り、671BのフルDeepSeek-R1（78.2）に対してもわずか3.8ポイント差にとどまった。約100分の1のパラメータ規模で標準化推論に肉薄する、RL後訓練の効率性を示す事例である。（出典: \cite{x05finr1_2025}）
+\end{casestudy}
+
+\begin{casestudy}{Palmyra-Fin-70B: CFA Level IIIに初合格した金融特化モデル}
+WriterのPalmyra-Fin-70B（2024年8月公開）は、CFA Level IIIモック試験に\textbf{73\%}で合格した初のモデルとして報告された（平均合格ラインは約60\%、GPT-4は同試験で33\%）。長文書とQAを組み合わせた社内ベンチマークlong-fin-evalでは、Claude 3.5 Sonnet・GPT-4o・Mixtral-8x7bを上回った。長文脈の金融タスクにおけるドメイン特化の価値を示す。（出典: \cite{x05palmyrafin2024}）
+\end{casestudy}
+
+\begin{insight}{仮説: 特化小型モデルと汎用巨大モデルの交差点はタスク形状で決まる}
+出力空間が明確な構造化タスク（NER: ファインチューンBERT F値約0.88 > プロンプトGPT-4o 0.82、センチメント: FinGPTのLoRA適応が優勢）ではドメイン特化の小型モデルが勝ち、開放的な統合・推論タスク（CFA III記述式、FinanceQAの仮定生成）ではフロンティア推論モデル（o4-mini 79.1\%）が支配する。RL後訓練は7B（Fin-R1、平均75.2）を671Bモデルの3.8ポイント差まで引き上げる。導入判断は「どちらが賢いか」ではなく「どのタスクか」であり、特化抽出器群＋フロンティア推論器のポートフォリオが単一モデルを上回る。かつFin-R1の100分の1のパラメータが示す総保有コストの優位により、高スループットの抽出用途では特化小型モデルが経済的に支配的であり続けると予想される。（出典: \cite{x05finr1_2025,x05finerord2025,x05fingpt2023,x05cfa3eval2025,x05palmyrafin2024}）
+\end{insight}
+
+\subsection{ハルシネーションと忠実度: 推論のアリティが崩壊点を決める}
+
+金融QAでは、事実と異なる数値の生成（ハルシネーション）や、与えられた文脈に接地しない出力（忠実度の欠如）が意思決定に直結するため、その体系的な計測が不可欠である。
+
+\begin{casestudy}{FAITH: 表形式ハルシネーションは「多変数計算」で0\%近くへ崩壊する}
+FAITHは金融ハルシネーションを、文脈対応のマスク付きスパン予測タスクとして定式化する。S\&P 500企業の10-K「MD\&A（Item 7）」から単位付きの数値スパンをマスクし（453社・回答可能スパン2,406件）、モデルに文脈から復元させる。結果はClaude-Sonnet-4 \textbf{95.6\%}、Gemini-2.5-Pro \textbf{91.9\%}、GPT-4.1 89.2\%、Llama-3.1-8B 47.5\%、Qwen-3-8B 30.6\%。決定的なのは、推論の複雑さが増すと精度が急落する点で、\textbf{多変数計算}では多くのモデルが\textbf{ほぼ0\%}まで低下する。特徴的な失敗は「スケール誤り」（\$150と\$150 millionの混同）と、表とテキストの証跡を跨いだ統合の失敗である。（出典: \cite{x05faith2025}）
+\end{casestudy}
+
+金融QAの脆さは、既知のFinanceBenchの結果とも整合する。検索を併用したGPT-4-Turboでも\textbf{81\%}の質問を誤答または回答拒否し\cite{financebench2023}、AUDITFLOWではシンボリック検証層を除去すると精度が82\%から18\%へ崩壊する\cite{auditflow2026}。またFin-RATEベンチマークでは、企業横断比較タスクでファインチューン済み金融LLMの精度が23.91\%から\textbf{1.27\%}へ崩れる事例が確認されている\cite{finrate2026}。
+
+\begin{insight}{仮説: 金融LLMの信頼性は推論のアリティで律速され、額面精度は多段の尾を過大評価する}
+金融QAの信頼性を支配するのはモデル規模ではなく、要求される数値推論のアリティ（変数の数・ホップ数）である。FAITHでは最良モデル（Claude-Sonnet-4 95.6\%）でさえ多変数計算でほぼ0\%へ落ち、直接ルックアップはほぼ解決済み、FinReflectKGでは年度またぎ多段が最難、FCMRではホップ増加ごとに劣化する。示唆は二つ。第一に、実運用系はアリティでルーティングすべきである――ルックアップ・単段抽出はLLM、多変数計算はシンボリック／表計算ソルバ（検証済みツール呼び出し）へ。第二に、公表される総合精度は低アリティ問題の大きな比率に支配され、アナリストにとって重要な多段の尾（tail）における信頼性を系統的に過大評価している。（出典: \cite{x05faith2025,x05finreflectkg2025,x05fcmr2025,x05financeqa2025}）
+\end{insight}
+
+\subsection{記号検証ハイブリッド: LLMを読解器、ソルバを検証器に分離する}
+
+ハルシネーション対策を「より大きなモデル」だけで解く発想は、金融文書では早く限界に当たる。財務諸表の整合性、XBRL概念、年度差分、倍率・単位、セグメント合計のような制約は、自然言語生成よりも実行可能な計算・グラフ探索・claim検証に向いている。近年のベンチマークは、LLMを読解・候補生成・根拠抽出に使い、数値整合性は記号層で再検証するアーキテクチャへ明確に収束している。
+
+\begin{casestudy}{FinChain: 「答え」ではなく推論ステップを機械検証する}
+FinChainは、FinQA/ConvFinQAが最終数値の正否を中心に評価していた弱点を補うため、58トピック・12金融ドメインにわたるパラメータ化された記号テンプレートと実行可能Pythonコードで、Chain-of-Thoughtの各ステップを検証可能にしたベンチマークである。提案指標CHAINEVALは、最終答えだけでなく中間推論の整合性も評価する。重要なのは、テンプレート生成によりデータ汚染に強い問題を拡張できる点であり、金融推論の評価単位が「正答したか」から「どの式・根拠で正答したか」へ移ることを示す。（出典: \cite{x05finchain2025}）
+\end{casestudy}
+
+\begin{casestudy}{GBFR: 証拠が足りないときに安全に棄権する金融推論}
+GBFR（graph-bounded financial reasoning）は、財務指標ナレッジグラフでLLMの多段計算を制約し、複数の導出経路を並列探索して意味的に整合する結果だけを集約する。さらに、企業・時点・指標を摂動した反実仮想サンプルで「答えられない問い」を作り、検索失敗と真のデータ欠如を区別して安全に棄権する能力を評価する。これは、曖昧な根拠を値で埋める金融LLMの強制生成を、モデル出力後の拒否判定ではなく推論過程そのものの制約で抑える設計である。（出典: \cite{x05gbfr2026}）
+\end{casestudy}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}p{2.8cm}p{3.2cm}p{3.4cm}p{4.0cm}@{}}
+\toprule
+\textbf{方式} & \textbf{検証対象} & \textbf{記号層の役割} & \textbf{実装上の示唆} \\
+\midrule
+FinChain \cite{x05finchain2025} & CoTの中間式・最終答え & 実行可能Pythonテンプレートでステップ整合性を採点 & ベンチマークは最終正答率だけでなく推論経路を保存する \\
+FinVerBench \cite{finverbench2026} & 財務諸表の数値整合性 & 算術・勘定連鎖・前年比・桁/倍率の摂動を識別 & 入力の丸め・単位・符号正規化を前処理で明示する \\
+FinGround \cite{finground2026} & QA回答中の原子的claim & claim型に応じて検索・式再構成・根拠付与を分岐 & 回答生成後に段落・表セル単位の引用で書き戻す \\
+AUDITFLOW \cite{auditflow2026} & 監査証跡・報告書計算 & 実行環境で会計演算を再計算 & LLMは読解と例外説明、計算は検証層へ委譲する \\
+GBFR \cite{x05gbfr2026} & 多段財務指標と棄権判断 & 財務指標KGで導出経路を制約し交差検証 & 証拠不足時に推測で埋めず安全に棄権する \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\small\color{brandgray}\textbf{表: 金融LLMの記号検証ハイブリッド}\ 金融文書QAの信頼性向上は、単一LLMの生成能力ではなく、CoTステップ、財務諸表、原子的claim、監査演算、指標グラフをそれぞれ検証可能な対象へ分解する設計に依存する。}
+
+\begin{insight}{示唆: 「根拠付き回答」から「実行可能な根拠」へ評価軸が移る}
+金融LLMの次の信頼性基準は、回答に引用が付いていることでは不十分である。引用された表・文・XBRLタグから、回答内の式と数値が再実行できる必要がある。FinGroundはclaim単位で根拠を付け直し、FinVerBenchは財務諸表の数値摂動を検出し、FinChainは推論ステップを実行可能テンプレートへ落とし、GBFRは指標グラフで導出経路を閉じる。したがって実務実装では、RAGの検索ログ、LLMの中間推論、表計算ソルバの実行結果、棄権理由を同じ監査証跡に保存することが、精度改善とモデルリスク管理を同時に満たす最小単位になる。（出典: \cite{finground2026,finverbench2026,x05finchain2025,x05gbfr2026,auditflow2026}）
+\end{insight}
+
+\subsection{ESG・サステナビリティ分析: 知識ギャップと検索依存}
+
+ESG／サステナビリティ分析は、専門的・学際的な知識と非構造化開示の読解を同時に要する。ESGenius（専門家検証済み1,136問のMCQ＋7つの権威的情報源からの231文書コーパス）を用いた50モデル（0.5B〜671B）の評価では、最先端モデルでもゼロショット正答率は\textbf{55〜70\%}にとどまり、この専門ドメインにおける明確な知識ギャップが露呈した。一方RAGを併用すると性能は大きく改善し、DeepSeek-R1-Distill-Qwen-14Bは63.82\%から\textbf{80.46\%}へ上昇した。ESG分析は、パラメータに内在する知識ではなく検索（retrieval）に律速される――すなわち「モデルが知っているか」ではなく「正しい規格・文書を引けるか」が支配的であることを示す。（出典: \cite{x05esgenius2025}）
+
+\subsection{ベンチマーク横断の俯瞰: スコアより評価プロトコルを読む}
+
+以下の表は、本節で扱った主要な金融データ分析ベンチマークを、タスク種別・最良スコア・そこから読み取れる限界とともに一覧化したものである。単一の「精度」だけを見るのではなく、各ベンチマークがどのタスク形状・推論アリティを測っているかに注意して読む必要がある。
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}p{2.7cm}p{2.6cm}p{3.4cm}p{4.4cm}@{}}
+\toprule
+\textbf{ベンチマーク} & \textbf{タスク種別} & \textbf{最良スコア} & \textbf{読み取れる限界} \\
+\midrule
+FinQA / ConvFinQA \cite{x05finqa2021,x05convfinqa2022} & 数値推論／対話的数値推論 & 事前学習モデルは専門家人間に及ばず & 多段の数値推論が最初期からの難所 \\
+FinanceQA \cite{x05financeqa2025} & 実務アナリスト業務 & 正答率約40\%（約60\%を誤答） & 試験の合格が実務へ転移しない \\
+CFA Level III \cite{x05cfa3eval2025} & 選択式＋記述式 & o4-mini 79.1\%（閾値約63\%） & 記述式（統合・戦略）で分散大 \\
+FinReflectKG-MultiHop \cite{x05finreflectkg2025} & 企業横断・年度またぎ多段 & 年度またぎ最難（LLM-Judge 6.72） & 律速はモデル規模でなく検索設計 \\
+FCMR \cite{x05fcmr2025} & クロスモーダル多段 & ホップ増で単調に劣化 & 誤りの伝播が主要失敗モード \\
+FAITH \cite{x05faith2025} & 表形式ハルシネーション & Claude-Sonnet-4 95.6\% & 多変数計算でほぼ0\%へ崩壊 \\
+FinanceBench \cite{financebench2023} & 開示文書QA（検索併用） & 81\%を誤答・回答拒否 & 検索併用でも高い失敗率 \\
+FinChain \cite{x05finchain2025} & 検証可能CoT金融推論 & 26モデルを評価 & 中間推論ステップの機械検証が必要 \\
+GBFR \cite{x05gbfr2026} & 多段計算＋安全棄権 & SOTAベースラインを上回る & 証拠不足時の強制生成をKG制約で抑制 \\
+FinTagging \cite{x05fintagging2025} & XBRL概念タグ付け & ファクト抽出F値約72\% & 概念リンキングが真の律速 \\
+FiNER-ORD \cite{x05finerord2025} & 固有表現抽出 & BERT約0.88 > GPT-4o 0.82 & 構造化タスクは小型FTモデル優位 \\
+ESGenius \cite{x05esgenius2025} & ESG知識QA & ゼロショット55〜70\%、RAGで80\%超 & 知識ギャップは検索で補償 \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\small\color{brandgray}\textbf{表: 金融データ分析ベンチマーク横断の俯瞰}\ タスク形状（抽出・分類・数値推論・多段・クロスモーダル・ハルシネーション）ごとに最良スコアと限界を整理。構造化タスクでは小型ファインチューンモデルが優位、開放的推論ではフロンティアモデルが優位、多段・多変数の尾では総じて信頼性が崩壊するという構造が共通して現れる。}
+
+\subsection{アルファ生成のためのLLM／時系列基盤モデル}
+
+自然言語による着想やニュース・開示情報を、実際に取引可能なアルファやポートフォリオシグナルへと変換する試みが、学術・産業双方で急速に増えている。
+
+\begin{casestudy}{Supply Chain Propagation of Textual Signals: 報告企業を超えて伝播するテキストシグナル}
+10-K SECファイリングから抽出したFinBERT埋め込みをサプライチェーンネットワーク経由で伝播させ、S\&P 500銘柄で2011〜2025年においてSharpe比\textbf{0.86}のクロスセクショナル株式リターン要因を構築。LLMで符号化された非構造化開示情報が、報告企業自身を超えて価格形成シグナルを持つことを実証した。（出典: \cite{supplychain2026}）
+\end{casestudy}
+
+\begin{casestudy}{Kronos: 120億件のローソク足で訓練された市場専用基盤モデル}
+45取引所・120億件超のローソク足レコードで事前学習した金融市場専用の基盤モデル。専用のマーケット・トークナイザを採用し、既存の時系列基盤モデルに対して価格予測・ボラティリティ予測タスクで\textbf{93\%の性能改善}を達成した（AAAI 2026）。もっとも、ベンチマーク上の改善が実際のライブアルファに転化するかは、事前学習コーパスのサバイバーシップバイアスや取引コスト、流動性の高い市場ではローソク足レベルのシグナルが既に裁定されつくしている可能性のため未検証であると留保されている。（出典: \cite{kronos2025}）
+\end{casestudy}
+
+\begin{casestudy}{Alpha-GPT: 自然言語の着想をアルファへ変換し、41,000超チーム中トップ10入り}
+LLM（プロンプトエンジニアリング活用）でクオンツ研究者の自然言語による着想を候補アルファ（取引ファクター）へ変換するフレームワーク（EMNLP 2025 System Demonstration Track）。WorldQuantのInternational Quant Championship (IQC) 2024に外部参加者として参加し、\textbf{41,000超のチーム中トップ10}にランクインした。（出典: \cite{alphagpt2023}）
+\end{casestudy}
+
+\begin{casestudy}{CrossAlpha: 開示文書から国境を越えるアルファを抽出するクロスマーケット・ベンチマーク}
+LLMエージェントが5市場の\textbf{10,700件}の年次報告書を標準化されたシグナルへ変換するベンチマーク。開示文書から導いたクロスマーケットのピア（同業他社）シグナルが、米国から日本へのリターン予測において国内ベースラインを上回った（ICIR \textbf{0.39} 対 0.07〜0.18）。AIが処理した開示情報が国境を越えたアルファを内包しうることを示す。（出典: \cite{crossalpha2026}）
+\end{casestudy}
+
+\begin{center}
+\begin{tikzpicture}[
+  src/.style={fnode, text width=4.6cm, minimum height=1.9cm, font=\footnotesize},
+  outbox/.style={fnode accent, text width=9.5cm, minimum height=1.2cm, font=\small},
+  arr/.style={farr blue},
+]
+\node[src] (n1) at (1.9,3.4) {\textbf{Supply Chain Propagation}\\FinBERT埋め込み×サプライチェーン伝播\\Sharpe比\textbf{0.86}（S\&P 500, 2011〜2025）};
+\node[src] (n2) at (6.3,3.4) {\textbf{Kronos}\\120億件超のローソク足で事前学習\\既存基盤モデル比\textbf{+93\%}改善（AAAI 2026）};
+\node[src] (n3) at (10.7,3.4) {\textbf{Alpha-GPT}\\自然言語の着想を候補アルファへ変換\\IQC 2024 41,000超チーム中\textbf{トップ10}};
+\node[outbox] (out) at (6.3,-0.2) {\textbf{取引可能なアルファ／ポートフォリオシグナル}};
+\draw[arr] (n1.south) -- ++(0,-0.5) -| (out.north);
+\draw[arr] (n2.south) -- (out.north);
+\draw[arr] (n3.south) -- ++(0,-0.5) -| (out.north);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: テキスト・価格系列・自然言語からのアルファ生成アプローチ}\ Supply Chain Propagation（テキスト由来シグナルの企業間伝播）、Kronos（価格系列基盤モデル）、Alpha-GPT（自然言語アイデアの構造化）はいずれも入力形式が異なるが、取引可能なアルファ・ポートフォリオシグナルへと収束する点は共通している。}
+
+\begin{itemize}
+  \item \textbf{GIFT (LLM-Guided State-Reward Interface)}: LLMを推論時ではなく、PPOポートフォリオ取引エージェントの状態特徴量と報酬設計ルール自体の設計に用いる手法。金融ドメイン知識を構造的に注入し、リスク調整後のアウトオブサンプル性能を改善する。（\cite{gift2026}）
+  \item \textbf{Alpha-R1}: 8Bパラメータの推論モデルを強化学習で訓練し、システマティック投資におけるシグナル劣化・レジーム変化に対応。過去パターンのみに頼らずリアルタイムニュースとファクターロジックを取り込み、アルファファクターの文脈的な有効性を判定して選択的に有効化・無効化する（上海交通大学・StepFun・FinStep所属）。（\cite{alphar1_2025}）
+  \item \textbf{Point-in-Time Financial RAG}: LLM自体をファインチューンするのではなく、ベイズ的な市場フィードバックでどのニュース文書を検索（retrieve）するかを選ぶことで、ニュース駆動型トレーディングポートフォリオのSharpe比を\textbf{0.52から0.84}へ改善。金融RAGでは検索戦略の選択がモデル選択と同等に重要であることを示す。凍結（frozen）LLM前提のためポイントインタイム性の担保にも資する。（出典: \cite{pitrag2026}）
+  \item \textbf{Quant 4.0（フレームワーク提唱）}: 純粋なディープラーニングを超えた第4世代の量的投資として、自動機械学習（アルゴリズムがアルゴリズムを生成）、隠れたリスクを開示する説明可能AI、ドメイン事前知識を注入する知識駆動AIを統合するアーキテクチャを提案。分野の10の未解決課題を整理する。（\cite{quant40_2023}）
+  \item \textbf{サーベイ}: 統計的・特徴量ベース手法からディープラーニング、LLM／エージェント駆動の自己反復ワークフローに至る量的投資AIの進化を包括的に整理したサーベイとして\cite{quantsurvey2025}、テキスト・数値表・図表が混在する複雑な財務情報を処理する新規LLM手法を統合し実務家向けの研究方向を示すサーベイとして\cite{bridginglm2025}、株式市場におけるLLM活用を予測・センチメント・トレーディング・分析・ポートフォリオ管理・リスク・コンテンツ生成・評価の8応用カテゴリで整理し84本の研究（2022〜2025年）を統合した上でバックテスト結果と実運用執行との間の決定的なギャップを指摘するサーベイとして\cite{llmequitysurvey2025}を参照。
+  \item \textbf{オルタナティブデータの制度化（市場動向）}: Coalition Greenwichが2025年9〜10月にバイサイド56社を対象に実施した調査では、およそ\textbf{半数}が中頻度のオルタナティブデータ利用者であり、\textbf{63\%}が支出の増額を計画していると報告された。衛星画像・消費者取引・Webスクレイピングによるシグナルが、周縁的なツールからコアインフラへと移行しつつあることを示す。（出典: \cite{altdata2025}）
+\end{itemize}
+
+\begin{insight}{仮説: マルチモーダルLLMによる小型株アルファ生成}
+FinMME（ACL 2025、11,000以上のサンプル）は、最良のマルチモーダルモデル（Gemini Flash 2.0, Qwen2.5-VL 72B）でも金融チャートからの計算問題正答率が\textbf{40\%未満}であることを発見した。それでもRussell 2000銘柄（アナリストカバレッジ2〜3人）では、決算スライドの収益ブリッジ図表にテキストトランスクリプトに現れない定量シグナルが含まれると分析されており、大型株では飽和した精度向上の価値が小型株では相対的に高いという仮説が提示されている。（出典: \cite{finmme2025}）
+\end{insight}
+
+\begin{insight}{仮説: 進化的LLMアルファマイニングは混雑により自己劣化する}
+抽象構文木（AST）で制約したファクター式に遺伝的な突然変異・交叉を適用する進化的LLMアルファマイニング（例: QuantaAlpha）は、創造的な着想（LLMによる仮説生成）と構文的妥当性（AST制約付きコード構築）を切り離し、既知シグナルの微修正ではなく構造的に多様なファクターを生む。QuantaAlphaはCSI 300で年率\textbf{27.75\%}、S\&P 500で再最適化なしに\textbf{137\%}の超過リターンを報告した。ただし複数の競合ファンドが同一の銘柄ユニバースに類似の進化的探索を適用すれば、発見されるファクターは重複し混雑（crowding）を通じて自己劣化していくと予想される。クロスマーケット汎化の結果も2022〜2025年のバックテスト期間に固有のモメンタム動学やサバイバーシップバイアスにより見かけ上誇張されている恐れがある。（出典: \cite{quantaalpha2026}）
+\end{insight}
+
+\begin{insight}{仮説: 意思決定志向学習はポートフォリオ成果を大きく引き上げる}
+予測誤差の平均最小化は、下流のポートフォリオ損失の最小化とは整合しない。意思決定にとって重要な誤差構造は予測誤差の特定の部分空間に集中している。接空間（tangent-space）射影による意思決定志向学習（decision-focused learning）はこの部分空間を直接ターゲットとし、予測精度はやや劣るがポートフォリオ成果は大幅に優れるモデルを生む（ICML 2026）。これはリターン予測の改善に注ぎ込まれてきたアルファ生成努力の多くが方向違いであった可能性を示唆する。ただし意思決定志向モデルは相関崩壊のような構造的レジーム転換で過学習が露呈しうるうえ、微分可能なポートフォリオソルバと複雑な学習パイプラインを要し、実運用への導入障壁となる。（出典: \cite{decisionfocused2026}）
+\end{insight}
+
+\begin{insight}{仮説: グラフ言語モデルの優位は連鎖的な波及タスクで拡大する}
+企業間サプライチェーンをLLM互換のグラフ埋め込みとして符号化するハイブリッドなグラフ言語モデル（例: InterCorpRel-LLM）は、GNN埋め込みをLLMトークン空間へ対照学習で整合させ、サプライ関係予測でF値\textbf{0.8543}を達成した。単一企業の信用評価（DSCR・レバレッジ）はテキストのみからでも導けるが、Tier-1サプライヤの破綻がTier-2/3へ連鎖する系統的なショック波及は明示的なグラフ探索を要する。ゆえにテキストのみのLLMに対する性能差は、単一企業のデフォルト予測よりも波及（contagion）タスクで有意に拡大すると予想される。もっともサプライチェーンのデータ被覆は非上場・非米国企業で疎であり、見かけの優位はアーキテクチャではなくベンダー由来のデータ品質を反映している恐れがあり再現が難しい。（出典: \cite{intercorprel2025}）
+\end{insight}
+
+\subsection{高頻度・非構造化シグナルの解読}
+
+オプション市場のミクロ構造や経営者の発話パターンといった高頻度・非構造化シグナルの解読は、伝統的な定量分析では捉えにくい情報をLLMが抽出できるかを試す領域として注目されている。
+
+\begin{itemize}
+  \item \textbf{Inferring Latent Market Forces（オプションガンマ検出）}: LLMがオプションチェーン構造のみからディーラーのガンマヘッジ制約レジーム（ピンニング、0DTEウォール抑制、デルタリバランス圧力）を検出できるかを検証。難読化テストで記憶可能な時間的文脈をすべて除去した状態でも\textbf{71.5\%の検出精度}、構造的文脈を保持すると\textbf{91.2\%}まで上昇し、単なる訓練データパターンマッチングではなく因果理解の兆候を示唆する。（\cite{gammaexposure2025}）
+  \item \textbf{CFOs Meet LLMs}: デューク大学・NBERの研究者が、特定企業のCFOをロールプレイするLLMが2002〜2025年にわたる当該経営者の実際の景況感サーベイ回答を予測できることを実証。LLMを高頻度金融センチメントデータのためのスケーラブルなデジタルツインとして活用する可能性を示す。（\cite{cfosmeetllms2026}）
+  \item \textbf{FinCall-Surprise（決算コールのパラ言語分析）}: 現行の汎用マルチモーダルモデルは、決算コール音声からトランスクリプトのみのベースラインに対して控えめかつ一貫性のない改善しか得られない。ピッチの分散・センシティブな話題での発話速度の加速・躊躇マーカーの密度といった音声特徴には、汎用マルチモーダル訓練が最適化していないストレス・欺瞞シグナルが含まれる可能性がある一方、エグゼクティブのメディアトレーニングによるストレスマーカー抑制や決算コール音声の意図的なトーン調整がすでに始まっているとの報告もあり、訓練済みシグナルが漸近的に無効化しうるリスクが指摘されている。（\cite{fincallsurprise2025}）
+\end{itemize}
+
+\begin{insight}{仮説: 拡散モデルは決算イベント時のボラティリティ曲面予測でVAEを上回る}
+過去のボラティリティ曲面動学とマクロ経済状態変数を条件付けした生成拡散モデル（DDPM）は、翌日のSPXボラティリティ曲面予測で既存手法を上回り、拡散過程が生む裁定違反を抑制する信号対雑音比（SNR）重み付けを備える。一方、10次元VAEで曲面を圧縮する並行手法はテール動学のモデル化を犠牲にする。決算イベントはストライク×満期の局所的で鋭いショックを生み、VAE圧縮はこれを平準化して消してしまうため、まさにそこで拡散モデルが優位に立つと予想される。ただしDDPM推論はVAEデコードに比べ計算コストが高く、数千のストライク・満期を秒未満で再価格付けするマーケットメイク業務では、精度優位に関わらず遅延がVAEを事実上の実運用標準にしうる。（出典: \cite{diffusionvol2025}）
+\end{insight}
+
+\begin{insight}{仮説: LLMエージェント的ナウキャスティングは変曲点で統計モデルを上回る}
+歴史的指標系列で学習した従来の統計的ナウキャスティングは、正確な予測が最も必要となる構造的断絶・レジーム転換のときにこそ機能不全に陥る。LLMエージェントは中央銀行のフォワードガイダンスやクロスマーケットのセンチメントをほぼリアルタイムに同化でき、変曲点で高い予測力を持つがラグ付き統計入力では捉えにくい情報を取り込める。優位は高VIX四半期に統計的に集中すると予想される（インフレナウキャスティングでニュースセンチメントとFED声明埋め込みを統合）。ただしLLMは真の基礎指標ではなく報道に埋め込まれた市場コンセンサスをナウキャストしているにすぎない恐れがあり、既に価格に織り込まれた予想からの情報の切り分けにはプロの予測サーベイに対する直交化が要る。（出典: \cite{inflationnowcast2024}）
+\end{insight}
+
+\begin{center}
+\begin{tikzpicture}[
+  inp/.style={fnode muted, text width=3.6cm, minimum height=1.5cm, font=\footnotesize},
+  llm/.style={fnode, text width=3.4cm, minimum height=1.5cm, font=\footnotesize},
+  res/.style={fnode blue, text width=4.0cm, minimum height=1.5cm, font=\footnotesize},
+  arr/.style={farr blue},
+]
+\node[inp] (a1) at (1.9,6.4) {オプションチェーン構造\\（価格・出来高のみ）};
+\node[llm] (a2) at (6.0,6.4) {LLM推論\\ディーラーのガンマヘッジレジーム検出};
+\node[res] (a3) at (10.3,6.4) {検出精度\\難読化時\textbf{71.5\%} → 文脈保持時\textbf{91.2\%}};
+\node[inp] (b1) at (1.9,3.6) {CFOの過去景況感\\サーベイ回答（2002〜2025）};
+\node[llm] (b2) at (6.0,3.6) {LLMロールプレイ\\CFOデジタルツイン};
+\node[res] (b3) at (10.3,3.6) {実際の回答を予測\\高頻度センチメントの\\スケーラブルな代替};
+\node[inp] (c1) at (1.9,0.8) {決算コール音声\\ピッチ分散・発話速度・\\躊躇マーカー};
+\node[llm] (c2) at (6.0,0.8) {汎用マルチモーダル\\モデル};
+\node[res] (c3) at (10.3,0.8) {改善は控えめかつ不安定\\（メディアトレーニングで\\漸近的に無効化するリスク）};
+\draw[arr] (a1) -- (a2); \draw[arr] (a2) -- (a3);
+\draw[arr] (b1) -- (b2); \draw[arr] (b2) -- (b3);
+\draw[arr] (c1) -- (c2); \draw[arr] (c2) -- (c3);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 高頻度・非構造化シグナルをLLMが解読する3つの試み}\ オプションガンマ検出は構造的文脈の保持で精度が71.5\%から91.2\%へ向上する一方、CFOデジタルツインは実サーベイ回答の予測に成功し、決算コール音声のパラ言語分析は改善が限定的かつ不安定である。}
+
+\subsection{信用リスク・与信分析への応用}
+
+与信・信用リスク評価は、規制上の説明可能性要求と数値推論の精度が同時に求められる領域であり、LLM単体ではなく専用アーキテクチャや連合学習との組み合わせが模索されている。
+
+\begin{itemize}
+  \item \textbf{Large Tabular Models (LTM)}: LLMは精密な数値推論に弱くハルシネーションを起こしやすいため、信用リスクスコアリング・不正検知・規制資本計算のような構造化タスクでは、目的特化型のLarge Tabular Modelsがファインチューン済みLLMに取って代わる可能性がある。DeepMind出身者が共同創業したFundamentalのNEXUS LTMは\textbf{2.55億ドル}の資金調達で立ち上げられ、「数時間ではなく数秒で予測」を提供すると謳っている。（出典: \cite{citiventuresndtabular}）
+  \item \textbf{クロス機関連合学習によるAML}: 香港の銀行（Airstar Bank、livi bank）の実証実験で、連合学習AMLモデルは孤立した単独銀行モデルよりおよそ\textbf{2倍の不正資金フロー検知有効性}を示した。ただし異種データ分布下でのクライアントドリフトにより、より代表性の高いデータを持つ機関が勾配更新を支配し、小規模な地域銀行の個別改善効果が乏しくなる可能性、また法域ごとに異なるAML報告基準がモデル勾配の共有さえ法的障壁にしうる点が課題として指摘されている。（\cite{federatedlearning2025}）
+  \item \textbf{Interpretable LLMs for Credit Risk（サーベイ）}: 2020〜2025年の60本の論文をPRISMAレビュー手法で整理し、ハイブリッドパイプライン（LLM＋伝統的スコアカードロジック、chain-of-thought推論、パラメータ効率的ファインチューニング）が主流トレンドである一方、モデルレベルの解釈可能性と機関レベルの規制検証との間にギャップがあると指摘する。（\cite{creditrisk2025}）
+  \item \textbf{LendNova}: 生の信用情報機関（bureau）テキストに言語モデルを直接適用する初のエンドツーエンドパイプラインで、手作業の特徴量エンジニアリングを不要にし、前処理コストの削減とスケーラビリティ向上を図る（AAAI 2026 Workshop on Agentic AI in Financial Services）。（出典: \cite{lendnova2026}）
+  \item \textbf{AI-BAAM（オルタナティブデータによる与信）}: 生の銀行取引履歴をオルタナティブデータとして用いるマレーシアのMSME（零細・中小企業）与信のエンドツーエンドMLパイプライン。AUROC \textbf{0.806}を達成し、申込情報のみのベースラインに対し\textbf{+24.6\%}の改善を示した（ICLR 2026 oral）。（出典: \cite{aibaam2025}）
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[
+  hdr/.style={font=\footnotesize\bfseries, text=figgray},
+  inp/.style={fnode muted, text width=5.0cm, minimum height=1.3cm, font=\footnotesize},
+  opt/.style={fnode blue, text width=4.6cm, minimum height=1.7cm, font=\footnotesize},
+  outp/.style={fnode accent, text width=6.0cm, minimum height=1.2cm, font=\small},
+  outp2/.style={fnode accent, text width=4.4cm, minimum height=1.4cm, font=\footnotesize},
+  arr/.style={farr blue},
+]
+\node[hdr] at (3.1,5.6) {与信スコアリング};
+\node[inp] (n1) at (3.1,4.7) {顧客の構造化・非構造化データ\\（財務諸表・取引履歴）};
+\node[opt] (o1) at (0.6,2.5) {Large Tabular Model\\NEXUS（Fundamental）\\\textbf{2.55億ドル}調達、数秒で予測};
+\node[opt] (o2) at (5.9,2.5) {ハイブリッドLLM＋\\伝統的スコアカード\\chain-of-thought／PEFT};
+\node[outp] (n3) at (3.1,0.0) {与信判定（規制上の説明可能性が必須）};
+\draw[arr] (n1) -- (o1);
+\draw[arr] (n1) -- (o2);
+\draw[arr] (o1) -- (n3);
+\draw[arr] (o2) -- (n3);
+
+\draw[figgray, dashed] (-1.0,-1.2) -- (12.0,-1.2);
+\node[hdr] at (5.4,-1.7) {クロス機関連合学習によるAML};
+\node[inp] (m1) at (1.7,-3.1) {香港複数銀行の\\分散取引データ\\(Airstar Bank, livi bank)};
+\node[opt] (m2) at (5.9,-3.1) {連合学習AMLモデル\\（クライアントドリフト・\\法域間の課題あり）};
+\node[outp2] (m3) at (10.0,-3.1) {孤立モデル比\\\textbf{約2倍}の不正資金\\フロー検知有効性};
+\draw[arr] (m1) -- (m2);
+\draw[arr] (m2) -- (m3);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 信用リスク・与信分析と連合学習AMLのパイプライン}\ 与信スコアリングはLarge Tabular ModelまたはLLM＋伝統的スコアカードのハイブリッドを経て、規制上説明可能な判定に至る。下段のクロス機関連合学習AMLは、孤立した単独銀行モデル比で約2倍の不正資金フロー検知有効性を示す一方、クライアントドリフトや法域差が課題として残る。}
+
+\subsection{モデル圧縮とコスト効率}
+
+フロンティア財務LLMの推論コストを実運用可能な水準まで下げる取り組みも並行して進んでいる。
+
+\begin{itemize}
+  \item \textbf{知識蒸留による財務LLM圧縮（P-KD-Q）}: Pruning→Knowledge Distillation→Quantizationの圧縮パイプラインにより、フロンティア財務LLMから7〜13Bパラメータの生徒モデルを生成し、教師モデルの精度の\textbf{90\%以上}を保持する可能性が、WiproとNVIDIAの2026年実務知見に基づく体系的レビューで報告されている。（出典: \cite{researchgatendkd}）
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[
+  model/.style={fnode, text width=3.0cm, minimum height=1.8cm, font=\footnotesize},
+  stg/.style={fnode blue, text width=2.4cm, minimum height=1.4cm, font=\footnotesize},
+  note/.style={fnode accent, text width=12.5cm, minimum height=1.1cm, font=\small},
+  arr/.style={farr blue},
+]
+\node[model] (teacher) at (1.6,0) {教師モデル\\フロンティア\\財務LLM};
+\node[stg] (prune) at (4.6,0) {Pruning};
+\node[stg] (kd) at (7.2,0) {Knowledge\\Distillation};
+\node[stg] (quant) at (9.8,0) {Quantization};
+\node[model] (student) at (12.6,0) {生徒モデル\\7〜13B\\パラメータ};
+\node[note] (note) at (7.1,-2.0) {教師モデル精度の\textbf{90\%以上}を保持（WiproとNVIDIAの2026年実務知見に基づく体系的レビュー）};
+\draw[arr] (teacher) -- (prune);
+\draw[arr] (prune) -- (kd);
+\draw[arr] (kd) -- (quant);
+\draw[arr] (quant) -- (student);
+\draw[figgray, dashed] (teacher.south) |- (note.west);
+\draw[figgray, dashed] (student.south) |- (note.east);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: 財務LLMの知識蒸留パイプライン（P-KD-Q）}\ Pruning → Knowledge Distillation → Quantizationの3段階を経て、フロンティア財務LLM（教師）から7〜13Bパラメータの生徒モデルを生成し、教師モデルの精度の90\%以上を保持する。}
+
+\subsection{再現性・頑健性への警鐘: 「ルックアヘッドバイアス」問題}
+
+\begin{concept}{ルックアヘッドバイアス（先読みバイアス）}
+ルックアヘッドバイアス（先読みバイアス）とは、本来その時点ではまだ知り得ないはずの「未来の情報」が、過去時点の判断や検証にこっそり混ざり込んでしまう誤りである。LLMに特有の形として、モデルが学習データの中に学習カットオフ以降の市場の結果を実質的に「記憶」しており（temporal contamination）、それを使ってバックテストすると本来の実力以上に成績が良く見えてしまう問題がある。いわば「答えを知ってから解いた模試の点数を、実力だと錯覚する」ようなものである。対策は、評価期間を学習カットオフより後に限定することと、その時点で実際に入手可能だったデータだけを使うpoint-in-time原則の徹底である。
+\begin{center}
+\begin{tikzpicture}[
+  lbl/.style={font=\footnotesize, align=center, text width=3.6cm},
+  cut/.style={font=\footnotesize\bfseries, text=fignavy, align=center},
+  r1/.style={fnode accent, text width=2.7cm, minimum height=1.3cm, font=\footnotesize, align=center},
+  r2/.style={fnode, text width=2.2cm, minimum height=1.3cm, font=\footnotesize, align=center},
+]
+\draw[farr] (0,0) -- (12.2,0);
+\node[font=\scriptsize, text=figgray] at (12.2,0.35) {時間};
+\draw[figgray, dashed, line width=0.8pt] (5.0,-2.6) -- (5.0,2.6);
+\node[cut] at (5.0,2.95) {学習\\カットオフ};
+\draw[figblue, line width=3mm, line cap=round] (0.6,1.2) -- (4.4,1.2);
+\node[lbl] at (2.5,1.75) {評価期間\\（カットオフ以前に設定）};
+\node[r1] (out1) at (9.0,1.2) {モデルが未来を「記憶」\\$\to$見かけの高アルファ};
+\draw[farr accent] (4.4,1.2) -- (out1);
+\draw[figgray, line width=3mm, line cap=round] (5.6,-1.5) -- (9.4,-1.5);
+\node[lbl] at (7.5,-2.05) {評価期間\\（カットオフ以降に限定）};
+\node[r2] (out2) at (10.9,-1.5) {真の性能\\（過大評価なし）};
+\draw[farr] (9.4,-1.5) -- (out2);
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: ルックアヘッドバイアスが生じる仕組み}\ 評価期間が学習カットオフより前に設定されると（上段）モデルが未来の結果を実質的に記憶しており見かけの高アルファが生じる一方、評価期間をカットオフ以降に限定すると（下段）point-in-timeな真の性能が測れる。}
+\end{concept}
+
+金融特化のアルファ生成研究において、LLMが事前学習データに含まれる過去の結果を「記憶」して見かけ上高いバックテスト成績を出す「look-ahead bias／temporal contamination」問題が、独立した複数の研究によって体系的に検証されている。下図は、この問題が公表アルファをどれほど劇的に消し去りうるかを示す典型例である。
+
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+  ybar,
+  bar width=26mm,
+  width=9.6cm,
+  height=6.2cm,
+  ymin=-6, ymax=25,
+  ylabel={年率アルファ（\%）},
+  ylabel style={font=\small},
+  xtick={1,2},
+  xticklabels={学習カットオフ前, 学習カットオフ後},
+  xmin=0.4, xmax=2.6,
+  xticklabel style={font=\bfseries\small, align=center},
+  tick label style={font=\small},
+  ymajorgrids,
+  major grid style={draw=figlight},
+  axis line style={draw=figgray},
+  clip=false,
+]
+\addplot[fill=figblue, draw=fignavy, thick, bar shift=0pt] coordinates {(1, 20.73)};
+\addplot[fill=red!55!black, draw=red!70!black, thick, bar shift=0pt] coordinates {(2, -1.04)};
+\node[above, font=\bfseries, text=fignavy] at (axis cs:1, 20.73) {+20.73\%};
+\node[below, font=\bfseries, text=red!60!black] at (axis cs:2, -1.04) {-1.04\%};
+\end{axis}
+\end{tikzpicture}
+\end{center}
+{\small\color{brandgray}\textbf{図: ルックアヘッドバイアスによるアルファの消失（Look-Ahead-Bench, DeepSeek 3.2）}\ 評価期間をモデルの学習データカットオフより前に設定すると年率アルファ\textbf{+20.73\%}を記録するが、評価期間をカットオフ後に移動するだけで\textbf{-1.04\%}へとほぼ完全に消失する。「学習カットオフ前」バーの高成績は、モデルが事前学習データに含まれる過去の結果を記憶していた人為的成果物である可能性が高いことを示す。（出典: \cite{lookaheadbench2026}）}
+
+\begin{casestudy}{77件のLLMトレーディング研究の系統的レビュー: 再現性の危機}
+取引コストを明示的にモデル化していたのはわずか\textbf{1件}、再現可能で時間整合的な評価プロトコルを用いていたのはわずか\textbf{2件}にとどまる。公表された「アウトパフォーム」の大半が方法論的精査に耐えない実態を指摘し、evidence ledger・再現性監査・報告チェックリストを提案している。（出典: \cite{agentictrading2026}）
+\end{casestudy}
+
+\begin{itemize}
+  \item \textbf{Profit Mirage}: FinLake-Benchによるリーク耐性評価と、RAG＋MCTS＋反実仮想シミュレーションを組み合わせたFactFin学習フレームワークを提案。（\cite{profitmirage2025}）
+  \item \textbf{All Leaks Count}: Shapley-DCLRでどの推論クレームがモデルの学習カットオフ後知識を含むかを特定し、TimeSPECによる時間フィルタ付き検索で緩和する手法を提案。（\cite{allleakscount2026}）
+\end{itemize}
+
+\begin{insight}{示唆: ベンチマーク上の高成績を額面通りに受け取らない}
+上図のLook-Ahead-Bench、KTD-Fin（\S\ref{sec:investment-agents}）、77件のレビューが示す共通のメッセージは、「公表されたLLM投資アルファの多くは、ティッカー名・日付・価格系列を適切に匿名化・時間整合化すると大幅に縮小するか消失する」というものである。導入検討時には、ベンチマークのスコアそのものよりも、評価プロトコルが時間整合性・取引コスト・匿名化をどこまで厳密に扱っているかを精査する必要がある。
+\end{insight}
+
+\subsection{他分野に学ぶ: 医療・法律・コード・科学LLMの忠実性研究}
+\label{subsec:cross-domain-hallucination}
+
+金融のLLM忠実性・ハルシネーション研究は急速に厚みを増しているが（\S\ref{subsec:reasoning-bench}以降）、単一分野だけを見ていると「これは金融特有の問題か、それともLLMという技術に内在する一般的な限界か」の切り分けを誤りやすい。IT・AI業界全体を見渡すと、医療・法律・コード生成・科学の各分野では、ハルシネーション計測・忠実性評価・ドメイン特化LLMの是非をめぐる議論が金融より数年先行して、しかも訴訟や患者安全といった具体的な実害を伴って進んでいる。本節では、金融関係者が評価手法・ハルシネーション対策・ドメインLLM論争として直接転用できる知見に絞って、他分野の研究を整理する。
+
+\subsubsection{法律LLMのハルシネーション実証: RAGを足しても17〜43\%は残る}
+
+法律ドメインは、金融と同じく「専門文書を正確に読み、実在する根拠だけを引用できるか」が問われる領域であり、しかも実際の訴訟という形で失敗の代償が可視化されている点で金融より研究が先行している。
+
+\begin{casestudy}{Large Legal Fictions: 汎用LLMは検証可能な法律問答で58〜88\%ハルシネートする}
+Dahl・Magesh・Suzgun・Ho（スタンフォード RegLab/HAI）は、実在する連邦裁判所判例について「どの巡回区が判断したか」「この先例は今も有効か」といった検証可能な質問をLLMに投げ、回答の正誤を判定した。ハルシネーション率はGPT-4（ChatGPT）で\textbf{58\%}、Llama 2で\textbf{88\%}に達し、しかもモデルはユーザーの誤った法的前提を訂正せず追従する（sycophancy）傾向や、自分がいつハルシネートしているかを自己認識できない傾向を示した。提案された類型（架空の権威の捏造、判旨の誤認、先例の誤適用）は、金融QAで観測される単位誤り（\$150と\$150 millionの混同、\S\ref{sec:llm-analysis}のFAITH）や文書横断統合の失敗と構造的に対応する。（出典: \cite{y05dahl2024legalfictions}）
+\end{casestudy}
+
+\begin{casestudy}{Hallucination-Free？: 「ハルシネーションなし」を謳う法律RAGツールも17〜43\%誤る}
+LexisNexisのLexis+ AIとThomson ReutersのWestlaw AI-Assisted Research／Ask Practical Law AIは、いずれも「ハルシネーションを回避する」と謳って市場投入された商用法律リサーチツールである。スタンフォードRegLab/HAIの追試では、権威ある判例への検索（RAG）を組み込んでいるにもかかわらず、Lexis+ AIで\textbf{17\%}、Westlaw AI-Assisted Researchで\textbf{33\%}のハルシネーション／誤り率が確認された（比較対象のGPT-4単体は\textbf{43\%}）。エラー類型には「sycophancy」――ユーザーの誤った前提を訂正せず、捏造・誤認した権威から尤もらしい主張を組み立てる挙動――が含まれる。これは、「RAGを足せばハルシネーションは解決する」という前提そのものへの、高リスク専門分野における定量的な反証である。（出典: \cite{y05magesh2025hallucinationfree}）
+\end{casestudy}
+
+\begin{casestudy}{Mata v.\ Avianca から1,313件へ: ハルシネーションが法廷リスクとして常態化}
+2023年6月、ChatGPTが捏造した架空の判例・引用を含む準備書面を提出した弁護士らに対し、南部ニューヨーク連邦地裁のCastel判事が\textbf{5,000ドル}の制裁金を科した（Mata v.\ Avianca事件）。当時はAIハルシネーションが訴訟に持ち込まれた象徴的な初期事例だったが、Damien Charlotinが継続更新する「AI Hallucination Cases Database」によれば、2026年4月時点でAI生成の捏造内容を含む訴訟手続は\textbf{1,313件}（うち弁護士が関与したもの496件）に達し、報告された制裁金額は\textbf{2023年の5,000ドルから2025年には55,597ドルへ約11倍}に拡大している。単発の事故ではなく、専門文書業務にLLMを組み込む際の恒常的なコンプライアンス・リスクへと性質が変化したことを示す。（出典: \cite{y05mataavianca2023,y05charlotin2026database}）
+\end{casestudy}
+
+法律分野は評価手法の設計でも先行している。LegalBenchは法律実務家自身が設計に参画し、司法試験の選択式のような単一の代理指標に頼らず、\textbf{162個}のタスクを6種類の法的推論類型（争点発見・ルール想起・ルール適用・結論導出・解釈・修辞理解）に分解して評価する（NeurIPS 2023）。単一の総合正答率ではなくタスク形状ごとに能力を切り分けるという設計原則は、本節\S\ref{subsec:reasoning-bench}のFinQA／FinanceQA／CFA Level IIIが体現する考え方と同一であり、金融推論ベンチマークの新設・改訂時に参照すべき先行例である\cite{y05legalbench2023}。
+
+\subsubsection{医療LLMの忠実性研究: ドメイン適応の安全性効果と検出の難しさ}
+
+医療は、金融と同様に「専門知識のカバレッジ」と「誤りが実害に直結する」という二重の制約を抱える領域であり、ハルシネーションの\emph{生成}を減らす努力と、ハルシネーションの\emph{検出}という別問題への取り組みの両方で示唆に富む。
+
+\begin{casestudy}{Med-PaLM: ドメイン適応チューニングが「有害な回答」を29.7\%から5.9\%へ削減}
+GoogleのMed-PaLM／Med-PaLM 2（Singhal et al., \emph{Nature Medicine}）は、臨床医パネルが科学的事実性・医学的コンセンサスとの整合・推論の質・バイアス・有害となりうる可能性を評価軸として長文回答を採点する枠組みを用いた。汎用の指示チューニングモデル（Flan-PaLM）では長文回答の\textbf{29.7\%}が「潜在的に有害」と判定されたのに対し、医療データでドメイン適応したMed-PaLMでは\textbf{5.9\%}まで低下し、科学的コンセンサスとの整合率も\textbf{61.9\%から92.6\%}へ改善した。さらにMed-PaLM 2は、1,066件の一般消費者向け医療質問のペア比較で、臨床的有用性に関わる9軸中8軸において医師の回答よりも好まれた。精度だけでなく「有害性」を専門家パネルが明示的に採点した数少ない事例であり、金融のモデルリスク管理チームが投資助言・与信判断の出力に対して同様の有害性ルーブリックを設計する際の直接のテンプレートになりうる。（出典: \cite{y05medpalm2_2025}）
+\end{casestudy}
+
+\begin{casestudy}{MedHallu: 「ハルシネーションを検出できるか」は「ハルシネーションを避けられるか」より難しい}
+MedHalluはPubMedQA由来の1万件のQAペアに、双方向含意クラスタリングで難易度を層別化した（正解に意味的に近いほど検出が難しい）ハルシネーション回答を系統的に付与したベンチマークである（EMNLP 2025）。GPT-4oや医療特化ファインチューン済みモデルUltraMedicalを含む強力なモデルでも、「難」カテゴリのハルシネーション検出F値は\textbf{0.625まで低下}する。一方、回答カテゴリに「不明」という棄権選択肢を加えるだけで、F値・適合率が相対で最大\textbf{38\%}改善した。金融のGBFR（\S\ref{sec:llm-analysis}）が示す「安全な棄権」の価値を、医療分野が独立に裏付けている。（出典: \cite{y05medhallu2025}）
+\end{casestudy}
+
+歴史的な警鐘として、Meta AIの科学LLM Galacticaは2022年11月、4,800万本の科学論文で学習し「学術文献の要約・化学物質の注釈付け」を謳って公開されたが、実在しない論文への捏造引用や架空の化学物質を流暢に生成することが露見し、公開デモから\textbf{わずか数日}で撤去された。ベンチマーク上はGPT-3やPaLM 540Bを上回る数値（例: MATH \textbf{20.4\%} 対 PaLM 540Bの8.8\%）を示していたにもかかわらずである\cite{y05galactica2022}。医療分野でも、LLM以前の教訓としてIBM Watson for Oncologyの事例がある。少数の専門医が作成した合成症例に偏った学習データが、狭い専門家集団の癖をあたかも一般的な正解であるかのように埋め込んでしまい、STATの調査報道は内部文書から「安全性を欠き誤った」治療提案が複数あったことを明らかにした。MDアンダーソンがんセンターは関連プロジェクトに約\textbf{6,200万ドル}を投じた末に2016年に中止している\cite{y05watsononcology2018}。いずれも「ベンチマークで高スコアを出すこと」と「本番で信頼できること」は別問題であるという、Fin-R1のような合成CoTデータでのファインチューニング（\S\ref{sec:llm-analysis}）にも通じる警鐘である。
+
+\subsubsection{コード生成の忠実性: 記号検証（実行）ハイブリッドの最も成熟した実例}
+
+コード生成は、金融の記号検証ハイブリッド（\S\ref{sec:llm-analysis}のFinChain・AUDITFLOW・GBFR）と全く同じ設計思想が、より早くより成熟した形で実装されている分野である。
+
+\begin{itemize}
+  \item \textbf{CodeHalu（実行検証によるコードハルシネーションの定式化）}: 生成コードを参照解との表面的な類似度で評価するのではなく、実際に\textbf{実行}して挙動の乖離からハルシネーションを判定する枠組み。CodeHaluEvalベンチマーク（699タスク・8,883サンプル）は、マッピング・命名・リソース・ロジックの各ハルシネーション類型を実行結果から機械的に分類する。金融のAUDITFLOW（実行環境での会計演算再計算）・FinChain（実行可能Pythonテンプレートでの中間推論検証）と設計思想が完全に一致する、コード領域における「記号検証層」の最も成熟した実装例である。（出典: \cite{y05codehalu2024}）
+  \item \textbf{パッケージ捏造という固有リスク}: 生成コードが提案するパッケージ名のうち約\textbf{2割}が実在しないとの調査もあり、生成テキストのハルシネーションがそのままサプライチェーン攻撃の入口になりうる。実行検証をループに組み込むことでハルシネーション率を最大\textbf{96\%}削減できたとの報告もある。
+\end{itemize}
+
+\subsubsection{ドメインLLM vs 汎用LLM＋RAG論争の他分野版: 二択ではなく併用が勝つ}
+
+金融ではBloombergGPT（ドメイン専用事前学習）とFinGPT／FinBERT（安価な適応）、汎用フロンティアLLM＋RAGの間で「どちらに投資すべきか」が論じられてきた（\S\ref{sec:llm-analysis}の概念ボックス）。同じ論争は半導体設計・法律の分野でも独立に起きており、いずれも「二択ではなく併用」という結論に収束している。
+
+\begin{casestudy}{ChipNeMo: ドメイン適応で同品質のまま5分の1のモデルサイズへ}
+NVIDIAのChipNeMoは、半導体設計ドメインに特化したトークナイザ・継続事前学習・SFT・ドメイン適応済み検索モデル（RAG）を組み合わせ、エンジニアリング支援チャットボット・EDAスクリプト生成・バグ要約の3用途で評価した。結論は、ドメイン適応技術によって汎用ベースモデルと同等以上の品質を維持したまま\textbf{最大5分の1のモデルサイズ}を実現できるというものである。BloombergGPT／Fin-R1（\S\ref{sec:llm-analysis}）が突きつける「規模かコストか」という問いに、非金融分野から与えられた定量的な回答であり、金融機関のモデル導入における総保有コスト判断に直接転用できる。（出典: \cite{y05chipnemo2023}）
+\end{casestudy}
+
+法律AIスタートアップHarveyは、この論争を「どちらか」ではなく「両方」で解決した好例である。信頼できる法源への検索（RAG）で捏造の自由度を絞り込みつつ、その上に汎用フロンティアモデルのファインチューニング・専用埋め込み・ワークフロー統合を重ね、2025年にはOpenAI単独依存からAnthropic Claude・Google Geminiを含むマルチモデル体制へ移行した。10法律事務所での盲検比較では、弁護士はHarveyの回答を素のGPT-4よりほぼ常に選好したと報告されている\cite{y05harvey2025}。「ドメインLLM対汎用LLM＋RAG」という二項対立の設問自体が、本番運用では誤った設問設定になりがちであることを示す。
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}p{2.0cm}p{4.0cm}p{3.4cm}p{3.7cm}@{}}
+\toprule
+\textbf{分野} & \textbf{代表的なハルシネーション率／指標} & \textbf{評価手法の要点} & \textbf{ドメインLLM採否の実態} \\
+\midrule
+金融 & FAITH: 直接検索95.6\%（Claude-Sonnet-4）→多変数計算ほぼ0\%\cite{x05faith2025}／FinanceBench: 検索併用でも81\%誤答・拒否\cite{financebench2023} & 記号検証（AUDITFLOW/GBFR/FinChain）＋推論アリティ別ルーティング\cite{x05finchain2025,x05gbfr2026} & BloombergGPT／FinGPT等の専用モデルと汎用LLM＋RAGが併存、タスク形状で使い分け \\
+医療 & Flan-PaLM有害回答率29.7\%→Med-PaLM 5.9\%\cite{y05medpalm2_2025}／MedHallu検出F値「難」で0.625\cite{y05medhallu2025} & 臨床医パネルによる有害性・コンセンサス整合ルーブリック＋棄権カテゴリの導入 & Med-PaLM系はドメイン適応で成功、Watson for Oncologyは狭いデータで失敗\cite{y05watsononcology2018} \\
+法律 & 汎用LLM 58\%（GPT-4）〜88\%（Llama 2）\cite{y05dahl2024legalfictions}／RAG併用ツールでも17〜43\%\cite{y05magesh2025hallucinationfree} & LegalBenchが162タスク・6類型に分解\cite{y05legalbench2023}、訴訟データベースで実害を定量化\cite{y05charlotin2026database} & Harveyはドメイン適応＋RAG＋マルチモデルの併用型\cite{y05harvey2025} \\
+コード & パッケージ名の約2割が実在しない捏造 & CodeHaluEvalが実行結果からハルシネーション類型を機械判定\cite{y05codehalu2024} & ChipNeMoはドメイン適応で同品質のまま5分の1のサイズを達成\cite{y05chipnemo2023} \\
+科学 & Galacticaは公開後数日で撤去\cite{y05galactica2022} & ベンチマークスコアと実運用信頼性の乖離が典型例として定着 & 汎用モデルへの安全弁なき特化は失敗、後続はドメイン適応＋対話的検証へ移行 \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\small\color{brandgray}\textbf{表: ハルシネーション・評価手法・ドメインLLM採否の分野横断比較}\ 金融の記号検証ハイブリッド・推論アリティ別ルーティングという設計は、医療の棄権カテゴリ、法律のタスク分解型ベンチマーク、コードの実行検証と同じ「LLMを読解器、外部機構を検証器に分離する」思想の一変種であることが分野横断で確認できる。}
+
+\begin{casestudy}{RMCB: 金融・医療・法律・数学を同一基準で測る、JPMorgan AI Researchも参加した信頼度較正ベンチマーク}
+Reasoning Model Confidence estimation Benchmark（RMCB, EACL 2026）は、臨床・金融・法律・数学の4つの高リスク推論領域と一般推論を横断し、6種の大規模推論モデルから収集した\textbf{347,496件}の推論トレースに正誤ラベルを付与した、数少ない「分野をまたいで同一の物差しで測る」信頼度較正ベンチマークである。10種類以上の信頼度推定手法（系列型・グラフ型・テキスト型）を評価した結果、判別力（AUROC）で最良のテキストベース手法（\textbf{0.672}）と較正誤差（ECE）で最良のグラフ構造ベース手法（\textbf{0.148}）は一致せず、\textbf{両方を同時に達成する単一の手法は存在しない}。しかも著者にはJPMorgan AI Research所属のSimerjot KaurとCharese H. Smiley（FinQA／ConvFinQA\cite{x05finqa2021,x05convfinqa2022}の共著者でもある）が含まれており、金融業界の研究者自身が「LLMが自分の誤りにいつ気づいていないか」は金融固有の課題ではなく分野横断の未解決問題であると認めていることを意味する。（出典: \cite{y05rmcb2026}）
+\end{casestudy}
+
+\begin{insight}{金融への示唆: 「ハルシネーション対策＝金融データを増やす」ではない}
+法律・医療・コードの事例が共通して示すのは、ハルシネーション対策の成否を分けるのはドメインデータの量ではなく、\textbf{（1）検証を独立した外部機構に分離する設計}（法律の判例検索＋人間照合、医療の棄権カテゴリ、コードの実行検証、金融のAUDITFLOW／GBFR）と、\textbf{（2）タスクを能力の細粒度に分解して評価する設計}（LegalBenchの162タスク6類型、金融のFinQA〜FCMRの推論アリティ別整理）である、という点である。RAGを足すだけでは17〜43\%の誤りが残るというLexis+ AI／Westlawの実証は、金融RAGシステム（FinanceBench・AUDITFLOW）についても「検索を足したから安全」という単純化を戒める直接の反証材料として引用できる。
+\end{insight}
+
+\begin{insight}{金融への示唆: ドメインLLMの是非は「規模か適応か」ではなく「検証層があるか」で決まる}
+ChipNeMoの5分の1サイズ、Harveyのドメイン適応＋RAG＋マルチモデル併用、Med-PaLMの臨床医ルーブリックによる安全性検証は、いずれも「ドメインLLMか汎用LLM＋RAGか」という二項対立ではなく、外部検証層の有無・質が成否を分けることを示している。BloombergGPT／Fin-R1（\S\ref{sec:llm-analysis}）の位置づけも同様に再解釈すべきであり、調達判断は「どちらのアーキテクチャが賢いか」ではなく「検証層と棄権機構をどれだけ厳密に監査可能な形で実装できるか」に軸足を置くべきである。
+\end{insight}
+
+\begin{insight}{金融への示唆: 訴訟という現物のフィードバックループが金融には（まだ）ない}
+法律分野には、Mata v.\ Avianca以降1,313件・11倍の制裁金増という、ハルシネーションの実害を定量化する外部フィードバック（訴訟記録）が存在する。金融のLLM出力の誤りは、開示文書の誤読や与信判断の誤りとして同様の実害を生みうるにもかかわらず、法律ほど体系的に追跡・公開される仕組みを欠く。RMCBにJPMorgan AI Researchが参加している事実は、金融業界内部でもこの較正・検証ギャップへの危機感が既に生まれていることを示しており、金融規制・業界団体（\S\ref{sec:cross-cutting}）が法律分野の訴訟データベースに相当する「AI起因インシデントの業界横断台帳」を持つべきかどうかは、未解決ギャップ（\S\ref{sec:open-gaps}）として検討に値する。
+\end{insight}

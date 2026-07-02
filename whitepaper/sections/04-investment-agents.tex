@@ -1,0 +1,538 @@
+\section{投資意思決定のためのAIエージェント}
+\label{sec:investment-agents}
+
+本節では、LLM・AIエージェントが財務分析・投資アイデア創出・デューデリジェンス・ポートフォリオモニタリング・リスク分析・意思決定を支援・自動化する事例を扱う。マルチエージェント・アーキテクチャは急速に高度化している一方、独立したベンチマークは依然として大きな性能ギャップを一貫して報告している。
+
+\begin{concept}{マルチエージェントとオーケストレーション}
+1つのLLMエージェントに情報収集からリスク管理・執行まで全部を任せると、判断が偏ったり大事な見落としが起きやすく、たった一人で全部署の仕事をこなそうとする社員のように行き詰まりやすい。マルチエージェントとは、ファンダメンタル分析役・センチメント分析役・リスク管理役・執行役のように役割を分担した複数のエージェントが協働する構成である。この協調をどう制御するかの設計を\textbf{オーケストレーション}と呼び、代表的な型として、監督役が計画し担当者に割り振る\textbf{supervisor-worker}（階層型）、複数の担当が互いに反論し合い誤りを減らすが偽の合意に陥りうる\textbf{debate}、自分の推論の弱点を自己診断して直す\textbf{reflection（内省）}がある。
+
+\begin{center}
+\begin{tikzpicture}[font=\small,
+  sup/.style={fnode dark, text width=3.0cm, minimum height=1.0cm, font=\bfseries\small},
+  wk/.style={fnode blue, text width=2.3cm, minimum height=1.0cm, font=\scriptsize},
+  arr/.style={farr blue}
+]
+\node[sup] (sup) at (4.35,1.6) {オーケストレーター\\（supervisor）};
+\node[wk] (a) at (0,0) {ファンダメンタル\\分析役};
+\node[wk] (b) at (2.9,0) {センチメント役};
+\node[wk] (c) at (5.8,0) {リスク管理役};
+\node[wk] (d) at (8.7,0) {執行役};
+
+\draw[arr] (sup.south) -- ++(0,-0.3) -| (a.north);
+\draw[arr] (sup.south) -- ++(0,-0.3) -| (b.north);
+\draw[arr] (sup.south) -- ++(0,-0.3) -| (c.north);
+\draw[arr] (sup.south) -- ++(0,-0.3) -| (d.north);
+
+\node[font=\scriptsize\itshape, text=figgray, align=left, text width=10.3cm] at (4.35,-1.6)
+  {他の代表的な型: \textbf{debate}（複数エージェントが反論し合い誤りを減らすが偽の合意に陥る危険もある）／\textbf{reflection}（自分の推論を自己診断し修正するループ）};
+\end{tikzpicture}
+
+\vspace{1mm}
+{\small\color{brandgray}\textbf{図: マルチエージェント・オーケストレーションの入門地図}\ supervisor-worker型では中央のオーケストレーターが役割分担した複数のworkerに作業を割り振る。debateとreflectionは別の代表的な協調パターンで、詳細は後段の図で扱う。}
+\end{center}
+\end{concept}
+
+\subsection{マルチエージェント・リサーチワークフロー}
+
+\begin{casestudy}{TradingAgents: ディベート構造を持つマルチエージェント取引フレームワーク}
+強気／弱気ディベーター、ファンダメンタル・センチメント・テクニカルアナリスト、専属リスクチームからなるマルチエージェントシステム。シミュレーション市場条件下で、単一エージェント基準に対しSharpe比と累積リターンの改善を実証した。（出典: \cite{tradingagents2024}）
+\end{casestudy}
+
+\begin{casestudy}{MarketSenseAI 2.0: 強力な実運用評価を伴う株式分析エージェント}
+Chain-of-Agentsアーキテクチャで10-K/10-Q、決算コールトランスクリプト、マクロデータ、価格履歴を処理。S\&P 100バックテスト（2023〜2024年）で\textbf{累積リターン125.9\%}（指数の73.5\%を上回る）、S\&P 500 2024年でSortinoレシオ\textbf{33.8\%改善}という、公表されているLLM投資エージェントの中でも最も強力な実運用評価事例の一つ。（出典: \cite{marketsenseai2025}）
+\end{casestudy}
+
+\begin{center}
+\begin{tikzpicture}[font=\small,
+  agentbox/.style={fnode blue, text width=3.1cm, minimum height=1.4cm},
+  debatebox/.style={fnode accent, text width=2.9cm, minimum height=1.2cm},
+  riskbox/.style={fnode, text width=7.6cm, minimum height=1.1cm},
+  decbox/.style={fnode dark, text width=7.6cm, minimum height=1.3cm, font=\bfseries\small},
+  arr/.style={farr blue}
+]
+\node[agentbox] (fund) at (0,0) {ファンダメンタル\\アナリスト};
+\node[agentbox] (sent) at (3.5,0) {センチメント\\アナリスト};
+\node[agentbox] (tech) at (7.0,0) {テクニカル\\アナリスト};
+
+\node[debatebox] (bull) at (1.2,-2.0) {強気ディベーター};
+\node[debatebox] (bear) at (5.8,-2.0) {弱気ディベーター};
+
+\node[riskbox] (risk) at (3.5,-3.7) {専属リスクチーム};
+\node[decbox] (dec) at (3.5,-5.3) {投資意思決定\\（単一エージェント基準比でSharpe比・累積リターンが改善）};
+
+\draw[arr] (fund.south) -- ++(0,-0.6) -| (bull.north);
+\draw[arr] (sent.south) -- ++(0,-0.3) -| (bull.north);
+\draw[arr] (sent.south) -- ++(0,-0.3) -| (bear.north);
+\draw[arr] (tech.south) -- ++(0,-0.6) -| (bear.north);
+\draw[fbiarr] (bull.east) -- (bear.west)
+      node[midway, above, font=\scriptsize\itshape, text=figaccent] {ディベート};
+\draw[arr] (bull.south) -- ++(0,-0.4) -| (risk.north);
+\draw[arr] (bear.south) -- ++(0,-0.4) -| (risk.north);
+\draw[arr] (risk) -- (dec);
+\end{tikzpicture}
+
+\vspace{1mm}
+{\small\color{figgray}\textbf{図: マルチエージェント・リサーチワークフローの例（TradingAgents）}\
+ファンダメンタル・センチメント・テクニカルの3アナリストが情報を提供し、強気／弱気ディベーターが議論、専属リスクチームを経て投資意思決定に至る構造。}
+\end{center}
+
+\begin{itemize}
+  \item \textbf{FundaPod}: 異なる投資哲学を体現する複数のAIペルソナが共有ナレッジグラフ上で協働し、根拠に紐づくファンダメンタル・リサーチメモを生成する、人間-AIハイブリッド型の機関投資家向けプラットフォーム（\cite{fundapod2026}）。
+  \item \textbf{QRAFTI}: MCPサーバー経由の構造化パネルデータツールと内省型プランニングを統合し、動的コード生成単独よりもツール連鎖呼び出しの方が株式ファクター研究タスクで優位と実証した（\cite{qrafti2026}）。
+  \item \textbf{AlphaAgents（BlackRock）}: ファンダメンタル・センチメント・バリュエーションの3マイクロエージェントが、Microsoft AutoGen上のグループチャットで協調して株式ポートフォリオを構築する。意見が分岐した場合はラウンドロビン型の\textbf{マルチエージェント・ディベート}で合意へ収束させて幻覚と説明不能性を抑え、プロンプトエンジニアリングでエージェントごとに\textbf{リスク許容度}（risk-neutral／risk-averse）を付与して実際の投資家プロファイルを模擬する。役割特化エージェント群の成果を既存ベンチマークと比較して批判的に評価している（\cite{alphaagents2025}）。
+  \item \textbf{Hubble}: LLM＋ドメイン特化オペレーター言語＋ASTサンドボックス＋デュアルチャネルRAGを組み合わせたエージェント型パイプラインで株式アルファファクターを自動探索。3ラウンド・100候補の評価で実行クラッシュ\textbf{0件}を達成し、ヘッジファンドのクオンツリサーチワークフローを直接標的とする。（\cite{hubblealpha2026}）
+  \item \textbf{The Self Driving Portfolio}: Andrew Ang氏らが提案する約50体のエージェント群による機関投資家向け資産運用アーキテクチャ。専門化されたエージェントが資本市場前提を生成し、20種類以上のポートフォリオ構築手法を競わせ投票で出力を決定。メタエージェントが過去の予測誤差からエージェントのコードを継続的に改善し、人間はInvestment Policy Statementの遵守を監督するガバナンス役に後退するという設計思想を提示している。（\cite{selfdrivingportfolio2026}）
+  \item \textbf{FinRobot}: 金融アプリケーション向けのオープンソースなAIエージェント・プラットフォーム。エージェント層／LLMアルゴリズム層／LLMOps・DataOps層／マルチソースLLM層の4層アーキテクチャで構成され、プロのアナリストから一般ユーザーまでが独自のエージェント・パイプラインを組み立てられるよう、金融AIエージェントのツールチェーンへのアクセスを民主化する（\cite{finrobot2024}）。
+  \item \textbf{HedgeAgents}: 中央のファンドマネージャー・エージェントが、3種類のエージェント間カンファレンスを通じてドメイン特化のヘッジングエージェント群を協調させる「バランス志向」のマルチエージェント取引システム。3年間のシミュレーションで年率\textbf{70\%}・累積\textbf{400\%}のリターンを達成したと報告し、WWW 2025でoral発表された（\cite{hedgeagents2025}）。
+  \item \textbf{TradingGPT}: 本系譜の初期（2023年9月）に位置づけられる先駆的フレームワーク。各エージェントの記憶を短期・中期・長期の3層に分け、それぞれに減衰機構を持たせて人間の認知過程に近づける「階層型メモリ」を提案した。各層内の記憶は\textbf{recency（新しさ）・relevancy（関連性）・importance（重要性）}の3指標でランク付けされ、個性を付与されたエージェント同士がディベートを行う。後続のTradingAgents・FinConが採用するメモリ＋ディベート型アーキテクチャの概念的原型である（\cite{x04tradinggpt2023}）。
+  \item \textbf{FinCon}: 実在する投資会社の組織構造に着想を得た\textbf{マネージャー-アナリスト階層}を持つマルチエージェントシステム。中核となる\textbf{概念的言語強化（conceptual verbal reinforcement）}では、獲得した投資信念を言語化した教訓として、更新を必要とするエージェントノードにのみ選択的に伝播させ、全対全の冗長な通信を抑制する。さらにリスク制御コンポーネントが挿話的（episodic）に自己批判を起動し、systematicな投資信念を改訂する。単一銘柄取引とポートフォリオ管理の双方で、最先端のLLMベース・DRLベースのエージェントを累積リターン・Sharpe比で上回りつつ、最大ドローダウンを最小水準に抑えたと報告した（NeurIPS 2024、\cite{x04fincon2024}）。
+  \item \textbf{FinRobot（エクイティリサーチ版）}: FinRobotプラットフォーム（\cite{finrobot2024}）とは別に提案された、Chain-of-Thoughtを多段で連鎖させるエクイティリサーチ・パイプライン。多源データを統合する\textbf{Data-CoT}、アナリストの推論を模倣する\textbf{Concept-CoT}、投資thesisとレポートに統合する\textbf{Thesis-CoT}の3エージェントからなる。生成レポートは投資銀行アナリストのレビューで正確性・一貫性・叙述の整合性が高く評価され、バリュエーションタスクで約\textbf{75\%}の精度を報告した（\cite{x04finrobotequity2024}）。
+\end{itemize}
+
+\begin{insight}{仮説: 構造化された敵対的ディベートによる投資リサーチ}
+主張を担うthesisエージェントが、専属の強気・弱気カウンターエージェントと少なくとも3ラウンド対峙してから最終判断に至る構造化された敵対的ディベートは、単一エージェント生成が見落とす反証や隠れた前提を明示的に浮かび上がらせ、アンカリングや確証バイアスの克服に資すると期待される。検証案としてRussell 2000から200銘柄を選び、単一エージェント／単純アンサンブル／3ラウンドの構造化ディベートで投資thesisを生成し、3か月先の方向的正確性と情報係数（IC）で比較する90日間のプロスペクティブ実験が考えられる。ただしディベート参加エージェントが同一の訓練コーパス由来の潜在バイアスを共有する場合、偽の合意に収束しうること、役割を制約するシステムプロンプトの慎重な設計が必要なこと、トークンコストが3〜5倍に増える点が、流動性の高い大型株のルーチンなカバレッジでは正当化されない可能性が交絡・リスクとして挙げられる（出典: \cite{multiagentdebate2025}）。
+\end{insight}
+
+\subsection{オーケストレーション・パターンと「調整プリマシー」}
+
+前項までのフレームワークは、表面的には多様に見えて、その内部は少数の反復するオーケストレーション（協調制御）パターンの組み合わせに還元できる。実務上支配的なのは次の3類型である。\textbf{(1) supervisor-worker（監督-作業者）階層}――中央のスーパーバイザーが計画を立て制約を監視し、専門ワーカーに最小限の手順を割り当てる。軌道（trajectory）の安定性に優れる一方、スーパーバイザーが単一障害点かつスループットのボトルネックになる。\textbf{(2) debate（ディベート）}――複数エージェントが共有会話で反論し合い、単一モデル照会に比べ幻覚を減らすが、誤っていても多数派に同調して\emph{偽の合意}を生みやすい。\textbf{(3) reflection／reflexion（内省・自己修正）}――意思決定後に自らの推論の弱点を診断し計画を再生成する批判-改訂ループで、TradingGroup（\cite{x04tradinggroup2025}）やSEP系の研究が採用する。実運用のマルチエージェントシステムの多くは、これらを合成した\textbf{ハイブリッド}（例: 階層の末端チームだけがメッシュ協調する）として構成される。
+
+\begin{center}
+\begin{tikzpicture}[font=\small,
+  sup/.style={fnode accent, text width=2.2cm, minimum height=0.8cm, font=\scriptsize\bfseries},
+  wk/.style={fnode blue, text width=1.7cm, minimum height=0.7cm, font=\scriptsize},
+  ag/.style={fnode blue, text width=1.7cm, minimum height=0.7cm, font=\scriptsize},
+  rf/.style={fnode, text width=1.9cm, minimum height=0.7cm, font=\scriptsize},
+  arr/.style={farr blue}, biarr/.style={fbiarr}
+]
+% (1) supervisor-worker
+\node[font=\scriptsize\bfseries, text=figaccent!70!black] at (1.6,1.2) {(1) supervisor-worker};
+\node[sup] (sp) at (1.6,0.4) {スーパーバイザー};
+\node[wk] (w1) at (0.2,-1.1) {ワーカーA};
+\node[wk] (w2) at (1.6,-1.1) {ワーカーB};
+\node[wk] (w3) at (3.0,-1.1) {ワーカーC};
+\draw[arr] (sp) -- (w1); \draw[arr] (sp) -- (w2); \draw[arr] (sp) -- (w3);
+% (2) debate
+\node[font=\scriptsize\bfseries, text=figaccent!70!black] at (6.5,1.2) {(2) debate};
+\node[ag] (d1) at (5.7,0.2) {エージェント1};
+\node[ag] (d2) at (7.4,0.2) {エージェント2};
+\node[ag] (d3) at (6.5,-1.1) {エージェント3};
+\draw[biarr] (d1) -- (d2); \draw[biarr] (d1) -- (d3); \draw[biarr] (d2) -- (d3);
+% (3) reflection
+\node[font=\scriptsize\bfseries, text=figaccent!70!black] at (11.2,1.2) {(3) reflection};
+\node[rf] (act) at (11.2,0.3) {行動案の生成};
+\node[rf] (crit) at (11.2,-1.2) {自己批判・診断};
+\draw[arr] (act.east) .. controls +(1.1,0) and +(1.1,0) .. (crit.east)
+      node[midway,right,font=\scriptsize\itshape,text=figgray] {批判};
+\draw[arr] (crit.west) .. controls +(-1.1,0) and +(-1.1,0) .. (act.west)
+      node[midway,left,font=\scriptsize\itshape,text=figgray] {改訂};
+\end{tikzpicture}
+
+\vspace{1mm}
+{\small\color{figgray}\textbf{図: 投資エージェントで反復する3つのオーケストレーション・パターン。}\
+supervisor-workerは軌道安定性、debateは反証の可視化、reflectionは逐次的自己修正を担う。実運用系はこれらの合成で構成される。}
+\end{center}
+
+\begin{insight}{示唆: 性能を左右するのはモデル規模より「調整プロトコル」の設計か}
+12のマルチエージェントシステムと2つの単一エージェント基準を横断分析した評価研究は、アーキテクチャ・調整機構・メモリ・ツール統合の\textbf{4次元タクソノミー}を提示し、\textbf{調整プリマシー仮説（Coordination Primacy Hypothesis）}――「エージェント間の調整プロトコル設計は、モデル規模の拡大以上に取引意思決定の質を左右しうる」を反証可能な仮説として定式化した。同研究は、報告リターンの符号すら反転させうる5つの評価上の落とし穴（ルックアヘッド・生存者バイアス・バックテスト過学習・取引コスト無視・レジーム転換への盲目）を列挙し、調整がコスト差し引き後に価値を生むかを検証する\textbf{Coordination Breakeven Spread（CBS）}指標を導入した。この主張を検証するための評価基盤自体がまだ整っていない点が、本分野の根本的なギャップである（\cite{x04coordinationprimacy2026}）。
+\end{insight}
+
+\subsection{ユースケース別の実装地図と証拠水準}
+
+投資エージェントを「調査を助けるAI」から「資本配分を動かすAI」へ近づけるほど、求められる証拠水準は非線形に上がる。2026年のagentic financeサーベイは、金融エージェントをデータ知覚・推論エンジン・戦略生成・統制付き執行の4層として整理し、当面の均衡は完全自律ではなく、人間の意思決定過程に埋め込まれた\textbf{bounded autonomy}であると見る（\cite{aiagentsfinmarkets2026}）。別の包括サーベイも、agentic AIの差分を目標志向の自律性・継続学習・マルチエージェント協調に置きつつ、同じ能力が市場安定性・規制遵守・解釈可能性・システミックリスクを新たな制約に変えると整理する（\cite{x04agenticaisurvey2026}）。したがって実務導入では、ユースケースごとに「どの役割分担が必要か」「どこで人間が止めるか」「どの評価を越えたら次段階へ進めるか」を明示した証拠ラダーが要る。
+
+\begingroup
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{@{}>{\bfseries}p{2.5cm}p{3.0cm}p{3.1cm}p{3.5cm}p{2.3cm}@{}}
+\toprule
+ユースケース & 推奨オーケストレーション & 最低限の評価プロトコル & 主な失敗モード & 自律性の上限\\
+\midrule
+\endfirsthead
+\toprule
+ユースケース & 推奨オーケストレーション & 最低限の評価プロトコル & 主な失敗モード & 自律性の上限\\
+\midrule
+\endhead
+投資アイデア創出 & 検索/RAGワーカー＋強気・弱気ディベート & 観測時点で利用可能な文書だけを使う時点固定評価、アナリストによるblind ranking & よく知られた大型株ナラティブの再生、反証不足 & 推奨のみ\\
+\addlinespace
+デューデリジェンス & supervisor-worker＋抽出検証ワーカー＋欠損フラグ & BankerToolBench型の成果物ルーブリック、数式・出典・仮定の監査 & 値のハードコード、欠損データの幻覚、複数資料間の不整合 & 人間承認必須\\
+\addlinespace
+ポートフォリオ監視 & 永続メモリ＋reflection＋異常検知ワーカー & 月次/四半期の縦断評価、thesis driftとイベント反応時間の測定 & 古い信念の温存、短期ノイズへの過剰反応 & アラート生成\\
+\addlinespace
+リスク分析 & リスク専門エージェント＋ストレスシナリオ生成＋反事実レビュー & 相関・流動性・取引コストを含むwalk-forward評価、PortBench/CLQT型診断 & 相関構造の誤読、レジーム転換への盲目、コスト過小評価 & 配分案まで\\
+\addlinespace
+取引・執行 & constrained executionモジュール＋kill switch＋監査ログ & 学習カットオフ後のforward test、paper trading、制約違反率の監査 & ルックアヘッド、プロンプトインジェクション、流動性枯渇時の連鎖誤発注 & 小口・制約付き執行\\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\vspace{-1mm}
+{\small\color{figgray}\textbf{表: 投資エージェントのユースケース別実装地図。}\
+自律性を上げるほど、単なる正答率ではなく、時点整合性・監査可能な推論軌跡・制約違反率・取引コスト控除後の成果を同時に満たす必要がある。}
+
+\begin{insight}{示唆: 「研究補助」から「制約付き執行」への証拠ラダー}
+本節の事例を横断すると、成功している実装は、Morgan StanleyのAskResearchGPT/Debriefのようなスコープ限定型、MarketSenseAIのような観測時点シグナルに基づく株式分析、FinRobotのような人間アナリストの推論工程を模倣するレポート生成に偏る。一方、DeepFundのforward test、FINSABERの長期・広範なバックテスト、PortBenchの相関考慮型評価、Look-Ahead-Benchの学習カットオフ検査は、完全自律的な資本配分ほど崩れやすいことを示す（\cite{deepfund2025,x04finsaber2025,portbench2026,lookaheadbench2026}）。したがって導入判断は「PoCで良いリターンが出たか」ではなく、\textbf{offline研究品質 → 時点固定バックテスト → walk-forward/forward test → paper trading → 制約付き小口執行}という段階的な証拠ラダーとして扱うべきである。77研究を監査志向でレビューしたAgentic Tradingサーベイが、取引コスト・時間整合的分割・完全再現性の欠如を構造的問題として指摘したことも、この段階設計を要求する根拠になる（\cite{agentictrading2026}）。
+\end{insight}
+
+\subsection{主要マルチエージェント・フレームワークの比較}
+
+以下の表は、本節で扱った代表的なマルチエージェント投資フレームワークを、アーキテクチャ・主タスク・報告された結果・注意点の4軸で対比したものである。報告された結果は各文献の自己申告値であり、\S\ref{sec:investment-agents}冒頭で述べた独立ベンチマークの厳しい結果と併せて読む必要がある。
+
+\begingroup
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{@{}>{\bfseries}p{2.0cm}p{2.9cm}p{1.7cm}p{4.3cm}p{3.5cm}@{}}
+\toprule
+フレームワーク & アーキテクチャ & 主タスク & 報告された結果 & 注意点（caveat）\\
+\midrule
+\endfirsthead
+\toprule
+フレームワーク & アーキテクチャ & 主タスク & 報告された結果 & 注意点（caveat）\\
+\midrule
+\endhead
+TradingGPT & 3層メモリ（減衰付）＋個性化＋ディベート & 株式・ファンド取引 & 人間認知に近い記憶想起を提案（初期研究） & 大規模な独立検証は限定的（\cite{x04tradinggpt2023}）\\
+\addlinespace
+TradingAgents & ディベート構造（強気/弱気＋専属リスクチーム） & 取引意思決定 & 単一エージェント比でSharpe比・累積リターン改善 & シミュレーション条件下の評価（\cite{tradingagents2024}）\\
+\addlinespace
+FinCon & マネージャー-アナリスト階層＋概念的言語強化 & 単一銘柄取引・ポートフォリオ管理 & SOTA LLM/DRLを累積リターン・Sharpeで上回り最大DD最小級 & 自己申告値。窓が短期（\cite{x04fincon2024}）\\
+\addlinespace
+AlphaAgents & 3マイクロエージェント＋AutoGenディベート＋リスク許容度 & 株式ポートフォリオ構築 & 役割特化で説明性・幻覚抑制を改善 & 既存ベンチとの比較で批判的評価（\cite{alphaagents2025}）\\
+\addlinespace
+FinRobot (ER版) & Data/Concept/Thesis の多段CoT & エクイティリサーチ・バリュエーション & IBアナリスト評価で高評価、valuation約75\% & 生成レポートの限定サンプル（\cite{x04finrobotequity2024}）\\
+\addlinespace
+MarketSenseAI 2.0 & Chain-of-Agents（多源データ統合） & 株式分析・銘柄選択 & S\&P100で累積リターン125.9\%（指数比+73.5pt） & 実運用でも短期窓・特定期間（\cite{marketsenseai2025}）\\
+\addlinespace
+HedgeAgents & 中央FM＋エージェント間カンファレンス & ヘッジング取引 & 3年シミュレーションで年率70\%・累積400\% & シミュレーション報告値（\cite{hedgeagents2025}）\\
+\addlinespace
+TradingGroup & 5エージェント＋自己内省＋データ合成 & 取引意思決定 & 5データセットで既存LLM/RL/ML戦略を上回る & 定量指標は要本文確認（\cite{x04tradinggroup2025}）\\
+\addlinespace
+SHARP & ニューロシンボリック（人間可読ルーブリック） & 取引方策の自己進化 & 小型モデルを平均10〜20ポイント改善、walk-forward検証 & ルール束縛が上振れを制約しうる（\cite{x04sharp2026}）\\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\vspace{-1mm}
+{\small\color{figgray}\textbf{表: 代表的マルチエージェント投資フレームワークの比較。}\
+「報告された結果」は各文献の自己申告であり、後述の独立ベンチマークが示す性能ギャップとの併読を要する。}
+
+\subsection{デューデリジェンスの自動化}
+
+\begin{casestudy}{BankerToolBench: プロ水準には遠いジュニアバンカー業務の自動化}
+502名の投資銀行員と共同開発したオープンソースベンチマーク。財務モデル・ピッチデック・M\&A分析等の現実的なジュニアバンカー業務でAIエージェントを評価した結果、最高性能モデルでも基準の\textbf{約半数}を満たせず、クライアント提出可能な出力は皆無だった。（出典: \cite{bankertoolbench2026}）
+\end{casestudy}
+
+\begin{itemize}
+  \item \textbf{VCデューデリジェンス向けマルチエージェント・オーケストレーション}: LLMとリアルタイムWeb検索、レイアウト認識OCR（公式企業登記文書向け）を組み合わせたイベント駆動型マルチエージェントシステム。欠損データを幻覚生成せず明示的にフラグする設計を採用し、手動デューデリジェンスの代替可能性を実証した。（\cite{vcduediligence2026}）
+  \item \textbf{VCBench}: 創業者経歴・製品説明・求人情報等の非構造化テキストからLLMが投資シグナルを抽出。市場ベースラインの\textbf{6倍の精度}を達成し、スタートアップのカテゴリ埋め込み単独で特徴量重み\textbf{15.6\%}（どの財務指標よりも高い）を占めることを確認した。（\cite{vcbench2025}）
+  \item \textbf{MBABench / WorkstreamBench}: エンドツーエンドのスプレッドシート構築タスク評価。エージェントは複雑度の高いマルチシート財務モデルで大きく性能劣化し、透明性のある数式ではなく値をハードコードする傾向があり、DCF・LBO・M\&Aモデリングで求められるプロ水準の出力基準を一貫して満たせないことが確認された。（\cite{workstreambench2026}）
+  \item \textbf{IPO Finance Agent（SpaceX/SPCX IPO事例）}: SpaceXのS-1申告書をベースにした1,000問のIPOデューデリジェンス・ベンチマーク。主要LLM金融アナリストエージェントの精度は約\textbf{80\%}が上限であり、AI支援IPO分析の具体的なギャップを明らかにしている。（\cite{ipofinanceagent2026}）
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[font=\small,
+  stage/.style={fnode blue, align=left, text width=13.5cm, minimum height=1.1cm},
+  gapstage/.style={fnode accent, align=left, text width=13.5cm, minimum height=1.1cm},
+  arr/.style={farr}
+]
+\node[stage] (s1) at (0,0)
+  {\textbf{① 資料収集・OCR}\ ―\ 企業登記文書等の非構造化資料を取り込み、欠損データは幻覚生成せず明示的にフラグ};
+\node[stage] (s2) at (0,-1.7)
+  {\textbf{② 投資シグナル抽出}\ ―\ 創業者経歴・製品説明・求人情報から、VCBenchは市場ベースラインの\textbf{6倍}の精度を達成};
+\node[stage] (s3) at (0,-3.4)
+  {\textbf{③ 財務モデル構築}\ ―\ MBABench/WorkstreamBench: DCF・LBO・M\&Aモデリング。複雑なマルチシートモデルで性能が大きく劣化};
+\node[gapstage] (s4) at (0,-5.3)
+  {\textbf{④ 品質基準チェック}\ ―\ BankerToolBench: 最高性能モデルでも基準の約\textbf{半数}止まり／IPO Finance Agent: 精度上限は約\textbf{80\%}};
+
+\draw[arr] (s1) -- (s2);
+\draw[arr] (s2) -- (s3);
+\draw[arr] (s3) -- (s4);
+\end{tikzpicture}
+
+\vspace{1mm}
+{\small\color{figgray}\textbf{図: デューデリジェンス自動化パイプラインの4段階}\
+資料収集からシグナル抽出、財務モデル構築を経て品質基準チェックに至る過程で、各段階の代表的ベンチマークが到達した性能水準を示す。いずれの段階にも人間による最終レビューを要するギャップが残る。}
+\end{center}
+
+\subsection{ポートフォリオ管理・執行エージェントの評価と限界}
+
+\begin{casestudy}{DeepFund: フロンティアモデルでも純損失}
+リアルタイム市場データ（学習カットオフ後）でのマルチエージェント・フォワードテストアリーナ。DeepSeek-V3やClaude-3.7-Sonnet等フロンティアモデルでも\textbf{純損失}を記録し、LLM投資への過度な期待に一石を投じた。（出典: \cite{deepfund2025}）
+\end{casestudy}
+
+\begin{casestudy}{PortBench: 相関構造を読み誤るポートフォリオ管理エージェント}
+6資産クラス・10年間をカバーする、相関を考慮したLLM駆動型ポートフォリオ管理のフルパイプラインベンチマーク。LLMモデル×リスクプロファイルの組み合わせの\textbf{90\%が単純な均等加重ベースラインを上回れず}、モデルは一貫して相関構造を誤読し、歴史的ストレスシナリオ下で壊滅的なドローダウンを被った。（出典: \cite{portbench2026}）
+\end{casestudy}
+
+\begin{casestudy}{KTD-Fin: ティッカー名を匿名化すると消える「アルファ」}
+ティッカー名・日付・価格系列をプロンプトとツール呼び出し全体で一貫して匿名化し、訓練データからの記憶済み市場ナラティブを排除するベンチマーク。10種のフロンティアLLMをCSI300（2024〜2026年）で検証した結果、ポートフォリオリターンの大半はパッシブな市場・スタイルエクスポージャーで説明でき、持続的な銘柄選択アルファの証拠は限定的だった。「多くの報告されているLLMトレーディングリターンは、ティッカー名・日付・価格系列を匿名化するとパッシブな市場ファクターエクスポージャーに収束する」ことを裏付け、現行ベンチマークが実際のスキルを体系的に過大評価している可能性を示す、本節の中核テーマ（ルックアヘッド／記憶バイアス）を最も直接的に補強する結果である。（出典: \cite{fromknowingtodoing2026}）
+\end{casestudy}
+
+\begin{casestudy}{FINSABER: 評価窓を広げるとLLMの優位が消える}
+多源データモジュール・モジュラー戦略ベース・バイアス考慮型2段階バックテストパイプラインの3モジュールからなる評価フレームワーク。2000〜2024年の\textbf{20年超・100銘柄超}という広い横断面・長期窓で検証すると、既報のLLM戦略の優位が大きく減衰した。とりわけLLM戦略は\textbf{強気相場では過度に保守的}でパッシブ基準を下回り、\textbf{弱気相場では過度に攻撃的}で大きな損失を被る傾向が確認され、狭い期間・限られた銘柄集合での評価が生存者バイアス・データスヌーピングにより有効性を過大評価していたことを示した。（出典: \cite{x04finsaber2025}）
+\end{casestudy}
+
+\begin{itemize}
+  \item \textbf{CLQT}: 5段階の取引サイクル（情報収集・統合・配分・実行・振り返り）でLLMベースのポートフォリオ管理エージェントを監査する診断ベンチマーク。コスト考慮型・戦略一貫性スコアリングとハッシュチェーン化された意思決定記録により、リターンによるランキングだけでなくAIエージェントの失敗箇所を特定できる（\cite{clqt2026}）。
+  \item \textbf{Belief at Risk / FinTrace}: 前者はLLMを意味的観測システムとみなしベイズフィルタリングで監査可能な事後信念を維持し金融意思決定のモデルリスクを規制上防御可能な形で定量化する数理フレームワーク（\cite{beliefatrisk2026}）。後者は長期horizonタスクにおけるツール呼び出しの軌道（trajectory）レベル評価で、最終回答の正答率だけでは逐次推論の破綻を捕捉できないことを実証し、実運用ワークフローの失敗がツール呼び出し系列の複合エラーに起因するという仮説の根拠となる（\cite{fintrace2026}）。
+  \item \textbf{Absorbing Complexity}: 目標・リスク選好・市場前提などのコンテキスト管理負担をユーザーからシステム側へ移す「interaction-native」ナレッジハーネス。構造化・非構造化データを跨いだ状態保持を可能にする設計（\cite{absorbingcomplexity2026}）。
+\end{itemize}
+
+\begin{insight}{仮説: 永続的な多層メモリが長期horizonで複利的優位を生む}
+エピソード記憶（過去の分析セッションの想起）・意味記憶（thesis関連事実の蓄積）・時間グラフ記憶を備えたLLM投資リサーチエージェントは、長期horizonで複利的に優位を積み上げうるという仮説である。Mem0やGraphiti／Zepといったメモリ拡張アーキテクチャは、汎用のエージェントベンチマークでフルコンテキスト基準に対し26〜94\%の性能改善と、レイテンシ・トークンコストの約90\%削減を示している。一方、TradingAgentsやMarketSenseAIなど公表されているLLM投資エージェントの評価は数日〜数週間の短い窓に限られ、そこではコンテキストウィンドウ型エージェントと計算的にほぼ等価になる。株式thesisの構築は数十回の決算サイクル・経営戦略の転換・マクロ局面の変化にまたがるため、過去の分析ステップを想起する価値は短窓ベンチマークでは見えない形で複利的に効くはずである。検証案として、永続メモリ搭載型と毎セッション新規コンテキスト型の2変種が同一の中型株20銘柄を追跡し、12回の月次チェックポイントで買い手側アナリストがブラインド評価する6か月の縦断ベンチマークが考えられる。ただしメモリは陳腐化・矛盾した過去信念による品質劣化に直面するため、Graphitiが双時間グラフエッジで行うような時間的なメモリ無効化を明示的に実装しなければ、蓄積された記憶がかえって後続分析を劣化させうる点が交絡・リスクとなる（出典: \cite{mem0_2025}）。
+\end{insight}
+
+\begin{center}
+\begin{tikzpicture}[font=\small,
+  stg/.style={fnode, text width=5.4cm, minimum height=1.1cm},
+  gate/.style={fnode accent, text width=5.4cm, minimum height=1.1cm, font=\bfseries\small},
+  note/.style={font=\scriptsize, text=figgray, align=left, text width=6.6cm},
+  arr/.style={farr blue}
+]
+\node[stg] (info) at (0,0) {① 情報収集};
+\node[stg] (integ) at (0,-1.4) {② 統合};
+\node[stg] (alloc) at (0,-2.8) {③ 配分};
+\node[gate] (gateN) at (0,-4.2) {人間による承認ゲート\\（Human-in-the-Loop）};
+\node[stg] (exec) at (0,-5.9) {④ 執行};
+\node[stg] (review) at (0,-7.3) {⑤ 振り返り};
+
+\draw[arr] (info) -- (integ);
+\draw[arr] (integ) -- (alloc);
+\draw[arr] (alloc) -- (gateN);
+\draw[arr] (gateN) -- (exec);
+\draw[arr] (exec) -- (review);
+\draw[arr] (review.west) .. controls +(-2.2,0) and +(-2.2,-0.5) .. (info.west);
+
+\node[note, anchor=west] at (3.2,-2.8)
+  {PortBench: モデル×リスクプロファイルの\textbf{90\%}が均等加重ベースラインを上回れず};
+\node[note, anchor=west] at (3.2,-5.9)
+  {DeepFund: フロンティアモデルでも\textbf{純損失}／KTD-Fin: ティッカー匿名化でアルファが消失};
+\end{tikzpicture}
+
+\vspace{1mm}
+{\small\color{figgray}\textbf{図: ポートフォリオ管理エージェントの5段階サイクルと承認ゲート（CLQTに基づく）}\
+情報収集・統合・配分を経て執行に移る前に人間による承認ゲートを置く設計。右側の注記は、こうしたゲートを欠く／不十分な場合に実運用・ベンチマークで観測された失敗モード。}
+\end{center}
+
+\subsection{ガバナンスと自律性の設計}
+
+\begin{casestudy}{Morgan Stanley: スコープを絞った人間協調型エージェントの大規模実運用}
+Morgan StanleyはOpenAIとの協業で2つの生成AIを本番投入した。\textbf{AskResearchGPT}（2024年10月）は、投資銀行・セールス\&トレーディング・リサーチ部門向けに、同社リサーチのレポート群を横断合成し出典付きで複雑な問いに答えるアシスタント。\textbf{AI @ Morgan Stanley Debrief}（2024年6月〜）は、約1.5〜1.6万人のウェルスアドバイザー向けに顧客ミーティングを自動で文字起こし・要約しCRMへのフォローアップ草案まで生成する。Debriefのアドバイザーチーム採用率は\textbf{98\%}超と報告されている。完全自律の投資エージェントが独立ベンチマークで苦戦する一方、\textbf{タスクを厳密にスコープし人間をループに残した}エージェントは広範な実運用採用に到達するという、本節を貫く対比を裏づける事例である。（出典: \cite{x04askresearchgpt2024}, \cite{x04morganstanleyai_nd}）
+\end{casestudy}
+
+\begin{casestudy}{Adaptive AI Delegation: 動的な権限委任のガバナンスモデル}
+リアルタイムの証拠品質と不確実性に基づき、AIと人間のポートフォリオマネージャー間で逐次的意思決定権限をどれだけ委任するかを動的調整するGovernance-Aware POMDPフレームワーク。5種類の静的ガバナンス代替案を上回る成果を示し、アカウンタブルなAI-Native投資ワークフロー設計の形式的モデルを提供する。（出典: \cite{adaptiveai2026}）
+\end{casestudy}
+
+\begin{casestudy}{BondGPT: 完全エージェント化された債券トレーディングと未解決のガードレール課題}
+LTXのBondGPTは2026年6月に完全エージェント型AIをローンチし、AIエージェントがリアルタイム市場を自律的に監視し、取引チケットを生成し、ディーラーを選定し、RFQを起動し、価格を受諾できるようになった。ガードレールは現状ポリシー駆動の取引サイズ制限に留まるが、固定収益市場は2020年3月の「dash-for-cash」や2023年3月SVB取り付け騒ぎのように、エピソード的に流動性が枯渇する局面が存在し、取引サイズ閾値だけでは流動性レジームの変化に対応できない可能性が指摘されている。（出典: \cite{prnewswirendbondgpt}）
+\end{casestudy}
+
+\begin{casestudy}{Agent-to-Agent Finance: 自律AIエージェント同士の機械媒介型金融レイヤー}
+自律AIエージェントが取引相手を発見し、互いに決済し合う「エージェント間金融（agent-to-agent finance）」を、ブロックチェーンベースのアイデンティティ・プログラマブルな決済・境界づけられた自律性（bounded-autonomy）のガバナンス基盤の上に成り立つ機械媒介型の金融レイヤーとして定義する。エージェントが人間の逐次的関与なしに相互取引を行う際に必要な、識別・信頼・決済・統制のインフラ要件を整理しており、自律性を高めたエージェント経済に向けた金融インフラの設計論を提示する。（出典: \cite{agenttoagentfinance2026}）
+\end{casestudy}
+
+\begin{insight}{仮説: プロンプトインジェクションという新たな攻撃面}
+市場ニュースフィード・クライアントメール・サードパーティのリサーチPDFなど外部の非構造化データを取り込むLLMエージェントワークフローに対し、OWASPがLLM01:2025としてランク付けするプロンプトインジェクションは、敵対的テストデータセットで50〜84\%の成功率を記録している。ニュース取り込み・分析・執行にわたるツール呼び出しを連鎖させるマルチエージェント金融ワークフローは、単一の汚染入力がパイプライン全体に伝播しうる複合的なインジェクションベクトルを生む。金融AIエージェント専用の成熟した緩和ツールキットは存在せず、拘束力のある技術基準を発行した金融規制当局もまだない。
+\end{insight}
+
+\begin{center}
+\begin{tikzpicture}[font=\small,
+  lvl/.style={fnode, align=left, text width=10.4cm, minimum height=1.1cm},
+  lvltop/.style={fnode accent, align=left, text width=10.4cm, minimum height=1.1cm},
+  arr/.style={farr}
+]
+\node[lvl] (l1) at (0,0)
+  {\textbf{Lv.1 人間が意思決定}\ ―\ AIは情報提供のみで決定権は人間に残る};
+\node[lvl] (l2) at (0,1.7)
+  {\textbf{Lv.2 AIが推奨・人間が承認}\ ―\ 典型的なHuman-in-the-Loop構成};
+\node[lvl] (l3) at (0,3.8)
+  {\textbf{Lv.3 動的権限委任}（Adaptive AI Delegation）\ ―\ 証拠品質・不確実性に応じPOMDPで逐次調整し、5種の静的ガバナンス代替案を上回る};
+\node[lvltop] (l4) at (0,6.3)
+  {\textbf{Lv.4 完全自律執行}（BondGPT）\ ―\ 市場監視・取引チケット生成・ディーラー選定・RFQ起動・価格受諾までを自律実行。ガードレールは取引サイズ制限のみ};
+
+\draw[arr] (l1) -- (l2);
+\draw[arr] (l2) -- (l3);
+\draw[arr] (l3) -- (l4);
+
+\node[anchor=west, font=\scriptsize\itshape, text width=3.4cm, text=figaccent, align=left] at (5.6,6.3)
+  {リスク面: プロンプトインジェクション成功率\textbf{50\textendash84\%}（OWASP LLM01:2025）};
+\end{tikzpicture}
+
+\vspace{1mm}
+{\small\color{figgray}\textbf{図: 自律性のガバナンス・スペクトラム}\
+人間が決定するLv.1から、BondGPTのように取引執行まで自律化されたLv.4まで、委任範囲が段階的に拡大する。自律性が高まるほど、プロンプトインジェクション等の攻撃面へのリスクも拡大する。}
+\end{center}
+
+\subsection{ベンチマークが示す一貫した性能ギャップ}
+
+\begin{itemize}
+  \item \textbf{BigFinanceBench}: 928件の専門家作成・自由回答形式の財務リサーチタスクをステップバイステップのルーブリック（36,241ポイント）で採点。最先端エージェントでもルーブリックスコア\textbf{58.8\%}に留まり、最終回答の正確性だけでなく監査可能な導出過程の質が未解決のボトルネックであることを示す。（\cite{bigfinancebench2026}）
+  \item \textbf{Deep FinResearch Bench}: AI生成の投資リサーチレポートをプロアナリストのレポートと定性的厳密さ・定量予測・claim信頼性の3軸で比較し、AIは全軸でプロ水準に及ばないことを確認した。（\cite{deepfinresearchbench2026}）
+  \item \textbf{FinMCP-Bench}: Model Context Protocol（MCP）下での金融ツール利用を評価する初のベンチマーク。65の実在する財務MCPツールサーバーを用い、株価データ・リスク分析・ポートフォリオ操作など33の金融シナリオにまたがる613タスクでLLMエージェントを評価し、マルチツール推論と長期タスク遂行に大きなギャップがあることを最先端モデル全般で確認した（ICASSP 2026）。（\cite{finmcpbench2026}）
+  \item \textbf{Hedge-Bench}: 実際のヘッジファンド・アナリスト業務から抽出した102件の自由回答形式タスクを、モデル判定ではなく検証済みの専門家の推論ステップに照らして採点するベンチマーク。フロンティアLLMでも平均スコアは\textbf{16\%未満}に留まり、機械的な金融ツール利用と真の投資推論との間に大きなギャップがあることを露呈した（\cite{hedgebench2026}）。
+  \item \textbf{LLMトレーディングエージェント・サーベイ}: LLM取引エージェントの設計空間（メモリ・ツール利用・内省・マルチエージェント協調）を体系化した初期の包括的サーベイ（\cite{x04finagentsurvey2024}）。より監査志向の後続サーベイ（\S\ref{sec:exec-summary}で言及した77研究のレビュー、\cite{agentictrading2026}）は、閉ループ評価を満たす19研究のうち取引コストを明示モデル化したのは\textbf{1件}、時間整合的な分割プロトコルを抽出できたのは\textbf{2件}、R3（完全再現性）に達した研究は\textbf{皆無}であったと報告し、標準化された報告様式の欠如を本分野の構造的問題と位置づけた。
+  \item \textbf{FinCoT}: 専門家の推論手順を\textbf{Mermaid図で符号化した「エキスパート・ブループリント」}をプロンプトに注入する構造化Chain-of-Thought。Qwen3-8B-Baseの精度を\textbf{63.2\%→80.5\%}、Fin-R1（7B）を\textbf{65.7\%→75.7\%}へ引き上げつつ出力長を最大\textbf{8.9倍}短縮した。金融ポストトレーニングを欠くモデルほど効果が大きく、より解釈可能で専門家整合的な推論トレースを生む――エージェントの推論ステップの監査可能性に直結する結果である（\cite{x04fincot2025}）。
+  \item \textbf{SHARP}: 自由形式のプロンプト変異を、\textbf{人間可読な条件-行動ルーブリック}の記号的方策最適化に置き換えたニューロシンボリック・フレームワーク。取引が劣化した際にどのルールが失敗したかを特定して的を絞った編集を行い、厳格なwalk-forward検証で方策ドリフトを防ぐ。3セクター・4種のLLMバックボーンで一貫した改善を示し、小型モデル（例: GPT-4o-mini）を平均\textbf{10〜20ポイント}引き上げた。機関投資家が要求する透明性・監査可能性と、方策の自己進化を両立させる設計である（\cite{x04sharp2026}）。
+\end{itemize}
+
+\begin{casestudy}{Look-Ahead-Bench: 学習カットオフを跨いだ瞬間に消えるアルファ}
+LLMベースの投資バックテストにおけるルックアヘッドバイアスを標準化して測定するベンチマーク。DeepSeek 3.2は、評価期間をモデルの学習カットオフ以降に移すと、年率アルファが\textbf{+20.73\%から-1.04\%}へとほぼ完全に消失することを示し、公表されているLLMアルファの多くが人為的成果物（記憶されたパターンの再生）である可能性を示唆した。（出典: \cite{lookaheadbench2026}）
+\end{casestudy}
+
+以下の図は、本節で取り上げた実運用・バックテストの成功事例と、独立ベンチマークが計測した性能ギャップを対比したものである。
+
+\begin{center}
+\begin{tikzpicture}[font=\small]
+  % ---- column header boxes ----
+  \node[fchip, fill=figblue, minimum width=6.4cm, minimum height=0.9cm]
+        (Lhead) at (0,0) {実運用・強力なバックテスト成果};
+  \node[fchip, fill=figaccent, minimum width=6.4cm, minimum height=0.9cm]
+        (Rhead) at (8.0,0) {独立ベンチマークが示す性能ギャップ};
+
+  % ---- left column: production / backtest successes ----
+  \node[fnode blue, minimum width=6.4cm, minimum height=2.6cm] (L1) at (0,-2.0) {};
+  \node[anchor=north west, text width=5.8cm, align=left]
+        at ($(L1.north west)+(0.3,-0.3)$)
+        {\textbf{Bridgewater AIA Labs}\\ 生成AI基盤を本番の投資意思決定支援に実装};
+  \node[fnode blue, minimum width=6.4cm, minimum height=2.6cm] (L2) at (0,-4.75) {};
+  \node[anchor=north west, text width=5.8cm, align=left]
+        at ($(L2.north west)+(0.3,-0.3)$)
+        {\textbf{MarketSenseAI 2.0}\\ S\&P100バックテストで累積リターン\textbf{\textcolor{figblue}{125.9\%}}（指数比+73.5pt）};
+  \node[fnode blue, minimum width=6.4cm, minimum height=2.6cm] (L3) at (0,-7.5) {};
+  \node[anchor=north west, text width=5.8cm, align=left]
+        at ($(L3.north west)+(0.3,-0.3)$)
+        {\textbf{TradingAgents}\\ ディベート構造で単一エージェント比のSharpe比・累積リターンが改善};
+
+  % ---- right column: benchmark performance gaps (bar = achieved / 100%) ----
+  \node[fnode accent, minimum width=6.4cm, minimum height=2.6cm] (R1) at (8.0,-2.0) {};
+  \node[anchor=north west, text width=5.8cm, align=left]
+        at ($(R1.north west)+(0.3,-0.3)$)
+        {\textbf{BankerToolBench}\\ ジュニアバンカー業務基準の達成率};
+  \node[fnode accent, minimum width=6.4cm, minimum height=2.6cm] (R2) at (8.0,-4.75) {};
+  \node[anchor=north west, text width=5.8cm, align=left]
+        at ($(R2.north west)+(0.3,-0.3)$)
+        {\textbf{PortBench}\\ 均等加重ベースラインを上回れた組合せ比率};
+  \node[fnode accent, minimum width=6.4cm, minimum height=2.6cm] (R3) at (8.0,-7.5) {};
+  \node[anchor=north west, text width=5.8cm, align=left]
+        at ($(R3.north west)+(0.3,-0.3)$)
+        {\textbf{BigFinanceBench}\\ 財務リサーチ・ルーブリックスコア};
+
+  % ---- bars (background = 100% reference, filled = achieved share) ----
+  \fill[figlight] ($(R1.south west)+(0.3,0.25)$) rectangle ($(R1.south west)+(4.9,0.5)$);
+  \fill[figaccent] ($(R1.south west)+(0.3,0.25)$) rectangle ($(R1.south west)+(2.6,0.5)$);
+  \node[font=\bfseries\small, anchor=west] at ($(R1.south west)+(5.05,0.375)$) {50\%};
+
+  \fill[figlight] ($(R2.south west)+(0.3,0.25)$) rectangle ($(R2.south west)+(4.9,0.5)$);
+  \fill[figaccent] ($(R2.south west)+(0.3,0.25)$) rectangle ($(R2.south west)+(0.76,0.5)$);
+  \node[font=\bfseries\small, anchor=west] at ($(R2.south west)+(5.05,0.375)$) {10\%};
+
+  \fill[figlight] ($(R3.south west)+(0.3,0.25)$) rectangle ($(R3.south west)+(4.9,0.5)$);
+  \fill[figaccent] ($(R3.south west)+(0.3,0.25)$) rectangle ($(R3.south west)+(3.0,0.5)$);
+  \node[font=\bfseries\small, anchor=west] at ($(R3.south west)+(5.05,0.375)$) {58.8\%};
+
+  % ---- bottom banner: Look-Ahead-Bench collapse spans both columns ----
+  \node[fnode dark, minimum width=14.4cm, minimum height=1.5cm, text width=13.4cm] (Banner) at (4.0,-9.75)
+        {\textbf{Look-Ahead-Bench}: 評価期間を学習カットオフ以降に移すと、DeepSeek 3.2の年率アルファは
+         \textbf{\textcolor{figaccent!70!white}{+20.73\%}} $\rightarrow$ \textbf{\textcolor{figaccent!70!white}{-1.04\%}} へとほぼ完全に消失};
+\end{tikzpicture}
+
+\vspace{1mm}
+{\small\color{figgray}\textbf{図: 実運用・バックテストの成功事例と独立ベンチマークが計測した性能ギャップの二極化。}
+左列は本節で扱った具体的な成功事例、右列は独立ベンチマークが計測した達成率（バーは0〜100\%を表す）。下段はLook-Ahead-Benchが示す、学習カットオフを跨ぐだけでアルファが消失するという最も直接的な証拠。}
+\end{center}
+
+\begin{insight}{示唆: 実運用に届くAIエージェントとベンチマーク上の弱いAIエージェントの共存}
+Bridgewater AIA LabsやMarketSenseAI 2.0のような強力な実運用・バックテスト成果、そしてMorgan StanleyのAskResearchGPT／Debrief（アドバイザー採用率98\%超）やAnthropicが提供する金融向けエージェント・テンプレート群（\cite{anthropicfinanceagents2026}）のような大規模な本番採用が存在する一方で、BankerToolBench、DeepFund、PortBench、FINSABER、Look-Ahead-Benchのような独立ベンチマークは一貫して大きな性能ギャップと方法論的な脆弱性を報告している。この二極化は、成功事例の多くが「厳密なタスクスコープ設定」「人間によるレビュー工程の保持」「透明な監査記録」を備えている一方、汎用的・完全自律的なエージェントほど性能が崩れやすいという構造を示唆している。SHARPの人間可読ルーブリックやFinCoTのエキスパート・ブループリントが示すように、\textbf{推論と方策を監査可能な記号的表現へ外部化する}方向性――そして調整プリマシー仮説が説くように調整プロトコルそのものをコスト差し引き後で評価する規律（CBS指標、\cite{x04coordinationprimacy2026}）――が、この二極を橋渡しし、自律性のガバナンス・スペクトラムを上方へ押し上げる現実的な経路になると考えられる。
+\end{insight}
+
+\subsection{ソフトウェア工学エージェントに学ぶ：評価と自律度の段階付け}
+\label{sec:investment-agents-crossdomain}
+
+投資エージェントが直面する「評価の厳密さ」「オーケストレーション設計」「自律度の段階付け」という3つの課題は、金融に固有のものではない。むしろ、ソフトウェア工学エージェント（コーディングエージェント）、深い調査（deep research）・科学的発見エージェント、そして本番運用されているカスタマーサポート・エージェントは、いずれも金融より先に大規模な実運用と厳密なベンチマークの両方を経験しており、投資エージェントの設計・評価に転用できる普遍的な教訓を蓄積している。本項では、これら周辺分野の代表事例を金融の視点から読み解き、投資エージェントの実務に持ち帰れる示唆を抽出する。
+
+\begin{casestudy}{SWE-bench／SWE-bench Verified：自己申告ではなく「閉じたテスト」で合否が決まる評価基盤}
+コーディングエージェント分野は、2023年のSWE-bench（12のPython OSSリポジトリから抽出した2,294件の実GitHub issue、\cite{y04swebench2023}）によって、「エージェントが生成したコード変更が、実際に隠しテストスイートを通過するか」という自動判定可能な客観指標を確立した。2024年8月にはOpenAIとの協業で、人間のアノテーターが問題記述の明確さ・テストパッチの正確さ・解決可能性を検証した500件の人手検証済みサブセット\textbf{SWE-bench Verified}が公開され（\cite{y04swebenchverified2024}）、あいまいな問題設定に起因するノイズを取り除いた。Cognition社のDevinは2024年3月、このSWE-bench上で570件中79件を自己完結的に解決（成功率\textbf{13.86\%}、当時の最良のアシスト型システムであるClaude 2の4.80\%を大きく上回る）と発表し（\cite{y04devinintro2024}）、自律型ソフトウェアエンジニアという分野を切り開いた。2025年公開のオープンソース・スカフォールドOpenHands Software Agent SDK（MIT License、40,000超のGitHubスター）は、Claude Sonnet 4.5＋拡張思考でSWE-bench Verifiedの解決率\textbf{72\%}に到達し（\cite{y04openhandssdk2025}）、オープンな実装でもクローズドな商用エージェントに迫れることを示した。金融のBankerToolBench・WorkstreamBenchが自由回答形式のルーブリック採点に留まるのに対し、SWE-bench Verifiedは「人間が事前に解決可能性を検証したタスク」に対して「自動テストが機械的に合否を判定する」という二重の厳密さを備えている点が対照的である。
+\end{casestudy}
+
+\begin{casestudy}{AI co-scientist：生成・ディベート・進化のループで仮説を淘汰する科学的発見エージェント}
+Google Research・Cloud AI・DeepMindが共同開発したAI co-scientist（Gemini 2.0基盤、\cite{y04aicoscientist2025}）は、科学者が示す研究目標に沿って検証可能な新規仮説を生成するマルチエージェントシステムである。中核設計は\textbf{「生成（generate）→ディベート（debate）→進化（evolve）」}のループで構成され、自己対戦型の科学的ディベートによる新規仮説生成、トーナメント方式のランキングによる仮説比較、反復的な品質改善の「進化」プロセスを非同期タスク実行フレームワーク上で回す。急性骨髄性白血病の薬剤再利用、肝線維症の新規標的発見、抗菌薬耐性メカニズムの説明という3つの生物医学応用で初期検証が行われ、Elo指標による自動評価で他の最先端エージェント・推論モデルを上回ったと報告されている。この「複数エージェントによるディベート＋トーナメント式の淘汰」という設計は、本節前半で扱ったTradingAgentsの強気・弱気ディベート構造と同型であり、投資thesisの生成において「どのように複数の候補案を競わせ淘汰するか」という設計問題が、金融固有ではなく多エージェント発見システム一般の課題であることを示している。一方、deep researchエージェントの評価でも、ResearchRubrics（2,800時間超の人手労働・2,500件超の専門家執筆ルーブリック、\cite{y04researchrubrics2025}）のように、事実の裏付け・推論の健全性・明瞭さを軸とする採点方式が標準化されつつあり、本節のBigFinanceBench（36,241ポイントのステップバイステップ・ルーブリック）と同型の設計思想が金融の外側でも独立に発展している。
+\end{casestudy}
+
+\begin{casestudy}{Klarnaのカスタマーサポート・エージェント：急進的自律化とその巻き戻し}
+Klarnaは2024年2月、OpenAIと共同開発したAIアシスタントを本番投入し、最初の1か月で\textbf{230万件}の会話（カスタマーサービスチャットの3分の2）を処理、フルタイム従業員\textbf{700名相当}の業務量をこなし、対応時間を平均11分から2分未満へ短縮、2024年通期で\textbf{4,000万ドル}の利益改善に貢献したと報告した（\cite{y04klarnapress2024}）。しかし2025年、CEO Sebastian Siemiatkowski氏はコストありきのAI自動化が「品質低下」を招いたと認め、人間のカスタマーサービス担当者を再雇用して「常に人間対応を選べる」方針へ転換した（\cite{y04klarnawalkback2025}）。カスタマーサポート・エージェント全般の評価でも、Sierra Research発のτ-bench（小売・航空ドメイン、\cite{y04taubench2024}）は、エージェントが対話全体を通じてドメイン固有のポリシーガイドラインに従い続けられるかを会話終了時のDB状態で機械的に判定し、当時最先端のGPT-4oでもタスク成功率は\textbf{50\%未満}に留まった。同一タスクを複数回試行した際の一貫性を測る\textbf{pass\textasciicircum k}という信頼性指標も導入されている。2025年のτ\textsuperscript{2}-bench（\cite{y04tau2bench2025}）は、ユーザー側もツール呼び出しを行うデュアルコントロール型の通信（telecom）ドメインを追加し、双方向にツールを操作する現実的シナリオへ拡張した。急速な自律化の定量的成功と、その後の巻き戻しが同一企業内で観測されたKlarnaの事例は、「ポリシー遵守」と「複数回試行での一貫性」を分離して測る評価の必要性を裏づけている。
+\end{casestudy}
+
+\begin{center}
+\begin{tikzpicture}[font=\small,
+  axisline/.style={line width=1pt, draw=fignavy!60},
+  tick/.style={line width=1pt, draw=fignavy!60},
+  chip/.style={fchip, text=fignavy, minimum width=2.6cm, minimum height=0.85cm, font=\scriptsize},
+  lbl/.style={font=\scriptsize, text=figgray, align=center}
+]
+% axis
+\draw[axisline] (0,0) -- (12,0);
+\foreach \x/\name in {0/Lv.1, 4/Lv.2, 8/Lv.3, 12/Lv.4} {
+  \draw[tick] (\x,0.12) -- (\x,-0.12);
+  \node[lbl] at (\x,-0.5) {\name};
+}
+\node[lbl, align=left, text width=2.6cm] at (0,-1.05) {人間が意思決定};
+\node[lbl, align=left, text width=2.6cm] at (4,-1.05) {AI推奨・人間承認};
+\node[lbl, align=left, text width=2.6cm] at (8,-1.05) {動的権限委任};
+\node[lbl, align=left, text width=2.6cm] at (12,-1.05) {完全自律執行};
+
+% chips above axis at each domain's typical position
+\node[chip, fill=figblue!18, draw=figblue] (swe) at (4,1.4) {SWE-bench Verified／Devin\\（合格後も人間がPRをレビュー・マージ）};
+\node[chip, fill=figaccent!18, draw=figaccent] (dr) at (2.6,3.0) {AI co-scientist／\\deep research（仮説提示のみ）};
+\node[chip, fill=fignavy!12, draw=fignavy] (cs2025) at (4,4.6) {Klarna 2025\\（人間対応の選択肢を復元）};
+\node[chip, fill=fignavy!12, draw=fignavy] (cs2024) at (9.5,4.6) {Klarna 2024\\（自律応答が主・700人分代替）};
+\draw[-{Stealth[length=2.4mm]}, line width=0.9pt, draw=figaccent!70!black] (cs2024) -- (cs2025)
+      node[midway, above, font=\scriptsize\itshape, text=figaccent!70!black] {2025年に巻き戻し};
+\node[chip, fill=fignavy!12, draw=fignavy] (inv) at (8,3.0) {投資エージェント（本節）\\ユースケースによりLv.1〜4に分布};
+
+\end{tikzpicture}
+
+\vspace{1mm}
+{\small\color{figgray}\textbf{図: 自律度スペクトラム上の周辺分野マッピング。}\
+横軸は\S\ref{sec:investment-agents}後段の自律性のガバナンス・スペクトラム（Lv.1〜4）と同じ尺度。SWE-bench Verified／Devinはタスク完了後も人間のレビュー・マージ工程を残し、AI co-scientist・deep researchは仮説提示に留まる。Klarnaは2024年に高い自律性へ踏み込んだのち、2025年に人間対応の選択肢を復元する形で後退した。投資エージェントは本節で見た通りユースケースごとにLv.1〜4へ分布する。}
+\end{center}
+
+以下の表は、ソフトウェア工学・深い調査／科学的発見・カスタマーサポートの3分野と、本節で扱った投資エージェントを、オーケストレーション類型・評価の厳密さ・自律度の段階付け・金融が学べる要点の4軸で対比したものである。
+
+\begingroup
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{@{}>{\bfseries}p{2.1cm}p{2.6cm}p{3.4cm}p{2.6cm}p{3.6cm}@{}}
+\toprule
+分野 & 代表的オーケストレーション & 評価の厳密さ & 自律度の段階付け & 金融が学べる要点\\
+\midrule
+\endfirsthead
+\toprule
+分野 & 代表的オーケストレーション & 評価の厳密さ & 自律度の段階付け & 金融が学べる要点\\
+\midrule
+\endhead
+ソフトウェア工学 & plan→act→verify（Devinのダッシュボード計画提示、OpenHandsの委譲型サブエージェント） & SWE-bench Verified：人手検証済み解決可能性＋隠しテストによる自動合否判定（\cite{y04swebench2023,y04swebenchverified2024}） & Devin：完了後も人間がPRをレビュー・マージ（Lv.2相当） & 「自動テストで機械的に合否が決まる成果物」を金融DDでどこまで設計できるか\\
+\addlinespace
+深い調査／科学的発見 & 生成→ディベート→進化（AI co-scientist）、専門家ルーブリック採点（ResearchRubrics） & Elo指標によるトーナメント評価、2,500件超の専門家ルーブリック（\cite{y04aicoscientist2025,y04researchrubrics2025}） & 仮説提示のみ、科学者が最終判断（Lv.1〜2相当） & 投資thesis候補の「淘汰」設計＋ルーブリック採点の標準化\\
+\addlinespace
+カスタマーサポート & ポリシー準拠型シングルエージェント＋人間エスカレーション & τ-bench／τ\textsuperscript{2}-bench：ポリシー遵守を機械判定、pass\textasciicircum kで多重試行の一貫性を測定。GPT-4oでも成功率50\%未満（\cite{y04taubench2024,y04tau2bench2025}） & Klarna 2024はLv.3〜4相当に接近も2025年にLv.2へ後退（\cite{y04klarnapress2024,y04klarnawalkback2025}） & 急進的な自律化は評価が追いつく前に品質・レピュテーションリスクを露呈しうる\\
+\addlinespace
+投資エージェント（本節） & supervisor-worker／debate／reflectionの合成（\S\ref{sec:investment-agents}参照） & 自己申告バックテストが主流。独立ベンチマーク（BankerToolBench等）は依然厳しい結果 & ユースケース別にLv.1（推奨のみ）〜Lv.4（BondGPT型執行）へ分布 & 周辺分野が先行して確立した「閉じた合否判定」「トーナメント淘汰」「ポリシー遵守の機械判定」を評価基盤に取り込む余地\\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\vspace{-1mm}
+{\small\color{figgray}\textbf{表: ソフトウェア工学・深い調査／科学的発見・カスタマーサポート・投資エージェントの比較。}\
+いずれの分野も「オーケストレーション」「評価の厳密さ」「自律度の段階付け」という3軸で整理でき、投資エージェントはこの3軸すべてにおいて周辺分野の到達点より後発である。}
+
+\begin{insight}{金融への示唆: 「閉じた合否判定」を金融DDワークフローへ移植する}
+SWE-bench Verifiedが示したのは、「人間が事前に解決可能性を検証したタスク」に対し「隠しテストが機械的に合否を判定する」という組み合わせが、自己申告のベンチマークより遥かに信頼できるという教訓である。金融のデューデリジェンス・エージェント評価（BankerToolBench、WorkstreamBench等）は依然として人間ルーブリック採点に依存しており、SWE-bench的な「自動テストハーネス」を持たない。財務モデルの数式・セル参照・出典の実在性など、機械的にチェック可能な要素（例: DCFモデルの特定セルが正しい財務諸表項目を参照しているか）を切り出し、SWE-bench Verified型の「人手検証済み解決可能性＋自動テストによる合否判定」を部分的にでも導入できれば、独立ベンチマークの信頼性を大きく引き上げられる可能性がある。ただし財務モデルには唯一の正解が存在しない設計選択（会計処理・前提の妥当な幅）が残るため、コードのPRのような二値的合否判定への単純化には限界がある点に注意が必要である。
+\end{insight}
+
+\begin{insight}{金融への示唆: 自律性は「主張」ではなく行動ログから測定する}
+Anthropicは約40万件のClaude Codeセッション（2025年10月〜2026年4月、プライバシー保護分析）を基に、ターン継続時間（99.9パーセンタイルで2025年10月の25分未満から2026年1月に45分超へほぼ倍増）、自動承認（auto-accept）モードの利用率（新規ユーザー約20\%に対し750セッション超の熟練ユーザーで40\%超）、中断率（新規ユーザー5\%に対し熟練ユーザー約9\%）を定量測定した（\cite{y04anthropicautonomy2026}）。最も複雑なタスクでは、Claude Code自身が人間の中断頻度の2倍以上の頻度で明確化を求める自己制限も観測されている。この「自律性を主張ではなく行動ログから実証する」手法は、本節の自律性のガバナンス・スペクトラム（Lv.1〜4）を裏付ける実証手段として金融機関の投資エージェント基盤にも転用できる。同時に、Klarnaの2024年急進的自律化と2025年の巻き戻しが示すように、行動ログ上の高い自律性指標だけでは品質・レピュテーションリスクを捕捉できない。The 2025 AI Agent Index（30の実運用エージェントを1,350項目にわたり監査し198項目で情報欠落を確認、\cite{y04aiagentindex2025}）が指摘する通り、安全性評価・開示メカニズムの透明性は自主的報告だけでは不十分であり、金融規制当局が投資エージェントに構造化された開示要件を課す素地は、周辺分野の経験からも既に整いつつある。
+\end{insight}
+
+\begin{insight}{金融への示唆: 評価インフラそのものを公共財として整備する}
+Holistic Agent Leaderboard（21,730回のエージェント実行を9モデル×9ベンチマーク・4領域〈コーディング・Web操作・科学・カスタマーサービス〉にわたり約4万ドルの計算コストで標準化、\cite{y04holisticagentleaderboard2025}）は、標準化された評価ハーネスを整備することで評価期間を数週間から数時間へ短縮し、「推論努力を上げるとむしろ大多数の実行で精度が低下する」「エージェントがベンチマーク自体をHuggingFace上で検索してしまう」といった評価汚染や不正確な挙動を横断的に検出した。ソフトウェア工学エージェント分野がこうした評価インフラを分野横断の公共財として整備しつつあるのに対し、金融の投資エージェント評価は個別研究ごとにバラバラのバックテスト設定・データ期間・取引コスト前提に依存しており、本節で繰り返し指摘してきた再現性の欠如（Agentic Tradingサーベイが指摘したR3達成研究\textbf{皆無}、\cite{agentictrading2026}）と表裏の関係にある。標準化されたVM並列実行基盤・共通のコスト前提・独立検証バッジ付き投稿制度を業界団体や規制当局が主導して整備することが、金融エージェント評価の再現性ギャップを埋める現実的な一歩になりうる。
+\end{insight}

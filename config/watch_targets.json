@@ -15,7 +15,7 @@
       "url": "https://news.ycombinator.com/",
       "selector": ".titleline",
       "wait_until": "domcontentloaded",
-      "enabled": true
+      "enabled": false
     },
     {
       "slug": "hacker-news-show",
@@ -24,6 +24,30 @@
       "selector": ".titleline",
       "wait_until": "domcontentloaded",
       "enabled": false
+    },
+    {
+      "slug": "arxiv-q-fin-cp",
+      "name": "arXiv — Computational Finance (q-fin.CP)",
+      "url": "https://arxiv.org/list/q-fin.CP/recent",
+      "selector": ".list-title",
+      "wait_until": "domcontentloaded",
+      "enabled": true
+    },
+    {
+      "slug": "hebbia-resources",
+      "name": "Hebbia — Resources & Research (AI-native investment research)",
+      "url": "https://www.hebbia.com/resources",
+      "selector": "main",
+      "wait_until": "domcontentloaded",
+      "enabled": true
+    },
+    {
+      "slug": "daloopa-blog",
+      "name": "Daloopa — Blog (AI-ready financial data / MCP)",
+      "url": "https://daloopa.com/blog",
+      "selector": "main",
+      "wait_until": "domcontentloaded",
+      "enabled": true
     }
   ]
 }

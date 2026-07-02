@@ -1,0 +1,7 @@
+{
+  "d46fd1b594b4": {
+    "domain": "finance",
+    "lang": "en",
+    "topic": "Research case studies from academia, large enterprises, and startups.\r\n\r\nI am especially interested in examples related to investment management, financial information, and making data “AI-ready” or “AI-native.”\r\n\r\nPlease focus on cases involving one or more of the following themes:\r\n\r\n1. AI-ready financial data infrastructure\r\n   * Converting financial information into a format that can be used effectively by LLMs, AI agents, RAG systems, or automated analysis workflows.\r\n   * Handling large volumes of structured and unstructured data, such as filings, earnings reports, analyst reports, market data, news, PDFs, tables, spreadsheets, and internal documents.\r\n\r\n2. AI-native hedge funds and investment firms\r\n   * Hedge funds, asset managers, or financial institutions that use LLMs, AI agents, machine learning, or other AI systems in investment research, portfolio management, risk management, or trading.\r\n\r\n3. AI agents for investment decision-making\r\n   * Use cases where LLMs or AI agents support or automate financial analysis, investment idea generation, due diligence, portfolio monitoring, risk analysis, or decision-making workflows.\r\n\r\n4. Financial data analysis using LLMs or AI agents\r\n   * Examples where AI is used to extract, summarize, classify, structure, compare, or reason over financial data.\r\n   * Include both structured data and unstructured data."
+  }
+}

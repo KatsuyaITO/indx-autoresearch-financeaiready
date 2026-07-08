@@ -1,3 +1,5 @@
+Signature-based identification of volatility models from path geometry
+Arbitrage-Free Multi-Maturity Risk-Neutral Marginals
 Square-Root Price Impact Is Necessary for Endogenous Manipulation Cycles in Learning-Agent Markets
 Order Splitting and Liquidity Replenishment Are Jointly Necessary for the Square-Root Law of Market Impact:
 Deep Learning for Dynamic Programming with Recursive Utility
@@ -7,6 +9,3 @@ Pump.fun Graduation Regime Windows: Survival Analysis of 832,941 Token Launches 
 Coordinated Sniper Cohorts on Pump.fun: Detection of 1,012 Persistent Wallet Rings and the Limits of Naive Causal Inference for First-Hour Buyer Flow
 A Cap-Axis Integral Diagnostic of Factor Models
 Shapley in Context: Explaining Financial Language with Domain Expertise
-CLQT: A Closed-Loop, Cost-Aware, Strategy-Consistent Benchmark for Diagnostic Evaluation of LLM Portfolio-Management Agents
-When Summaries Distort Decisions: Information Fidelity in LLM-Compressed Financial Analysis
-Liquidity-Based Audit of Algorithmic Trading Strategies

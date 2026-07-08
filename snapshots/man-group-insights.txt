@@ -1,53 +1,73 @@
-Insights. Original thinking. Creative minds. Man Group’s Insights.
-Man Institute
-Stay ahead of the curve with market snapshots and in-depth research.
-MARKET VIEWS READ 4 MIN
-JULY 7, 2026
-Views from the Floor
+Man Institute has had a makeover!
+Our institutional content platform is relaunching as Man Insights. This optimised web experience is based around macro and market views, asset class and investment themes, and client solutions and portfolio strategy. Your favourite franchises, such as Views from the Floor, will not change.
+Man Insights
+MIDYEAR GLOBAL OUTLOOK 2026
+The Ripple Effect
+Our interconnected world is under geopolitical and economic strain, yet markets are strangely calm. How long can this last?
+Macro & market views
+Asset class & investment themes
+Client solutions & portfolio strategy
+ARTICLE | 4 MIN | VIEWS FROM THE FLOOR
 Could 'Super El Niño' Scorch AI Too?
 Markets may chronically underprice climate volatility as a systematic risk.
-MARKET VIEWS READ 4 MIN
-JULY 1, 2026
-Views from the Floor
+ARTICLE | 15 MIN | THE ROAD AHEAD
+Don’t Look Down: Reflections on Cross-Asset Drawdowns
+Filters
+Series
+Format
+Article
+4 min
+Views From the Floor
+Jul 2026
+Could 'Super El Niño' Scorch AI Too?
+Markets may chronically underprice climate volatility as a systematic risk.
+Article
+4 min
+Views From the Floor
+Jul 2026
 The Hard Questions for AI Bonds Investors
 Investors looked to SpaceX for signals on the AI bond wave, but what they found probably raises more questions.
-PODCASTS READ & LISTEN 42 MIN
-JULY 1, 2026
-A Sustainable Future
-Cecilia Tam on the IEA's 2026 World Energy Investment Report
-Cecilia Tam, IEA Head of Energy Investment Unit, explains why energy security has become one of the most powerful drivers of the clean energy transition.
-IN FOCUS READ 11 MIN
-JUNE 25, 2026
-A Trend Following Deep Dive: Cash (Equities) Is King
-There is more to equity trend following than index futures.
-MARKET VIEWS READ 4 MIN
-JUNE 23, 2026
-Views from the Floor
+Article
+4 min
+Views From the Floor
+Jun 2026
 The Strait of Uncertainty
 The absence of a roadmap to a full peace deal means investors may need to prepare for more volatility and inflation spikes for the rest of the year. Also, what will markets make of prospective UK Prime Minister Andy Burnham?
-ACADEMIC RESEARCH READ 12 MIN
-JUNE 23, 2026
-Catching Angels Before They Fall
-Can machine learning potentially advance credit rating transition forecasting for insurance portfolio optimisation?
-VIEW ALL
-Man Technology Articles
-From quantum computing and data science to innovations in database management and trade execution, technology powers everything we do.
-Subscribe to Tech Articles now
-Faster Python 3.14: faster compression and fixing 28-year-old bugs
-May 8, 2026
-Python 3.14 swaps the ageing zlib library for zlib-ng, bringing 2–3x faster compression and 2x faster decompression. A 28-year-old bug in Python's default gzip level was also fixed along the way.
-,
-Improving Python: How we made pip install twice as fast
-July 15, 2025
-This article shares our journey to optimise pip, proving that even well-established tools like pip and the Python interpreter have room for improvement.
-TL;DR: Use pip 24.2 or newer – it’s twice as fast!
-,
-Inside Man Technology: Insights from Our Summer Interns
-October 18, 2024
-Hear first-hand from our summer interns what it's like to work at Man Technology, highlighting the projects, learning, and opportunities they embraced.
-,
-Leveraging Aeron Open-Source Technology to Improve Latency of FX Execution System
-April 30, 2024
-FX trading is fast-paced and complex, requiring low-latency trading systems to compete with the best.
-,
-MORE
+Article
+4 min
+Views From the Floor
+Jun 2026
+SpaceX – To Infinity and Beyond?
+The stellar debut of the largest IPO in history bodes well for the AI listings behind it, though SpaceX seems to be more a bet on Musk than a bellwether for the broader rally.
+Article
+4 min
+Views From the Floor
+Jun 2026
+When the AI Bubble Bursts, Don’t Count on the US Consumer
+The tech rally hides a fragile US consumer, traditionally the engine of US growth. If the AI bubble bursts, household spending can’t save the economy or the stock market.
+Article
+9 min
+Jun 2026
+Scenarios and Asset Class Implications
+Amid the geopolitical turmoil driven by the Iran war, we see multiple potential outcomes for economies and markets. We examine key asset allocation opportunities in the context of our base case, downside and upside scenarios..
+1
+2
+3
+...
+68
+Subscribe to our insights
+Never miss an article on your favourite topics.
+First name*
+Last name*
+Business email address*
+Delivery frequency*
+Daily
+Weekly
+Read our Privacy policy
+CAPTCHA
+Important information
+This information is communicated and/or distributed by the relevant Man entity identified below (collectively the "Company") subject to the following conditions and restriction in their respective jurisdictions.
+Opinions expressed are those of the author and may not be shared by all personnel of Man Group plc (‘Man’). These opinions are subject to change without notice, are for information purposes only and do not constitute an offer or invitation to make an investment in any financial instrument or in any product to which the Company and/or its affiliates provides investment advisory or any other financial services. Any organisations, financial instrument or products described in this material are mentioned for reference purposes only which should not be considered a recommendation for their purchase or sale. Neither the Company nor the authors shall be liable to any person for any action taken on the basis of the information provided. Some statements contained in this material concerning goals, strategies, outlook or other non-historical matters may be forward-looking statements and are based on current indicators and expectations. These forward-looking statements speak only as of the date on which they are made, and the Company undertakes no obligation to update or revise any forward-looking statements. These forward-looking statements are subject to risks and uncertainties that may cause actual results to differ materially from those contained in the statements. The Company and/or its affiliates may or may not have a position in any financial instrument mentioned and may or may not be actively trading in any such securities. Unless stated otherwise all information is provided by the Company. Past performance is not indicative of future results. The value of an investment and any income derived from it can go down as well as up and investors may not get back their original amount invested. Alternative investments can involve significant additional risks.
+Unless stated otherwise this information is communicated by the relevant entity listed below.
+United States: To the extent this material is distributed in the United States, it is communicated and distributed by Man Investments, Inc. (‘Man Investments’). Man Investments is registered as a broker-dealer with the SEC and is a member of the Financial Industry Regulatory Authority (‘FINRA’). Man Investments is also a member of the Securities Investor Protection Corporation (‘SIPC’). Man Investments is a wholly owned subsidiary of Man Group plc. The registration and memberships described above in no way imply a certain level of skill or expertise or that the SEC, FINRA or the SIPC have endorsed Man Investments. Man Investments Inc, 1345 Avenue of the Americas, 21st Floor, New York, NY 10105.
+This material is proprietary information and may not be reproduced or otherwise disseminated in whole or in part without prior written consent. Any data services and information available from public sources used in the creation of this material are believed to be reliable. However accuracy is not warranted or guaranteed. © Man 2026

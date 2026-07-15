@@ -1,6 +1,5 @@
+A Noise-Aware Quantum Algorithm for Credit Valuation Adjustments on Real Quantum Hardware
 Reinforcement Learning for Execution under Dynamic Fees in a Closed-Loop DEX Simulator
 Learning Predictive Ambiguity Sets for Decision-Focused Distributionally Robust Optimization
 Deep Learning for Dynamic Programming with Recursive Utility Using First-order Conditions
 Herding and Liquidity in Order-Book Markets. I. A Robust Liquidity-Stress Crossover and its Reflexive Mechanism
-Signature-based identification of volatility models from path geometry
-Arbitrage-Free Multi-Maturity Risk-Neutral Marginals

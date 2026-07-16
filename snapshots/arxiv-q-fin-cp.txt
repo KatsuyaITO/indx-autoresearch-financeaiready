@@ -1,3 +1,5 @@
+Is Deep Hedging Reinforcement Learning?
+VAIOM: Continuous-Input, Discrete-Output Decoder-Only Financial Sequence Modeling
 A Noise-Aware Quantum Algorithm for Credit Valuation Adjustments on Real Quantum Hardware
 Reinforcement Learning for Execution under Dynamic Fees in a Closed-Loop DEX Simulator
 Learning Predictive Ambiguity Sets for Decision-Focused Distributionally Robust Optimization

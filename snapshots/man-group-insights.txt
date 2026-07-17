@@ -16,6 +16,12 @@ Filters
 Series
 Format
 Article
+10 min
+The Road Ahead
+Jul 2026
+Andy Burnham, Can You Hear Me?
+Britain’s future prime minister once said the country was too “in hock” to the bond markets. Investors certainly aren’t, however. Just why are gilts so hated?
+Article
 4 min
 Views From the Floor
 Jul 2026
@@ -45,12 +51,6 @@ Views From the Floor
 Jun 2026
 SpaceX – To Infinity and Beyond?
 The stellar debut of the largest IPO in history bodes well for the AI listings behind it, though SpaceX seems to be more a bet on Musk than a bellwether for the broader rally.
-Article
-4 min
-Views From the Floor
-Jun 2026
-When the AI Bubble Bursts, Don’t Count on the US Consumer
-The tech rally hides a fragile US consumer, traditionally the engine of US growth. If the AI bubble bursts, household spending can’t save the economy or the stock market.
 1
 2
 3

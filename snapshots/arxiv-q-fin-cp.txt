@@ -1,3 +1,8 @@
+AlphaZeroBeta: Deep Reinforcement Learning for Market-Neutral Portfolios
+Abliteration Is Not a Scalpel: Off-Target Effects of Refusal Removal on Decision Disposition Across Model Families
+A Practical Guide to Simulating Correlated Binary Outcomes
+A Novel Hybrid Quantum Reservoir Computing (nHQRC) for Phase Transition Detection in Non-Equilibrium Dynamical Systems
+FinBench: Time-Gated Calibration and Uncertainty Benchmarking for Agentic Financial Forecasting
 AI Trading: Evaluating Large Language Models for Technical Market Analysis
 SciPhy Reinforcement Learning for Portfolio Optimization
 Structure-Aware Variational State Preparation for Quantum Basket Option Pricing
@@ -6,5 +11,3 @@ How Much of a 10-K Matters? Aggregation-Dependent Value of Full-Text versus Risk
 Is Deep Hedging Reinforcement Learning?
 VAIOM: Continuous-Input, Discrete-Output Decoder-Only Financial Sequence Modeling
 A Noise-Aware Quantum Algorithm for Credit Valuation Adjustments on Real Quantum Hardware
-Reinforcement Learning for Execution under Dynamic Fees in a Closed-Loop DEX Simulator
-Learning Predictive Ambiguity Sets for Decision-Focused Distributionally Robust Optimization

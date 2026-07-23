@@ -1,3 +1,4 @@
+Flux-Corrected Diagonal Frog: second order and positivity at all time steps
 Pricing options on illiquid assets using liquid market benchmarks: an application to energy markets
 Gaussian Boson Sampling for Asset Clustering in Statistical Arbitrage Portfolios
 AlphaZeroBeta: Deep Reinforcement Learning for Market-Neutral Portfolios
@@ -10,5 +11,3 @@ SciPhy Reinforcement Learning for Portfolio Optimization
 Structure-Aware Variational State Preparation for Quantum Basket Option Pricing
 NeuralChaos: Optimal Adapted Approximation of Square Integrable Predictable Processes
 How Much of a 10-K Matters? Aggregation-Dependent Value of Full-Text versus Risk-Factor Sentiment
-Is Deep Hedging Reinforcement Learning?
-VAIOM: Continuous-Input, Discrete-Output Decoder-Only Financial Sequence Modeling

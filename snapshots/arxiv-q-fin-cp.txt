@@ -7,7 +7,3 @@ A Practical Guide to Simulating Correlated Binary Outcomes
 A Novel Hybrid Quantum Reservoir Computing (nHQRC) for Phase Transition Detection in Non-Equilibrium Dynamical Systems
 FinBench: Time-Gated Calibration and Uncertainty Benchmarking for Agentic Financial Forecasting
 AI Trading: Evaluating Large Language Models for Technical Market Analysis
-SciPhy Reinforcement Learning for Portfolio Optimization
-Structure-Aware Variational State Preparation for Quantum Basket Option Pricing
-NeuralChaos: Optimal Adapted Approximation of Square Integrable Predictable Processes
-How Much of a 10-K Matters? Aggregation-Dependent Value of Full-Text versus Risk-Factor Sentiment

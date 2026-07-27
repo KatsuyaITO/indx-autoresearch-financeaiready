@@ -1,3 +1,4 @@
+Are cryptocurrencies real financial bubbles? Evidence from quantitative analyses
 Flux-Corrected Diagonal Frog: second order and positivity at all time steps
 Pricing options on illiquid assets using liquid market benchmarks: an application to energy markets
 Gaussian Boson Sampling for Asset Clustering in Statistical Arbitrage Portfolios
@@ -6,4 +7,3 @@ Abliteration Is Not a Scalpel: Off-Target Effects of Refusal Removal on Decision
 A Practical Guide to Simulating Correlated Binary Outcomes
 A Novel Hybrid Quantum Reservoir Computing (nHQRC) for Phase Transition Detection in Non-Equilibrium Dynamical Systems
 FinBench: Time-Gated Calibration and Uncertainty Benchmarking for Agentic Financial Forecasting
-AI Trading: Evaluating Large Language Models for Technical Market Analysis

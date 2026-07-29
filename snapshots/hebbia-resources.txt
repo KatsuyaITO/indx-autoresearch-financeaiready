@@ -1,9 +1,17 @@
 Resources
 Resource
+07.29.2026
+The 7 Best AI Tools for Leveraged Finance Research
+Explore the top AI tools for leveraged finance research to save up to 40 hours per deal and move from research to deal-ready analysis.
+Read More
+Resource
+07.28.2026
+Mid-Market PE Technology: Key Tools for Every Stage of the Deal
+Mid-market PE firms win on origination edge and the quality of their diligence. The right technology is what makes both possible.
+Resource
 07.23.2026
 The 9 Best Deal Sourcing Software Tools for PE, IB & M&A Teams
 Most deal teams rely on three or four tools without knowing whether they have the right ones. Here is a breakdown of the best deal sourcing software platforms and where each one actually fits in the stack.
-Read More
 Resource
 07.08.2026
 AI for Financial Document Processing: What It Is, How It’s Used, and More
@@ -34,24 +42,16 @@ The 10 Best Credit Risk Management Software Tools
 Explore the top credit risk management tools to discover how AI-driven data extraction and real-time monitoring are transforming underwriting and portfolio oversight.
 Resource
 05.15.2026
-RAG Architecture: Explanation and Limitations
-Explore RAG architecture in-depth, including what it is, how it works, and why it’s not suitable for finance workflows.
-Resource
-05.15.2026
 Enterprise Value to Equity Value Bridge: A Step-by-Step Guide
 Learn how to adjust for debt, cash, and minority interests, and how AI platforms automate data gathering for faster, accurate deal analysis.
+Resource
+05.15.2026
+RAG Architecture: Explanation and Limitations
+Explore RAG architecture in-depth, including what it is, how it works, and why it’s not suitable for finance workflows.
 Resource
 05.08.2026
 Finance Teams Spend Hours Each Week Searching For Data Buried in Documents
 Document overload is costing finance teams more than they realize. New survey data reveals the hidden toll on analysis quality, time, and team efficiency.
-Resource
-05.08.2026
-Finance Professionals Trust AI More Than Their Coworkers — But There’s a Catch
-New Hebbia data reveals that 63% of finance professionals trust AI over a coworker to catch model errors, but 58% want it to be flawless before they fully depend on it.
-Resource
-04.10.2026
-8 Best Financial Modeling Software Options for Faster, More Accurate Forecasting
-Learn how AI platforms like Hebbia transform accuracy, speed, and decision-making.
 PREVIOUS PAGE
 PAGE
 1
@@ -59,4 +59,6 @@ PAGE
 2
 PAGE
 3
+PAGE
+4
 NEXT PAGE

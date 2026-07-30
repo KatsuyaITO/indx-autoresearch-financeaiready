@@ -1,3 +1,5 @@
+Inverse Learning of Latent Risk-Neutral Densities from Irregular Option Quotes
+Crossing-Free Probabilistic K-Line Forecasts Without Retraining
 An Analytic COS Method for Compound Option Valuation
 How Likely and How Deep? Sharp Joint Bounds on Risk-Neutral Crash Probability and Conditional Depth from Option Bid-Ask Quotes
 RIDGE: An Autonomous Framework for Validation and Method Discovery in LLM-Generated Option Pricing
@@ -5,4 +7,3 @@ Robust Hedging Valuation Adjustment for Deep Hedging Policies under Market Frict
 Quantum Transformer BSDE Solver via Multi-Layer Fully-Connected Variational Quantum Circuits
 One Other Option Pricing Scheme
 Are cryptocurrencies real financial bubbles? Evidence from quantitative analyses
-Flux-Corrected Diagonal Frog: second order and positivity at all time steps

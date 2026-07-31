@@ -1,3 +1,4 @@
+FinanceHarness: Autonomous Financial Deep Research Framework
 Inverse Learning of Latent Risk-Neutral Densities from Irregular Option Quotes
 Crossing-Free Probabilistic K-Line Forecasts Without Retraining
 An Analytic COS Method for Compound Option Valuation

@@ -1,3 +1,4 @@
+Decoupled Probabilistic Forecasting and Arbitrage-Aware Refinement of Implied Volatility Surfaces
 FinanceHarness: Autonomous Financial Deep Research Framework
 Inverse Learning of Latent Risk-Neutral Densities from Irregular Option Quotes
 Crossing-Free Probabilistic K-Line Forecasts Without Retraining
@@ -7,4 +8,3 @@ RIDGE: An Autonomous Framework for Validation and Method Discovery in LLM-Genera
 Robust Hedging Valuation Adjustment for Deep Hedging Policies under Market Frictions
 Quantum Transformer BSDE Solver via Multi-Layer Fully-Connected Variational Quantum Circuits
 One Other Option Pricing Scheme
-Are cryptocurrencies real financial bubbles? Evidence from quantitative analyses

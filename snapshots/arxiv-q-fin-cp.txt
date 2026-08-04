@@ -1,3 +1,8 @@
+Battery Storage Co-Optimization in Day-Ahead and Real-Time Markets with Bayesian Optimization
+Latent Flow Matching for Arbitrage-Aware Implied Volatility Surface Generation
+Methodology for Modelling Token Economies and Performing Event Impact Analysis with DeTEcT
+AI and Exchange Rate Predictability
+Axient: On-Chain Credit and Loss Allocation for Leveraged Event Markets: A Venue-Agnostic Protocol for Traders, Credit Providers, Market Makers, and Liquidation Backstops
 Decoupled Probabilistic Forecasting and Arbitrage-Aware Refinement of Implied Volatility Surfaces
 FinanceHarness: Autonomous Financial Deep Research Framework
 Inverse Learning of Latent Risk-Neutral Densities from Irregular Option Quotes
@@ -7,4 +12,3 @@ How Likely and How Deep? Sharp Joint Bounds on Risk-Neutral Crash Probability an
 RIDGE: An Autonomous Framework for Validation and Method Discovery in LLM-Generated Option Pricing
 Robust Hedging Valuation Adjustment for Deep Hedging Policies under Market Frictions
 Quantum Transformer BSDE Solver via Multi-Layer Fully-Connected Variational Quantum Circuits
-One Other Option Pricing Scheme

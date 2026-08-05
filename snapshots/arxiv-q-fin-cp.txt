@@ -1,3 +1,4 @@
+Neural Networks with Local Converging Inputs for Efficient Options Pricing Models
 Battery Storage Co-Optimization in Day-Ahead and Real-Time Markets with Bayesian Optimization
 Latent Flow Matching for Arbitrage-Aware Implied Volatility Surface Generation
 Methodology for Modelling Token Economies and Performing Event Impact Analysis with DeTEcT
@@ -7,8 +8,3 @@ Decoupled Probabilistic Forecasting and Arbitrage-Aware Refinement of Implied Vo
 FinanceHarness: Autonomous Financial Deep Research Framework
 Inverse Learning of Latent Risk-Neutral Densities from Irregular Option Quotes
 Crossing-Free Probabilistic K-Line Forecasts Without Retraining
-An Analytic COS Method for Compound Option Valuation
-How Likely and How Deep? Sharp Joint Bounds on Risk-Neutral Crash Probability and Conditional Depth from Option Bid-Ask Quotes
-RIDGE: An Autonomous Framework for Validation and Method Discovery in LLM-Generated Option Pricing
-Robust Hedging Valuation Adjustment for Deep Hedging Policies under Market Frictions
-Quantum Transformer BSDE Solver via Multi-Layer Fully-Connected Variational Quantum Circuits

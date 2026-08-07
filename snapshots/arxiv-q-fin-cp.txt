@@ -6,4 +6,3 @@ Methodology for Modelling Token Economies and Performing Event Impact Analysis w
 AI and Exchange Rate Predictability
 Axient: On-Chain Credit and Loss Allocation for Leveraged Event Markets: A Venue-Agnostic Protocol for Traders, Credit Providers, Market Makers, and Liquidation Backstops
 Decoupled Probabilistic Forecasting and Arbitrage-Aware Refinement of Implied Volatility Surfaces
-FinanceHarness: Autonomous Financial Deep Research Framework

@@ -1,9 +1,13 @@
 Resources
 Resource
+08.07.2026
+AI for Data Extraction in Finance: How It Works and the Best Tools to Try
+Learn how AI data extraction works across the most critical finance workflows and which platforms institutional teams rely on most.
+Read More
+Resource
 08.04.2026
 Distressed Debt Investing Strategies Explained
 Most investors head for the exit when a company’s debt turns distressed. Here’s how specialized funds turn that moment into an opportunity.
-Read More
 Resource
 07.29.2026
 The 7 Best AI Tools for Leveraged Finance Research
@@ -48,10 +52,6 @@ Resource
 05.15.2026
 Enterprise Value to Equity Value Bridge: A Step-by-Step Guide
 Learn how to adjust for debt, cash, and minority interests, and how AI platforms automate data gathering for faster, accurate deal analysis.
-Resource
-05.15.2026
-RAG Architecture: Explanation and Limitations
-Explore RAG architecture in-depth, including what it is, how it works, and why it’s not suitable for finance workflows.
 PREVIOUS PAGE
 PAGE
 1

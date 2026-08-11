@@ -1,7 +1,2 @@
 Robust Control under Stationary Ambiguity
 Neural Networks with Local Converging Inputs for Efficient Options Pricing Models
-Battery Storage Co-Optimization in Day-Ahead and Real-Time Markets with Bayesian Optimization
-Latent Flow Matching for Arbitrage-Aware Implied Volatility Surface Generation
-Methodology for Modelling Token Economies and Performing Event Impact Analysis with DeTEcT
-AI and Exchange Rate Predictability
-Axient: On-Chain Credit and Loss Allocation for Leveraged Event Markets: A Venue-Agnostic Protocol for Traders, Credit Providers, Market Makers, and Liquidation Backstops

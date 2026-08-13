@@ -1,1 +1,2 @@
-Robust Control under Stationary Ambiguity
+Long-Horizon Forecasting of Complete Financial Statements with Forma
+AgonAlpha: Autonomous Alpha Discovery via Prompt Economy and Scalable Agentic Search

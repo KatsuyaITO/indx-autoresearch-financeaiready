@@ -1,3 +1,5 @@
+Self-Supervised Auxiliary Task Discovery for Stable Reinforcement Learning in Stock Trading
+Toward Decentralized Carbon Trading in Indonesia: A Public-Blockchain Architecture for Tokenized Real-World Assets
 On the First Hitting Time Problems for Diffusion Processes: Local Time-Space Approach
 LOB-ID: Evaluating Synthetic Market Data by Inception Distances
 Diffusion Models in Finance: A Survey

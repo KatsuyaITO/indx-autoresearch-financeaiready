@@ -1,3 +1,4 @@
+Tradable Itô Signatures: A Model-Free, Interpretable Framework for Dynamic Hedging
 COS-TT-CHF: A Tensor-Train Characteristic-Function COS Method for Multi-Asset Option Pricing
 Self-Consistent Adjoint Policy Iteration for Constrained Dynamic Portfolio Choice
 Self-Supervised Auxiliary Task Discovery for Stable Reinforcement Learning in Stock Trading
@@ -8,5 +9,3 @@ Diffusion Models in Finance: A Survey
 Beyond the Skew-Stickiness Ratio: Transport Geometry of Spot-Driven Variance Surface Dynamics
 AI-Driven Multiscenario Interest Rate Forecasting: A Proof of Concept for Banking Asset Management
 FlowLOB: Efficient and Controllable Limit Order Book Generation with Flow Matching
-Long-Horizon Forecasting of Complete Financial Statements with Forma
-AgonAlpha: Autonomous Alpha Discovery via Prompt Economy and Scalable Agentic Search

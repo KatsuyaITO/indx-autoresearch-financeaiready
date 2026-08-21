@@ -1,11 +1,10 @@
+Deep-MKV-TS: Path-Dependent McKean--Vlasov Control for Financial Time Series Generation
+M3: A State-Event Generative Foundation Model for Market Microstructure Dynamics
+CAT Bond Pricing with Kolmogorov--Arnold Networks
+Concentrated Liquidity Provision: a Reinforcement Learning Perspective
 Tradable Itô Signatures: A Model-Free, Interpretable Framework for Dynamic Hedging
 COS-TT-CHF: A Tensor-Train Characteristic-Function COS Method for Multi-Asset Option Pricing
 Self-Consistent Adjoint Policy Iteration for Constrained Dynamic Portfolio Choice
 Self-Supervised Auxiliary Task Discovery for Stable Reinforcement Learning in Stock Trading
 Toward Decentralized Carbon Trading in Indonesia: A Public-Blockchain Architecture for Tokenized Real-World Assets
 On the First Hitting Time Problems for Diffusion Processes: Local Time-Space Approach
-LOB-ID: Evaluating Synthetic Market Data by Inception Distances
-Diffusion Models in Finance: A Survey
-Beyond the Skew-Stickiness Ratio: Transport Geometry of Spot-Driven Variance Surface Dynamics
-AI-Driven Multiscenario Interest Rate Forecasting: A Proof of Concept for Banking Asset Management
-FlowLOB: Efficient and Controllable Limit Order Book Generation with Flow Matching

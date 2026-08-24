@@ -1,3 +1,6 @@
+Rethinking Synthetic Scenario Realism: Compatibility, Not Fidelity, Drives Hedging Performance
+Calibrating Inelastic Markets to Options: The Lean Marketron and the Generalized Langevin Equation
+If It Walks Like an Arbitrage: Protocol-Agnostic Detection with Decidable Structural Equivalence
 Deep-MKV-TS: Path-Dependent McKean--Vlasov Control for Financial Time Series Generation
 M3: A State-Event Generative Foundation Model for Market Microstructure Dynamics
 CAT Bond Pricing with Kolmogorov--Arnold Networks
@@ -7,4 +10,3 @@ COS-TT-CHF: A Tensor-Train Characteristic-Function COS Method for Multi-Asset Op
 Self-Consistent Adjoint Policy Iteration for Constrained Dynamic Portfolio Choice
 Self-Supervised Auxiliary Task Discovery for Stable Reinforcement Learning in Stock Trading
 Toward Decentralized Carbon Trading in Indonesia: A Public-Blockchain Architecture for Tokenized Real-World Assets
-On the First Hitting Time Problems for Diffusion Processes: Local Time-Space Approach

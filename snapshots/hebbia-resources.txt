@@ -1,9 +1,17 @@
 Resources
 Resource
+08.25.2026
+Top 12 AI Financial Research Platforms for 2026: The New Leaders in Data Synthesis
+Learn the top 12 financial research platforms making a difference across the industry.
+Read More
+Resource
+08.21.2026
+The 7 Best Financial NLP Tools for Investment Research
+Explore the top financial NLP tools for investment research that enable you to extract key signals from your documents for faster data insights.
+Resource
 08.07.2026
 AI for Data Extraction in Finance: How It Works and the Best Tools to Try
 Learn how AI data extraction works across the most critical finance workflows and which platforms institutional teams rely on most.
-Read More
 Resource
 08.04.2026
 Distressed Debt Investing Strategies Explained
@@ -44,14 +52,6 @@ Resource
 05.21.2026
 The 8 Best Financial Forecasting Tools
 Explore the leading AI-driven platforms redefining financial forecasting through automated complex modeling and enhanced data precision.
-Resource
-05.19.2026
-The 10 Best Credit Risk Management Software Tools
-Explore the top credit risk management tools to discover how AI-driven data extraction and real-time monitoring are transforming underwriting and portfolio oversight.
-Resource
-05.15.2026
-Enterprise Value to Equity Value Bridge: A Step-by-Step Guide
-Learn how to adjust for debt, cash, and minority interests, and how AI platforms automate data gathering for faster, accurate deal analysis.
 PREVIOUS PAGE
 PAGE
 1

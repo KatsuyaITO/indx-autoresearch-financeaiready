@@ -1,3 +1,5 @@
+The Physical Crash Frontier: What Finite Option Quotes Can and Cannot Reveal
+Diagonal Frog meets ADI: trading matrix exponentials for rational maps in the Fokker--Planck equation
 Rethinking Synthetic Scenario Realism: Compatibility, Not Fidelity, Drives Hedging Performance
 Calibrating Inelastic Markets to Options: The Lean Marketron and the Generalized Langevin Equation
 If It Walks Like an Arbitrage: Protocol-Agnostic Detection with Decidable Structural Equivalence
@@ -8,5 +10,3 @@ Concentrated Liquidity Provision: a Reinforcement Learning Perspective
 Tradable Itô Signatures: A Model-Free, Interpretable Framework for Dynamic Hedging
 COS-TT-CHF: A Tensor-Train Characteristic-Function COS Method for Multi-Asset Option Pricing
 Self-Consistent Adjoint Policy Iteration for Constrained Dynamic Portfolio Choice
-Self-Supervised Auxiliary Task Discovery for Stable Reinforcement Learning in Stock Trading
-Toward Decentralized Carbon Trading in Indonesia: A Public-Blockchain Architecture for Tokenized Real-World Assets

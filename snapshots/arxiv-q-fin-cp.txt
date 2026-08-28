@@ -1,3 +1,6 @@
+A Temporal Multiplex Graph Neural Network for Systemic Risk Transmission in Global Banking
+Tabular Deep Learning for Algorithmic Trading: Cross-Regime Bayesian Optimisation for Equity Signal Generation
+CIFQA: A Deterministic Tool-Grounded Multi-Agent LLM Framework for Financial Query Answering
 Harvesting the Volatility Risk Premium: A Learning-to-Rank Approach
 Where Does Ethereum Validators' Money Go? A Spectral Analysis
 The Physical Crash Frontier: What Finite Option Quotes Can and Cannot Reveal
@@ -5,8 +8,3 @@ Diagonal Frog meets ADI: trading matrix exponentials for rational maps in the Fo
 Rethinking Synthetic Scenario Realism: Compatibility, Not Fidelity, Drives Hedging Performance
 Calibrating Inelastic Markets to Options: The Lean Marketron and the Generalized Langevin Equation
 If It Walks Like an Arbitrage: Protocol-Agnostic Detection with Decidable Structural Equivalence
-Deep-MKV-TS: Path-Dependent McKean--Vlasov Control for Financial Time Series Generation
-M3: A State-Event Generative Foundation Model for Market Microstructure Dynamics
-CAT Bond Pricing with Kolmogorov--Arnold Networks
-Concentrated Liquidity Provision: a Reinforcement Learning Perspective
-Tradable Itô Signatures: A Model-Free, Interpretable Framework for Dynamic Hedging

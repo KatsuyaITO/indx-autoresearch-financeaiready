@@ -1,3 +1,5 @@
+Market-Informed Valuation of GMMB Riders with Surrender Options under a Heston Stochastic-Local Volatility Model
+Pricing and Calibration of Bitcoin Inverse Options via the Rough Bergomi Model
 A Temporal Multiplex Graph Neural Network for Systemic Risk Transmission in Global Banking
 Tabular Deep Learning for Algorithmic Trading: Cross-Regime Bayesian Optimisation for Equity Signal Generation
 CIFQA: A Deterministic Tool-Grounded Multi-Agent LLM Framework for Financial Query Answering
@@ -5,6 +7,3 @@ Harvesting the Volatility Risk Premium: A Learning-to-Rank Approach
 Where Does Ethereum Validators' Money Go? A Spectral Analysis
 The Physical Crash Frontier: What Finite Option Quotes Can and Cannot Reveal
 Diagonal Frog meets ADI: trading matrix exponentials for rational maps in the Fokker--Planck equation
-Rethinking Synthetic Scenario Realism: Compatibility, Not Fidelity, Drives Hedging Performance
-Calibrating Inelastic Markets to Options: The Lean Marketron and the Generalized Langevin Equation
-If It Walks Like an Arbitrage: Protocol-Agnostic Detection with Decidable Structural Equivalence

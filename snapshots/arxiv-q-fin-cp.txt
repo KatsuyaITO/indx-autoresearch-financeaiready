@@ -1,3 +1,8 @@
+Agentic Quantitative Trading: A Survey of Workflows, Systems, and Evaluation
+Neural Calibration of a Complete Market Model
+Importance Sampling Enhanced with the COS Method for the Portfolio Risk Allocation
+Improving Swaption Calibration in Factor HJM Stochastic Volatility Models: A First-Order Correction to Frozen Swap-Rate Loadings
+Deep Hedging Under Realistic Market Frictions: A Regime-Conditional Empirical Study of Dynamic Option Hedging on Bitcoin Options
 Market-Informed Valuation of GMMB Riders with Surrender Options under a Heston Stochastic-Local Volatility Model
 Pricing and Calibration of Bitcoin Inverse Options via the Rough Bergomi Model
 A Temporal Multiplex Graph Neural Network for Systemic Risk Transmission in Global Banking
@@ -5,5 +10,3 @@ Tabular Deep Learning for Algorithmic Trading: Cross-Regime Bayesian Optimisatio
 CIFQA: A Deterministic Tool-Grounded Multi-Agent LLM Framework for Financial Query Answering
 Harvesting the Volatility Risk Premium: A Learning-to-Rank Approach
 Where Does Ethereum Validators' Money Go? A Spectral Analysis
-The Physical Crash Frontier: What Finite Option Quotes Can and Cannot Reveal
-Diagonal Frog meets ADI: trading matrix exponentials for rational maps in the Fokker--Planck equation

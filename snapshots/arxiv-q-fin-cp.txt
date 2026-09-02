@@ -1,3 +1,6 @@
+Adaptive singular-point method for pricing and hedging surrenderable equity-linked contracts
+Single- and Multilevel Quadrature with Error Control for Fourier Pricing under the Rough Heston Model
+Latent-Space No-Arbitrage Geometry of Generative Models for Implied Volatility Surfaces
 Agentic Quantitative Trading: A Survey of Workflows, Systems, and Evaluation
 Neural Calibration of a Complete Market Model
 Importance Sampling Enhanced with the COS Method for the Portfolio Risk Allocation
@@ -8,5 +11,3 @@ Pricing and Calibration of Bitcoin Inverse Options via the Rough Bergomi Model
 A Temporal Multiplex Graph Neural Network for Systemic Risk Transmission in Global Banking
 Tabular Deep Learning for Algorithmic Trading: Cross-Regime Bayesian Optimisation for Equity Signal Generation
 CIFQA: A Deterministic Tool-Grounded Multi-Agent LLM Framework for Financial Query Answering
-Harvesting the Volatility Risk Premium: A Learning-to-Rank Approach
-Where Does Ethereum Validators' Money Go? A Spectral Analysis

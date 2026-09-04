@@ -1,3 +1,5 @@
+Global Multi-Maturity SPX-VIX Calibration Beyond Markovian Stitching
+An Entropic Factor Model for Robust Portfolio Replication
 Insights on Time-consistent Deep Hedging under Elicitable Dynamic Risk Measures
 Adaptive singular-point method for pricing and hedging surrenderable equity-linked contracts
 Single- and Multilevel Quadrature with Error Control for Fourier Pricing under the Rough Heston Model
@@ -9,6 +11,3 @@ Improving Swaption Calibration in Factor HJM Stochastic Volatility Models: A Fir
 Deep Hedging Under Realistic Market Frictions: A Regime-Conditional Empirical Study of Dynamic Option Hedging on Bitcoin Options
 Market-Informed Valuation of GMMB Riders with Surrender Options under a Heston Stochastic-Local Volatility Model
 Pricing and Calibration of Bitcoin Inverse Options via the Rough Bergomi Model
-A Temporal Multiplex Graph Neural Network for Systemic Risk Transmission in Global Banking
-Tabular Deep Learning for Algorithmic Trading: Cross-Regime Bayesian Optimisation for Equity Signal Generation
-CIFQA: A Deterministic Tool-Grounded Multi-Agent LLM Framework for Financial Query Answering

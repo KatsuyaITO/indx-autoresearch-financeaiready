@@ -1,3 +1,8 @@
+Unbiased Monte Carlo Greeks for Discontinuous Payoffs
+Asymptotically-informed neural networks for Black-Scholes implied volatility computation
+Deep Learning for Reflected BSDEs: Regularization and Error Analysis
+AlphaRJM: Reward-Jump Memory for Stochastic Return-Guided Alpha Discovery
+Regimes in the Order Flow
 Quantum Circuit Learning for Volatility Modeling: Multifractal Analysis of Realized Volatility Time Series
 Convex Modeling of Price Cross-Impact over Time
 Global Multi-Maturity SPX-VIX Calibration Beyond Markovian Stitching
@@ -6,8 +11,3 @@ Insights on Time-consistent Deep Hedging under Elicitable Dynamic Risk Measures
 Adaptive singular-point method for pricing and hedging surrenderable equity-linked contracts
 Single- and Multilevel Quadrature with Error Control for Fourier Pricing under the Rough Heston Model
 Latent-Space No-Arbitrage Geometry of Generative Models for Implied Volatility Surfaces
-Agentic Quantitative Trading: A Survey of Workflows, Systems, and Evaluation
-Neural Calibration of a Complete Market Model
-Importance Sampling Enhanced with the COS Method for the Portfolio Risk Allocation
-Improving Swaption Calibration in Factor HJM Stochastic Volatility Models: A First-Order Correction to Frozen Swap-Rate Loadings
-Deep Hedging Under Realistic Market Frictions: A Regime-Conditional Empirical Study of Dynamic Option Hedging on Bitcoin Options

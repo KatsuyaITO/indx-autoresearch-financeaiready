@@ -8,6 +8,3 @@ Convex Modeling of Price Cross-Impact over Time
 Global Multi-Maturity SPX-VIX Calibration Beyond Markovian Stitching
 An Entropic Factor Model for Robust Portfolio Replication
 Insights on Time-consistent Deep Hedging under Elicitable Dynamic Risk Measures
-Adaptive singular-point method for pricing and hedging surrenderable equity-linked contracts
-Single- and Multilevel Quadrature with Error Control for Fourier Pricing under the Rough Heston Model
-Latent-Space No-Arbitrage Geometry of Generative Models for Implied Volatility Surfaces

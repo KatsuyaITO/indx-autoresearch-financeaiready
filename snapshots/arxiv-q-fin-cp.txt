@@ -7,4 +7,3 @@ Quantum Circuit Learning for Volatility Modeling: Multifractal Analysis of Reali
 Convex Modeling of Price Cross-Impact over Time
 Global Multi-Maturity SPX-VIX Calibration Beyond Markovian Stitching
 An Entropic Factor Model for Robust Portfolio Replication
-Insights on Time-consistent Deep Hedging under Elicitable Dynamic Risk Measures

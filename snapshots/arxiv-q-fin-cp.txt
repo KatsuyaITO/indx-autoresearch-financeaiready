@@ -5,5 +5,3 @@ AlphaRJM: Reward-Jump Memory for Stochastic Return-Guided Alpha Discovery
 Regimes in the Order Flow
 Quantum Circuit Learning for Volatility Modeling: Multifractal Analysis of Realized Volatility Time Series
 Convex Modeling of Price Cross-Impact over Time
-Global Multi-Maturity SPX-VIX Calibration Beyond Markovian Stitching
-An Entropic Factor Model for Robust Portfolio Replication

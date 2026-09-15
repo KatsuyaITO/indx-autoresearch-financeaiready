@@ -1,7 +1,7 @@
+Same Book, Different Fills: Partial Identification of FIFO Execution from Aggregate Order Books
+Diffusion models for dynamic volatility surface generation and data-driven hedging
 Unbiased Monte Carlo Greeks for Discontinuous Payoffs
 Asymptotically-informed neural networks for Black-Scholes implied volatility computation
 Deep Learning for Reflected BSDEs: Regularization and Error Analysis
 AlphaRJM: Reward-Jump Memory for Stochastic Return-Guided Alpha Discovery
 Regimes in the Order Flow
-Quantum Circuit Learning for Volatility Modeling: Multifractal Analysis of Realized Volatility Time Series
-Convex Modeling of Price Cross-Impact over Time

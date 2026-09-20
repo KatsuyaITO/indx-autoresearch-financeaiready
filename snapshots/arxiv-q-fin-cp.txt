@@ -1,7 +1,9 @@
+Beyond Rough Volatility: Decoupling Memory and Scaling via a Generalized Langevin Equation
+Herding and Liquidity in Order-Book Markets. III. Leverage and the Onset of Endogenous Liquidity Crises under Weak Anchoring
+StableEval Arena: A Cost-Aware Agentic Benchmark for Stablecoin Price Stability Prediction
+Sniper Cohorts and Algorithmic Filter Rejections in Solana Memecoin Markets: Two-Window Replication of Lifecycle-Stage Population Separation
+Model-Free Passive Execution via Order-Level Shadowing
+SAiFE-gym: Model-based Environments for Automated Market Making with Concentrated Liquidity
+Financial Contagion Networks as Annealing-Ready Ising Systems Cascades, Bailout Optimization, and Susceptibility
 Same Book, Different Fills: Partial Identification of FIFO Execution from Aggregate Order Books
 Diffusion models for dynamic volatility surface generation and data-driven hedging
-Unbiased Monte Carlo Greeks for Discontinuous Payoffs
-Asymptotically-informed neural networks for Black-Scholes implied volatility computation
-Deep Learning for Reflected BSDEs: Regularization and Error Analysis
-AlphaRJM: Reward-Jump Memory for Stochastic Return-Guided Alpha Discovery
-Regimes in the Order Flow

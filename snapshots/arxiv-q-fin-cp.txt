@@ -1,3 +1,6 @@
+OrderFusion+: Probabilistic Buy--Sell Price Trajectory Forecasting in Intraday Electricity Markets
+Universal Diffusion Models for Implied Volatility Surfaces: Learning Shared Dynamics Across Stocks
+Leaky-integrator reconstruction: taming error accumulation in recursive differenced time-series forecasting
 Simulation of stochastic volatility models via operator splitting schemes
 Efficient simulation schemes for pricing options under the Ornstein--Uhlenbeck driven stochastic volatility model
 Beyond Rough Volatility: Decoupling Memory and Scaling via a Generalized Langevin Equation
@@ -7,5 +10,3 @@ Sniper Cohorts and Algorithmic Filter Rejections in Solana Memecoin Markets: Two
 Model-Free Passive Execution via Order-Level Shadowing
 SAiFE-gym: Model-based Environments for Automated Market Making with Concentrated Liquidity
 Financial Contagion Networks as Annealing-Ready Ising Systems Cascades, Bailout Optimization, and Susceptibility
-Same Book, Different Fills: Partial Identification of FIFO Execution from Aggregate Order Books
-Diffusion models for dynamic volatility surface generation and data-driven hedging

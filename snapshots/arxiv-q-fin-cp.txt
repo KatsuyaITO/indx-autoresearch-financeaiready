@@ -1,3 +1,4 @@
+Hierarchical Multi-Task Learning with Liquidity-Aware Signals for Stock Forecasting
 OrderFusion+: Probabilistic Buy--Sell Price Trajectory Forecasting in Intraday Electricity Markets
 Universal Diffusion Models for Implied Volatility Surfaces: Learning Shared Dynamics Across Stocks
 Leaky-integrator reconstruction: taming error accumulation in recursive differenced time-series forecasting
@@ -9,4 +10,3 @@ StableEval Arena: A Cost-Aware Agentic Benchmark for Stablecoin Price Stability 
 Sniper Cohorts and Algorithmic Filter Rejections in Solana Memecoin Markets: Two-Window Replication of Lifecycle-Stage Population Separation
 Model-Free Passive Execution via Order-Level Shadowing
 SAiFE-gym: Model-based Environments for Automated Market Making with Concentrated Liquidity
-Financial Contagion Networks as Annealing-Ready Ising Systems Cascades, Bailout Optimization, and Susceptibility

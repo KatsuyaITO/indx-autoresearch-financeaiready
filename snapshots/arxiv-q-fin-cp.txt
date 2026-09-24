@@ -1,3 +1,7 @@
+Loss Choice or Model Choice? The Role of Forecast Level in Cryptocurrency Volatility Forecasting
+Feasible Multi-Asset Optimal Execution under Cash Constraints
+Financial Tail Risk Beyond Lipschitz Continuity via Semi-Discrete Optimal Transport
+HARN: Hierarchical Associative Resonance Network for Event-Driven Multi-Timeframe Forecasting
 Hierarchical Multi-Task Learning with Liquidity-Aware Signals for Stock Forecasting
 OrderFusion+: Probabilistic Buy--Sell Price Trajectory Forecasting in Intraday Electricity Markets
 Universal Diffusion Models for Implied Volatility Surfaces: Learning Shared Dynamics Across Stocks
@@ -7,6 +11,3 @@ Efficient simulation schemes for pricing options under the Ornstein--Uhlenbeck d
 Beyond Rough Volatility: Decoupling Memory and Scaling via a Generalized Langevin Equation
 Herding and Liquidity in Order-Book Markets. III. Leverage and the Onset of Endogenous Liquidity Crises under Weak Anchoring
 StableEval Arena: A Cost-Aware Agentic Benchmark for Stablecoin Price Stability Prediction
-Sniper Cohorts and Algorithmic Filter Rejections in Solana Memecoin Markets: Two-Window Replication of Lifecycle-Stage Population Separation
-Model-Free Passive Execution via Order-Level Shadowing
-SAiFE-gym: Model-based Environments for Automated Market Making with Concentrated Liquidity

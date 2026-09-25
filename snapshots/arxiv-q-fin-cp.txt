@@ -8,6 +8,3 @@ Universal Diffusion Models for Implied Volatility Surfaces: Learning Shared Dyna
 Leaky-integrator reconstruction: taming error accumulation in recursive differenced time-series forecasting
 Simulation of stochastic volatility models via operator splitting schemes
 Efficient simulation schemes for pricing options under the Ornstein--Uhlenbeck driven stochastic volatility model
-Beyond Rough Volatility: Decoupling Memory and Scaling via a Generalized Langevin Equation
-Herding and Liquidity in Order-Book Markets. III. Leverage and the Onset of Endogenous Liquidity Crises under Weak Anchoring
-StableEval Arena: A Cost-Aware Agentic Benchmark for Stablecoin Price Stability Prediction

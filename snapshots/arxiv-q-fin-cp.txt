@@ -1,3 +1,6 @@
+Taming the Option Factor Zoo: A High-Dimensional Analysis
+Agentic Limit Order Books: Phase Transitions and Market Impact
+PALM: Point-in-Time Adaptation for Financial Language Models
 Loss Choice or Model Choice? The Role of Forecast Level in Cryptocurrency Volatility Forecasting
 Feasible Multi-Asset Optimal Execution under Cash Constraints
 Financial Tail Risk Beyond Lipschitz Continuity via Semi-Discrete Optimal Transport
@@ -6,5 +9,3 @@ Hierarchical Multi-Task Learning with Liquidity-Aware Signals for Stock Forecast
 OrderFusion+: Probabilistic Buy--Sell Price Trajectory Forecasting in Intraday Electricity Markets
 Universal Diffusion Models for Implied Volatility Surfaces: Learning Shared Dynamics Across Stocks
 Leaky-integrator reconstruction: taming error accumulation in recursive differenced time-series forecasting
-Simulation of stochastic volatility models via operator splitting schemes
-Efficient simulation schemes for pricing options under the Ornstein--Uhlenbeck driven stochastic volatility model

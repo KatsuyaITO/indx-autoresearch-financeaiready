@@ -1,3 +1,10 @@
+FinAutoRubric: Expert-Guided Automatic Rubric Generation for Evaluating Financial Research Agents
+Retrieval-Augmented Diffusion Modeling for Stochastic Discount Factor Portfolios
+Deep kernel hedging
+Taming the Greeks: Option Portfolios with Inductive Biases
+LiveOption: Evaluating LLM Agents in Structured Option Trading with Nonlinear Payoffs
+Forecasting Intraday USD/CAD Exchange Rate with News-Derived Monetary-Policy Signals
+Self-Evolving Multi-Agent Symbolic Discovery for Financial Fundamental Analysis
 Taming the Option Factor Zoo: A High-Dimensional Analysis
 Agentic Limit Order Books: Phase Transitions and Market Impact
 PALM: Point-in-Time Adaptation for Financial Language Models
@@ -6,6 +13,3 @@ Feasible Multi-Asset Optimal Execution under Cash Constraints
 Financial Tail Risk Beyond Lipschitz Continuity via Semi-Discrete Optimal Transport
 HARN: Hierarchical Associative Resonance Network for Event-Driven Multi-Timeframe Forecasting
 Hierarchical Multi-Task Learning with Liquidity-Aware Signals for Stock Forecasting
-OrderFusion+: Probabilistic Buy--Sell Price Trajectory Forecasting in Intraday Electricity Markets
-Universal Diffusion Models for Implied Volatility Surfaces: Learning Shared Dynamics Across Stocks
-Leaky-integrator reconstruction: taming error accumulation in recursive differenced time-series forecasting

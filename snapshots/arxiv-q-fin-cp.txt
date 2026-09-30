@@ -1,3 +1,10 @@
+From Intraday Orderbook to Imbalance Price: Understanding Cross-Market Interaction
+Information Games: Strategic Crowding and Firm Repositioning in Language-Model Space
+The Efficient Frontier from a LASSO Solver
+A Spread-Gated Hawkes-Flocking Model for Best Bid and Ask Dynamics, with an Application to Limit Order Placement
+A Generalized Langevin Model of Latent Liquidity and Concave Price Impact
+Dyson-Schwinger Effective-Action Methods for Rough Volatility: A Correlation-Response Architecture for Calibration, Exotics and Risk
+Introducing the CZAR Loss: A Tailored Objective Function for Financial Log-Return Predictions
 FinAutoRubric: Expert-Guided Automatic Rubric Generation for Evaluating Financial Research Agents
 Retrieval-Augmented Diffusion Modeling for Stochastic Discount Factor Portfolios
 Deep kernel hedging
@@ -12,4 +19,3 @@ Loss Choice or Model Choice? The Role of Forecast Level in Cryptocurrency Volati
 Feasible Multi-Asset Optimal Execution under Cash Constraints
 Financial Tail Risk Beyond Lipschitz Continuity via Semi-Discrete Optimal Transport
 HARN: Hierarchical Associative Resonance Network for Event-Driven Multi-Timeframe Forecasting
-Hierarchical Multi-Task Learning with Liquidity-Aware Signals for Stock Forecasting

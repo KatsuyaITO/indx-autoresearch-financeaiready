@@ -1,3 +1,5 @@
+Multiperiod bond portfolio optimization with transaction costs using a Markov Decision process
+Stochastic Knothe-Rosenblatt: Light-speed Calibration of Stochastic Local Volatility Models
 From Intraday Orderbook to Imbalance Price: Understanding Cross-Market Interaction
 Information Games: Strategic Crowding and Firm Repositioning in Language-Model Space
 The Efficient Frontier from a LASSO Solver
@@ -15,7 +17,3 @@ Self-Evolving Multi-Agent Symbolic Discovery for Financial Fundamental Analysis
 Taming the Option Factor Zoo: A High-Dimensional Analysis
 Agentic Limit Order Books: Phase Transitions and Market Impact
 PALM: Point-in-Time Adaptation for Financial Language Models
-Loss Choice or Model Choice? The Role of Forecast Level in Cryptocurrency Volatility Forecasting
-Feasible Multi-Asset Optimal Execution under Cash Constraints
-Financial Tail Risk Beyond Lipschitz Continuity via Semi-Discrete Optimal Transport
-HARN: Hierarchical Associative Resonance Network for Event-Driven Multi-Timeframe Forecasting

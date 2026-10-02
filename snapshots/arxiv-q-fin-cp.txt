@@ -1,3 +1,5 @@
+On the Pricing of American Options under Stochastic Local Volatility and Stochastic Correlation via the RBSDE Framework
+A Multi-Venue Solana/DeFi Microstructure Data Corpus: The RED-2400 Family v2
 Multiperiod bond portfolio optimization with transaction costs using a Markov Decision process
 Stochastic Knothe-Rosenblatt: Light-speed Calibration of Stochastic Local Volatility Models
 From Intraday Orderbook to Imbalance Price: Understanding Cross-Market Interaction

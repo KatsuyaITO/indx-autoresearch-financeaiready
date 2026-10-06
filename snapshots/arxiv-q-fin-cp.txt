@@ -1,3 +1,7 @@
+A posteriori error bounds for the Uncertain Volatility Model
+When Token Transfers Do Not Mean Liquidity in Tokenized Real-World Assets
+Latent Continuum of Regimes in Limit Order Book Dynamics
+AlphaPADI: Formulaic Alpha Discovery via Pool-Aware Hierarchical Discrete Diffusion
 Shapley-based Structural Analysis of Neural Calibration for Stochastic Volatility Models
 Event History Over Scale: Compact Transformers for Low-Latency Limit Order Book Forecasting
 FinNextAssist: Towards Professional Financial Deep Research Assistant
@@ -12,10 +16,3 @@ A Spread-Gated Hawkes-Flocking Model for Best Bid and Ask Dynamics, with an Appl
 A Generalized Langevin Model of Latent Liquidity and Concave Price Impact
 Dyson-Schwinger Effective-Action Methods for Rough Volatility: A Correlation-Response Architecture for Calibration, Exotics and Risk
 Introducing the CZAR Loss: A Tailored Objective Function for Financial Log-Return Predictions
-FinAutoRubric: Expert-Guided Automatic Rubric Generation for Evaluating Financial Research Agents
-Retrieval-Augmented Diffusion Modeling for Stochastic Discount Factor Portfolios
-Deep kernel hedging
-Taming the Greeks: Option Portfolios with Inductive Biases
-LiveOption: Evaluating LLM Agents in Structured Option Trading with Nonlinear Payoffs
-Forecasting Intraday USD/CAD Exchange Rate with News-Derived Monetary-Policy Signals
-Self-Evolving Multi-Agent Symbolic Discovery for Financial Fundamental Analysis

@@ -1,3 +1,6 @@
+Shapley-based Structural Analysis of Neural Calibration for Stochastic Volatility Models
+Event History Over Scale: Compact Transformers for Low-Latency Limit Order Book Forecasting
+FinNextAssist: Towards Professional Financial Deep Research Assistant
 On the Pricing of American Options under Stochastic Local Volatility and Stochastic Correlation via the RBSDE Framework
 A Multi-Venue Solana/DeFi Microstructure Data Corpus: The RED-2400 Family v2
 Multiperiod bond portfolio optimization with transaction costs using a Markov Decision process
@@ -16,6 +19,3 @@ Taming the Greeks: Option Portfolios with Inductive Biases
 LiveOption: Evaluating LLM Agents in Structured Option Trading with Nonlinear Payoffs
 Forecasting Intraday USD/CAD Exchange Rate with News-Derived Monetary-Policy Signals
 Self-Evolving Multi-Agent Symbolic Discovery for Financial Fundamental Analysis
-Taming the Option Factor Zoo: A High-Dimensional Analysis
-Agentic Limit Order Books: Phase Transitions and Market Impact
-PALM: Point-in-Time Adaptation for Financial Language Models

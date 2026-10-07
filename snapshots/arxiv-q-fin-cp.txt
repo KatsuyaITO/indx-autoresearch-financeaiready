@@ -1,3 +1,4 @@
+Adversarial Training for Deep Hedging in Nonstationary Markets
 A posteriori error bounds for the Uncertain Volatility Model
 When Token Transfers Do Not Mean Liquidity in Tokenized Real-World Assets
 Latent Continuum of Regimes in Limit Order Book Dynamics
@@ -9,10 +10,3 @@ On the Pricing of American Options under Stochastic Local Volatility and Stochas
 A Multi-Venue Solana/DeFi Microstructure Data Corpus: The RED-2400 Family v2
 Multiperiod bond portfolio optimization with transaction costs using a Markov Decision process
 Stochastic Knothe-Rosenblatt: Light-speed Calibration of Stochastic Local Volatility Models
-From Intraday Orderbook to Imbalance Price: Understanding Cross-Market Interaction
-Information Games: Strategic Crowding and Firm Repositioning in Language-Model Space
-The Efficient Frontier from a LASSO Solver
-A Spread-Gated Hawkes-Flocking Model for Best Bid and Ask Dynamics, with an Application to Limit Order Placement
-A Generalized Langevin Model of Latent Liquidity and Concave Price Impact
-Dyson-Schwinger Effective-Action Methods for Rough Volatility: A Correlation-Response Architecture for Calibration, Exotics and Risk
-Introducing the CZAR Loss: A Tailored Objective Function for Financial Log-Return Predictions

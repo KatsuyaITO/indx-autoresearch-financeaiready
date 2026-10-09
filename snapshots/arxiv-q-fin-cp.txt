@@ -1,3 +1,5 @@
+Multi-period Mean-Expectile Portfolio Optimization under Wasserstein Ambiguity: Reformulation, Degeneracy and the Role of the Ground Metric
+Deep Learning vs. Statistical Models for Multi-Horizon Price Forecasting of Second-Hand Electronics: A Systematic Benchmark
 DSTNet: Dynamic Spectral Trajectory Network for Causal Multi-Horizon Financial Forecasting
 Adversarial Training for Deep Hedging in Nonstationary Markets
 A posteriori error bounds for the Uncertain Volatility Model
@@ -7,5 +9,3 @@ AlphaPADI: Formulaic Alpha Discovery via Pool-Aware Hierarchical Discrete Diffus
 Shapley-based Structural Analysis of Neural Calibration for Stochastic Volatility Models
 Event History Over Scale: Compact Transformers for Low-Latency Limit Order Book Forecasting
 FinNextAssist: Towards Professional Financial Deep Research Assistant
-On the Pricing of American Options under Stochastic Local Volatility and Stochastic Correlation via the RBSDE Framework
-A Multi-Venue Solana/DeFi Microstructure Data Corpus: The RED-2400 Family v2

@@ -1,10 +1,11 @@
+4Cast Lab: Open-Source App for Machine Learning & Statistical Analysis
+Tail Instability and Scale Control in Conditional Normalizing Flows for Treasury Yield-Curve Scenarios
+A GLE-LSV model with state-dependent leverage and colored noise
+GROMM: Generative Risk-neutral Option Market Models
+Reinforcement Learning with Hawkes-Structured Networks for Market Making
 The Financing of Debt Relief: Intermediary Liquidity and the Value of Borrower Information
 L_0 Feature Selection via Monte Carlo Tree Search in High-Dimensional Financial Regression
 Multi-period Mean-Expectile Portfolio Optimization under Wasserstein Ambiguity: Reformulation, Degeneracy and the Role of the Ground Metric
 Deep Learning vs. Statistical Models for Multi-Horizon Price Forecasting of Second-Hand Electronics: A Systematic Benchmark
 DSTNet: Dynamic Spectral Trajectory Network for Causal Multi-Horizon Financial Forecasting
 Adversarial Training for Deep Hedging in Nonstationary Markets
-A posteriori error bounds for the Uncertain Volatility Model
-When Token Transfers Do Not Mean Liquidity in Tokenized Real-World Assets
-Latent Continuum of Regimes in Limit Order Book Dynamics
-AlphaPADI: Formulaic Alpha Discovery via Pool-Aware Hierarchical Discrete Diffusion

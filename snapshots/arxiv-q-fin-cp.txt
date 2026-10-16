@@ -1,3 +1,7 @@
+Algorithmic Collusion Without Deterrence: Auditing the Punishment Mechanism in Q-Learning Pricing Agents
+When Does "Post-Call" Begin? An Availability Contract for Earnings-Call NLP Benchmarks
+Pricing American Commodity Options Under the Schwartz Two-Factor Model Using the Alternating Direction Explicit (ADE) Method
+RICE-Alpha: Reliability-Informed Correction with Event Graphs for LLM-Agent Stock Forecasting
 Beyond Time Induction: Structured Conditional Neural Solvers for Parametric Stochastic-Volatility Pricing
 4Cast Lab: Open-Source App for Machine Learning & Statistical Analysis
 Tail Instability and Scale Control in Conditional Normalizing Flows for Treasury Yield-Curve Scenarios
@@ -8,4 +12,3 @@ The Financing of Debt Relief: Intermediary Liquidity and the Value of Borrower I
 L_0 Feature Selection via Monte Carlo Tree Search in High-Dimensional Financial Regression
 Multi-period Mean-Expectile Portfolio Optimization under Wasserstein Ambiguity: Reformulation, Degeneracy and the Role of the Ground Metric
 Deep Learning vs. Statistical Models for Multi-Horizon Price Forecasting of Second-Hand Electronics: A Systematic Benchmark
-DSTNet: Dynamic Spectral Trajectory Network for Causal Multi-Horizon Financial Forecasting

@@ -1,3 +1,4 @@
+Combinatorial Arbitrage in Prediction Markets
 Algorithmic Collusion Without Deterrence: Auditing the Punishment Mechanism in Q-Learning Pricing Agents
 When Does "Post-Call" Begin? An Availability Contract for Earnings-Call NLP Benchmarks
 Pricing American Commodity Options Under the Schwartz Two-Factor Model Using the Alternating Direction Explicit (ADE) Method
@@ -10,5 +11,3 @@ GROMM: Generative Risk-neutral Option Market Models
 Reinforcement Learning with Hawkes-Structured Networks for Market Making
 The Financing of Debt Relief: Intermediary Liquidity and the Value of Borrower Information
 L_0 Feature Selection via Monte Carlo Tree Search in High-Dimensional Financial Regression
-Multi-period Mean-Expectile Portfolio Optimization under Wasserstein Ambiguity: Reformulation, Degeneracy and the Role of the Ground Metric
-Deep Learning vs. Statistical Models for Multi-Horizon Price Forecasting of Second-Hand Electronics: A Systematic Benchmark

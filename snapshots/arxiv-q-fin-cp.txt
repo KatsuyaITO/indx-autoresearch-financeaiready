@@ -1,3 +1,8 @@
+Arbitrage-Free Implied Volatility Surface Reconstruction via Additive Martingales
+Disentangling Liquidity-Constrained from Strategic Default: A Deep Learning Approach
+Regime-Aware Interpretable Ranking for Sector Rotation
+AuDQ: Auditable Data Quality through Agentic Rule Discovery
+Rachev-Ratio Portfolio Optimization with TimeGAN Scenarios: Replacement versus Supplementation
 Combinatorial Arbitrage in Prediction Markets
 Algorithmic Collusion Without Deterrence: Auditing the Punishment Mechanism in Q-Learning Pricing Agents
 When Does "Post-Call" Begin? An Availability Contract for Earnings-Call NLP Benchmarks
@@ -9,5 +14,3 @@ Tail Instability and Scale Control in Conditional Normalizing Flows for Treasury
 A GLE-LSV model with state-dependent leverage and colored noise
 GROMM: Generative Risk-neutral Option Market Models
 Reinforcement Learning with Hawkes-Structured Networks for Market Making
-The Financing of Debt Relief: Intermediary Liquidity and the Value of Borrower Information
-L_0 Feature Selection via Monte Carlo Tree Search in High-Dimensional Financial Regression

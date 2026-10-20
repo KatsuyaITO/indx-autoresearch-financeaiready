@@ -15,7 +15,7 @@ Popular Article
 ICML 2025: Key Ideas on LLMs, Human-AI Alignment, and More
 A Two Sigma researcher highlights a selection of standout papers, talks, and tutorials from ICML 2025.
 Insights by
-July 31, 2025
+Updated on July 31, 2025
 What other social impact topics would you like to know more about?
 Pick a subject, or suggest your own.
 Data Clinic

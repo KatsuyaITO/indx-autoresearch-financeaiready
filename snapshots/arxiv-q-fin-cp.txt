@@ -9,8 +9,3 @@ When Does "Post-Call" Begin? An Availability Contract for Earnings-Call NLP Benc
 Pricing American Commodity Options Under the Schwartz Two-Factor Model Using the Alternating Direction Explicit (ADE) Method
 RICE-Alpha: Reliability-Informed Correction with Event Graphs for LLM-Agent Stock Forecasting
 Beyond Time Induction: Structured Conditional Neural Solvers for Parametric Stochastic-Volatility Pricing
-4Cast Lab: Open-Source App for Machine Learning & Statistical Analysis
-Tail Instability and Scale Control in Conditional Normalizing Flows for Treasury Yield-Curve Scenarios
-A GLE-LSV model with state-dependent leverage and colored noise
-GROMM: Generative Risk-neutral Option Market Models
-Reinforcement Learning with Hawkes-Structured Networks for Market Making

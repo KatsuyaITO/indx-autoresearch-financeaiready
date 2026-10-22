@@ -1,3 +1,5 @@
+Lineage-Aware Search Control for LLM-Based Evolutionary Factor Mining
+DSINC beyond Heston: the 3/2 and other non-affine stochastic-volatility models
 Arbitrage-Free Implied Volatility Surface Reconstruction via Additive Martingales
 Disentangling Liquidity-Constrained from Strategic Default: A Deep Learning Approach
 Regime-Aware Interpretable Ranking for Sector Rotation
@@ -8,4 +10,3 @@ Algorithmic Collusion Without Deterrence: Auditing the Punishment Mechanism in Q
 When Does "Post-Call" Begin? An Availability Contract for Earnings-Call NLP Benchmarks
 Pricing American Commodity Options Under the Schwartz Two-Factor Model Using the Alternating Direction Explicit (ADE) Method
 RICE-Alpha: Reliability-Informed Correction with Event Graphs for LLM-Agent Stock Forecasting
-Beyond Time Induction: Structured Conditional Neural Solvers for Parametric Stochastic-Volatility Pricing

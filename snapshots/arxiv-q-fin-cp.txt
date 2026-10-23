@@ -6,7 +6,3 @@ Regime-Aware Interpretable Ranking for Sector Rotation
 AuDQ: Auditable Data Quality through Agentic Rule Discovery
 Rachev-Ratio Portfolio Optimization with TimeGAN Scenarios: Replacement versus Supplementation
 Combinatorial Arbitrage in Prediction Markets
-Algorithmic Collusion Without Deterrence: Auditing the Punishment Mechanism in Q-Learning Pricing Agents
-When Does "Post-Call" Begin? An Availability Contract for Earnings-Call NLP Benchmarks
-Pricing American Commodity Options Under the Schwartz Two-Factor Model Using the Alternating Direction Explicit (ADE) Method
-RICE-Alpha: Reliability-Informed Correction with Event Graphs for LLM-Agent Stock Forecasting

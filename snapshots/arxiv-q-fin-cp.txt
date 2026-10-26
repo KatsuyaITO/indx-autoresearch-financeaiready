@@ -1,3 +1,6 @@
+On the continuity of conditional distributions and stratification for derivative pricing
+Financial Context-Rich Strategy for Actor-Critic based Agents: A Deep Reinforcement Learning Approach for Stock Trading
+Optimal Size in Market Making under State-Dependent Hawkes Process
 Lineage-Aware Search Control for LLM-Based Evolutionary Factor Mining
 DSINC beyond Heston: the 3/2 and other non-affine stochastic-volatility models
 Arbitrage-Free Implied Volatility Surface Reconstruction via Additive Martingales
@@ -5,4 +8,3 @@ Disentangling Liquidity-Constrained from Strategic Default: A Deep Learning Appr
 Regime-Aware Interpretable Ranking for Sector Rotation
 AuDQ: Auditable Data Quality through Agentic Rule Discovery
 Rachev-Ratio Portfolio Optimization with TimeGAN Scenarios: Replacement versus Supplementation
-Combinatorial Arbitrage in Prediction Markets

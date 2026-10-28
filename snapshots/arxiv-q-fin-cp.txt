@@ -1,3 +1,6 @@
+Optimal Order Placement under a State-Dependent Hawkes Process Limit Order Book model
+An Application of Geometric Riemannian Pricing Algorithm for Valuing Catastrophe Bonds in Incomplete Markets: Market-Consistent Financial Entropy and the Split of Frequency and Severity Risk Premia
+Event definition and the branching ratio: Hawkes estimates of price-change clustering in the consolidated quote feed
 Scenario Matching for Credit Dependence Stress Tests: Temporal correlation constraints and empirical risk bounds
 Det-MASO: Diversity-Regularized Multi-Agent Sequential Optimization for Factor Generation
 Cross-Bond Panel Learning for Next-Day Price Forecasting of Chinese Convertible Bonds: A Reality Check

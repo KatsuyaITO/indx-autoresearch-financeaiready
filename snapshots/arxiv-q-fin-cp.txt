@@ -1,3 +1,4 @@
+What Language Models Add to Healthcare-Equity Rankings, and What They Could Have Known
 Optimal Order Placement under a State-Dependent Hawkes Process Limit Order Book model
 An Application of Geometric Riemannian Pricing Algorithm for Valuing Catastrophe Bonds in Incomplete Markets: Market-Consistent Financial Entropy and the Split of Frequency and Severity Risk Premia
 Event definition and the branching ratio: Hawkes estimates of price-change clustering in the consolidated quote feed
@@ -9,5 +10,3 @@ The Digital-Energy Recomposition of the Kitchin Cycle: Exploratory Evidence from
 On the continuity of conditional distributions and stratification for derivative pricing
 Financial Context-Rich Strategy for Actor-Critic based Agents: A Deep Reinforcement Learning Approach for Stock Trading
 Optimal Size in Market Making under State-Dependent Hawkes Process
-Lineage-Aware Search Control for LLM-Based Evolutionary Factor Mining
-DSINC beyond Heston: the 3/2 and other non-affine stochastic-volatility models

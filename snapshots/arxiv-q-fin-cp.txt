@@ -1,3 +1,7 @@
+Functional Tensor Trains for High-Order Greeks and Exposure Tails of Multi-Asset Structured Products
+A New GAUSS Software Component for Implementing Dynamic Tests of Contagion with an Application
+QBX: A Compiler for Well-Formed, Auditable Alpha Programs
+Neural Network Methods in the 2BSDE Formalism for Solving the High-Dimensional Black--Scholes Equation with Transaction Costs
 What Language Models Add to Healthcare-Equity Rankings, and What They Could Have Known
 Optimal Order Placement under a State-Dependent Hawkes Process Limit Order Book model
 An Application of Geometric Riemannian Pricing Algorithm for Valuing Catastrophe Bonds in Incomplete Markets: Market-Consistent Financial Entropy and the Split of Frequency and Severity Risk Premia

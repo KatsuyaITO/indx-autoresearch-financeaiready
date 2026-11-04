@@ -1,3 +1,6 @@
+Symbol-based residual certification of reduced and neural surrogates for tempered-fractional CGMY pricing
+Herding or Racing? Decomposing Cross-Account Order-Flow Persistence in On-Chain Markets
+Beyond Binary Detection: Type-Aware Hallucination Analysis and Hierarchical Detection in Financial Question Answering
 Functional Tensor Trains for High-Order Greeks and Exposure Tails of Multi-Asset Structured Products
 A New GAUSS Software Component for Implementing Dynamic Tests of Contagion with an Application
 QBX: A Compiler for Well-Formed, Auditable Alpha Programs
@@ -11,6 +14,3 @@ Det-MASO: Diversity-Regularized Multi-Agent Sequential Optimization for Factor G
 Cross-Bond Panel Learning for Next-Day Price Forecasting of Chinese Convertible Bonds: A Reality Check
 Tokenised Sukuk: A Verifiable Architecture for Asset Evidence and Programmable Shariah Compliance
 The Digital-Energy Recomposition of the Kitchin Cycle: Exploratory Evidence from U.S. IT and Irish Data-Centre Series (1995-2025)
-On the continuity of conditional distributions and stratification for derivative pricing
-Financial Context-Rich Strategy for Actor-Critic based Agents: A Deep Reinforcement Learning Approach for Stock Trading
-Optimal Size in Market Making under State-Dependent Hawkes Process

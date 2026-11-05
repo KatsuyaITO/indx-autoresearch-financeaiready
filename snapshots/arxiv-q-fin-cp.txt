@@ -1,3 +1,7 @@
+CosmosAlpha: Multi-Relational Graph Search with Pareto-Guided Exploration for LLM-Driven Alpha Mining
+Multidimensional Views Behind Target-Price Revisions: An LLM-Based Representation of Analyst Outlooks
+Safe Portfolio Learning from Untrusted Predictions: Signed Trust, Abstention, and Cross-Universe Polarity Failure
+Long-term yields of short-rate models as Feynman-Kac ground states: a variational quantum eigensolver with single-setting energy estimation on two NISQ platforms
 Symbol-based residual certification of reduced and neural surrogates for tempered-fractional CGMY pricing
 Herding or Racing? Decomposing Cross-Account Order-Flow Persistence in On-Chain Markets
 Beyond Binary Detection: Type-Aware Hallucination Analysis and Hierarchical Detection in Financial Question Answering
@@ -9,8 +13,3 @@ What Language Models Add to Healthcare-Equity Rankings, and What They Could Have
 Optimal Order Placement under a State-Dependent Hawkes Process Limit Order Book model
 An Application of Geometric Riemannian Pricing Algorithm for Valuing Catastrophe Bonds in Incomplete Markets: Market-Consistent Financial Entropy and the Split of Frequency and Severity Risk Premia
 Event definition and the branching ratio: Hawkes estimates of price-change clustering in the consolidated quote feed
-Scenario Matching for Credit Dependence Stress Tests: Temporal correlation constraints and empirical risk bounds
-Det-MASO: Diversity-Regularized Multi-Agent Sequential Optimization for Factor Generation
-Cross-Bond Panel Learning for Next-Day Price Forecasting of Chinese Convertible Bonds: A Reality Check
-Tokenised Sukuk: A Verifiable Architecture for Asset Evidence and Programmable Shariah Compliance
-The Digital-Energy Recomposition of the Kitchin Cycle: Exploratory Evidence from U.S. IT and Irish Data-Centre Series (1995-2025)

@@ -1,3 +1,4 @@
+Hard to Fool: A Bounded LLM Research Loop for Quantitative Finance, and What Two Dozen Campaigns Found
 CosmosAlpha: Multi-Relational Graph Search with Pareto-Guided Exploration for LLM-Driven Alpha Mining
 Multidimensional Views Behind Target-Price Revisions: An LLM-Based Representation of Analyst Outlooks
 Safe Portfolio Learning from Untrusted Predictions: Signed Trust, Abstention, and Cross-Universe Polarity Failure
@@ -10,6 +11,3 @@ A New GAUSS Software Component for Implementing Dynamic Tests of Contagion with 
 QBX: A Compiler for Well-Formed, Auditable Alpha Programs
 Neural Network Methods in the 2BSDE Formalism for Solving the High-Dimensional Black--Scholes Equation with Transaction Costs
 What Language Models Add to Healthcare-Equity Rankings, and What They Could Have Known
-Optimal Order Placement under a State-Dependent Hawkes Process Limit Order Book model
-An Application of Geometric Riemannian Pricing Algorithm for Valuing Catastrophe Bonds in Incomplete Markets: Market-Consistent Financial Entropy and the Split of Frequency and Severity Risk Premia
-Event definition and the branching ratio: Hawkes estimates of price-change clustering in the consolidated quote feed

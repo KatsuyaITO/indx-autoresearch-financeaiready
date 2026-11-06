@@ -1,3 +1,4 @@
+FINCOSMOS: An Open-World Evaluation Paradigm for Agents in Finance
 Hard to Fool: A Bounded LLM Research Loop for Quantitative Finance, and What Two Dozen Campaigns Found
 CosmosAlpha: Multi-Relational Graph Search with Pareto-Guided Exploration for LLM-Driven Alpha Mining
 Multidimensional Views Behind Target-Price Revisions: An LLM-Based Representation of Analyst Outlooks
@@ -10,4 +11,3 @@ Functional Tensor Trains for High-Order Greeks and Exposure Tails of Multi-Asset
 A New GAUSS Software Component for Implementing Dynamic Tests of Contagion with an Application
 QBX: A Compiler for Well-Formed, Auditable Alpha Programs
 Neural Network Methods in the 2BSDE Formalism for Solving the High-Dimensional Black--Scholes Equation with Transaction Costs
-What Language Models Add to Healthcare-Equity Rankings, and What They Could Have Known

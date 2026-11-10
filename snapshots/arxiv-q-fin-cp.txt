@@ -1,3 +1,4 @@
+Towards Robust Reinforcement Learning Market Making: Lessons from Loss Function Experimentation
 FINCOSMOS: An Open-World Evaluation Paradigm for Agents in Finance
 Hard to Fool: A Bounded LLM Research Loop for Quantitative Finance, and What Two Dozen Campaigns Found
 CosmosAlpha: Multi-Relational Graph Search with Pareto-Guided Exploration for LLM-Driven Alpha Mining
@@ -7,7 +8,3 @@ Long-term yields of short-rate models as Feynman-Kac ground states: a variationa
 Symbol-based residual certification of reduced and neural surrogates for tempered-fractional CGMY pricing
 Herding or Racing? Decomposing Cross-Account Order-Flow Persistence in On-Chain Markets
 Beyond Binary Detection: Type-Aware Hallucination Analysis and Hierarchical Detection in Financial Question Answering
-Functional Tensor Trains for High-Order Greeks and Exposure Tails of Multi-Asset Structured Products
-A New GAUSS Software Component for Implementing Dynamic Tests of Contagion with an Application
-QBX: A Compiler for Well-Formed, Auditable Alpha Programs
-Neural Network Methods in the 2BSDE Formalism for Solving the High-Dimensional Black--Scholes Equation with Transaction Costs

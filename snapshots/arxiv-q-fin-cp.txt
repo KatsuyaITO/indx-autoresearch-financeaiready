@@ -1,3 +1,8 @@
+Diversification Across Predictors: Heterogeneous Ensemble Learning for Cross-Sectional Return Prediction
+Adjoint Kernel Sensitivity of the Rough Heston Characteristic Exponent
+Optimal execution in a fractional setting with reinforcement learning
+Risk-Sensitive Reinforcement Learning for an Options Market Maker: An Empirical Study with Real S&P 500 Options
+Trained, Frozen, or Absent: Identifying What a Quantum Layer Contributes to Cross-Sectional Equity Ranking
 Towards Robust Reinforcement Learning Market Making: Lessons from Loss Function Experimentation
 FINCOSMOS: An Open-World Evaluation Paradigm for Agents in Finance
 Hard to Fool: A Bounded LLM Research Loop for Quantitative Finance, and What Two Dozen Campaigns Found
@@ -5,6 +10,3 @@ CosmosAlpha: Multi-Relational Graph Search with Pareto-Guided Exploration for LL
 Multidimensional Views Behind Target-Price Revisions: An LLM-Based Representation of Analyst Outlooks
 Safe Portfolio Learning from Untrusted Predictions: Signed Trust, Abstention, and Cross-Universe Polarity Failure
 Long-term yields of short-rate models as Feynman-Kac ground states: a variational quantum eigensolver with single-setting energy estimation on two NISQ platforms
-Symbol-based residual certification of reduced and neural surrogates for tempered-fractional CGMY pricing
-Herding or Racing? Decomposing Cross-Account Order-Flow Persistence in On-Chain Markets
-Beyond Binary Detection: Type-Aware Hallucination Analysis and Hierarchical Detection in Financial Question Answering

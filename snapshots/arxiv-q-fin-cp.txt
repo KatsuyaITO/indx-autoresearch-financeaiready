@@ -1,3 +1,9 @@
+TAPES: Terminal Adjoint-Propagated Error Scheduling for Financial Diffusion Samplers
+Improving Algorithmic Trading for BESS on Intraday Electricity Markets through Distributional Price Forecasts
+Accuracy Is Not Welfare: Evaluating AI Buyers under Strategic Price Complexity in a Synthetic Duopoly
+A high-order recombination algorithm with adaptive scale selection for weak approximation of stochastic differential equations
+AFNO: Universal Certifiably-Arbitrage-Free Operator Learning Framework for European Call-Price Surfaces
+Tabular Foundation Models in Financial Predictions
 Diversification Across Predictors: Heterogeneous Ensemble Learning for Cross-Sectional Return Prediction
 Adjoint Kernel Sensitivity of the Rough Heston Characteristic Exponent
 Optimal execution in a fractional setting with reinforcement learning
@@ -5,8 +11,3 @@ Risk-Sensitive Reinforcement Learning for an Options Market Maker: An Empirical 
 Trained, Frozen, or Absent: Identifying What a Quantum Layer Contributes to Cross-Sectional Equity Ranking
 Towards Robust Reinforcement Learning Market Making: Lessons from Loss Function Experimentation
 FINCOSMOS: An Open-World Evaluation Paradigm for Agents in Finance
-Hard to Fool: A Bounded LLM Research Loop for Quantitative Finance, and What Two Dozen Campaigns Found
-CosmosAlpha: Multi-Relational Graph Search with Pareto-Guided Exploration for LLM-Driven Alpha Mining
-Multidimensional Views Behind Target-Price Revisions: An LLM-Based Representation of Analyst Outlooks
-Safe Portfolio Learning from Untrusted Predictions: Signed Trust, Abstention, and Cross-Universe Polarity Failure
-Long-term yields of short-rate models as Feynman-Kac ground states: a variational quantum eigensolver with single-setting energy estimation on two NISQ platforms

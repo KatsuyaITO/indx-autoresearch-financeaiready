@@ -2,6 +2,8 @@
 Unifying Numerai and Signals
 17 FEB 2026 • 4 MIN READ FEATURED
 NumerCon 2026: Genesis to Singularity
+12 NOV 2026 • 4 MIN READ
+Atomic Blockchain Staking
 3 NOV 2026 • 2 MIN READ
 Numerai Monthly: Unity Dataset & Tooling, Tournament Unification, Community Updates
 30 OCT 2026 • 5 MIN READ
@@ -26,5 +28,3 @@ Numerai Monthly: Signals Season Resolved, CoE Funding, UX Upgrades, Earlier Roun
 Numerai Monthly: Tournament Growth, Media, Community Events
 3 FEB 2026 • 1 MIN READ
 Numerai Monthly: NumerCon, Agents, Staking, Risk, $1M NMR Buyback
-6 JAN 2026 • 1 MIN READ
-Numerai Monthly: NumerCon Speakers, New Dataset & Target, 2026 Payout Updates

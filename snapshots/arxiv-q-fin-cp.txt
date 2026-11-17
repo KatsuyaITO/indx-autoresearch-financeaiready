@@ -1,3 +1,4 @@
+Local Stochastic Volatility Iterations
 TAPES: Terminal Adjoint-Propagated Error Scheduling for Financial Diffusion Samplers
 Improving Algorithmic Trading for BESS on Intraday Electricity Markets through Distributional Price Forecasts
 Accuracy Is Not Welfare: Evaluating AI Buyers under Strategic Price Complexity in a Synthetic Duopoly
@@ -10,4 +11,3 @@ Optimal execution in a fractional setting with reinforcement learning
 Risk-Sensitive Reinforcement Learning for an Options Market Maker: An Empirical Study with Real S&P 500 Options
 Trained, Frozen, or Absent: Identifying What a Quantum Layer Contributes to Cross-Sectional Equity Ranking
 Towards Robust Reinforcement Learning Market Making: Lessons from Loss Function Experimentation
-FINCOSMOS: An Open-World Evaluation Paradigm for Agents in Finance

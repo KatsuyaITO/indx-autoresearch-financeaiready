@@ -1,3 +1,7 @@
+Mollification Regularization and Asymptotic Correction for Analytical Expansion of BSDEs with Non-Smooth Terminal Conditions. I. Theory
+Markets for Compute and Inference: Structure, Financing, and Risk Transfer
+PIRanNN: Random-Feature Pricing and Calibration under Jump-Diffusion and Stochastic-Volatility Models
+Short Windows, Unmodelled Costs, Unknown Cutoffs: A Pre-Registered Evidence Audit of 91 LLM Trading Papers
 Local Stochastic Volatility Iterations
 TAPES: Terminal Adjoint-Propagated Error Scheduling for Financial Diffusion Samplers
 Improving Algorithmic Trading for BESS on Intraday Electricity Markets through Distributional Price Forecasts
@@ -10,4 +14,3 @@ Adjoint Kernel Sensitivity of the Rough Heston Characteristic Exponent
 Optimal execution in a fractional setting with reinforcement learning
 Risk-Sensitive Reinforcement Learning for an Options Market Maker: An Empirical Study with Real S&P 500 Options
 Trained, Frozen, or Absent: Identifying What a Quantum Layer Contributes to Cross-Sectional Equity Ranking
-Towards Robust Reinforcement Learning Market Making: Lessons from Loss Function Experimentation

@@ -1,3 +1,5 @@
+Beyond Strike Remapping: Conditional-Gamma Pricing of Leveraged ETF Options under Local Volatility
+Which Past Matters? Training History and Multi-Forecast Horizon in Equity Transformers
 Mollification Regularization and Asymptotic Correction for Analytical Expansion of BSDEs with Non-Smooth Terminal Conditions. I. Theory
 Markets for Compute and Inference: Structure, Financing, and Risk Transfer
 PIRanNN: Random-Feature Pricing and Calibration under Jump-Diffusion and Stochastic-Volatility Models
@@ -9,8 +11,3 @@ Accuracy Is Not Welfare: Evaluating AI Buyers under Strategic Price Complexity i
 A high-order recombination algorithm with adaptive scale selection for weak approximation of stochastic differential equations
 AFNO: Universal Certifiably-Arbitrage-Free Operator Learning Framework for European Call-Price Surfaces
 Tabular Foundation Models in Financial Predictions
-Diversification Across Predictors: Heterogeneous Ensemble Learning for Cross-Sectional Return Prediction
-Adjoint Kernel Sensitivity of the Rough Heston Characteristic Exponent
-Optimal execution in a fractional setting with reinforcement learning
-Risk-Sensitive Reinforcement Learning for an Options Market Maker: An Empirical Study with Real S&P 500 Options
-Trained, Frozen, or Absent: Identifying What a Quantum Layer Contributes to Cross-Sectional Equity Ranking

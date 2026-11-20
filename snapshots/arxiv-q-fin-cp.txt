@@ -1,3 +1,7 @@
+Sensitivity analysis in real options studies: systematic review and recommendations
+Spectral Pricing of Corridor Products under Layered Local Volatility
+Vibe-Trading: Towards Agent-Native Trading
+When Price Charts Rhyme: Historical Visual Retrieval for Stock Return Prediction
 Beyond Strike Remapping: Conditional-Gamma Pricing of Leveraged ETF Options under Local Volatility
 Which Past Matters? Training History and Multi-Forecast Horizon in Equity Transformers
 Mollification Regularization and Asymptotic Correction for Analytical Expansion of BSDEs with Non-Smooth Terminal Conditions. I. Theory
@@ -9,5 +13,3 @@ TAPES: Terminal Adjoint-Propagated Error Scheduling for Financial Diffusion Samp
 Improving Algorithmic Trading for BESS on Intraday Electricity Markets through Distributional Price Forecasts
 Accuracy Is Not Welfare: Evaluating AI Buyers under Strategic Price Complexity in a Synthetic Duopoly
 A high-order recombination algorithm with adaptive scale selection for weak approximation of stochastic differential equations
-AFNO: Universal Certifiably-Arbitrage-Free Operator Learning Framework for European Call-Price Surfaces
-Tabular Foundation Models in Financial Predictions

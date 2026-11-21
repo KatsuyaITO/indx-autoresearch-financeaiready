@@ -1,3 +1,6 @@
+Feasible sub-replicating portfolios for basket options via the block rearrangement algorithm
+Auto-Alpha: A Framework for Autonomous Factor Research
+Quantum Calibration of Local-Volatility Surfaces from Sparse Option Quotes
 Sensitivity analysis in real options studies: systematic review and recommendations
 Spectral Pricing of Corridor Products under Layered Local Volatility
 Vibe-Trading: Towards Agent-Native Trading
@@ -9,7 +12,3 @@ Markets for Compute and Inference: Structure, Financing, and Risk Transfer
 PIRanNN: Random-Feature Pricing and Calibration under Jump-Diffusion and Stochastic-Volatility Models
 Short Windows, Unmodelled Costs, Unknown Cutoffs: A Pre-Registered Evidence Audit of 91 LLM Trading Papers
 Local Stochastic Volatility Iterations
-TAPES: Terminal Adjoint-Propagated Error Scheduling for Financial Diffusion Samplers
-Improving Algorithmic Trading for BESS on Intraday Electricity Markets through Distributional Price Forecasts
-Accuracy Is Not Welfare: Evaluating AI Buyers under Strategic Price Complexity in a Synthetic Duopoly
-A high-order recombination algorithm with adaptive scale selection for weak approximation of stochastic differential equations

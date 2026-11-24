@@ -1,3 +1,9 @@
+Do Econophysics-Inspired Inputs Improve Neural Covariance Forecasting? A Leakage-Free Walk-Forward Study of Intraday DJIA Data
+Error analysis for the numerical approximation of the quantile hedging problem
+Distributional Deep Hedging
+VerifiQuant: Governance-by-Execution for Financial LLM Workflows
+Bottlenecked: The Capital Cost of Protected DeFi Lending
+Held-to-Maturity Accounting: Hidden Losses and Systemic Fragility
 Feasible sub-replicating portfolios for basket options via the block rearrangement algorithm
 Auto-Alpha: A Framework for Autonomous Factor Research
 Quantum Calibration of Local-Volatility Surfaces from Sparse Option Quotes
@@ -11,4 +17,3 @@ Mollification Regularization and Asymptotic Correction for Analytical Expansion 
 Markets for Compute and Inference: Structure, Financing, and Risk Transfer
 PIRanNN: Random-Feature Pricing and Calibration under Jump-Diffusion and Stochastic-Volatility Models
 Short Windows, Unmodelled Costs, Unknown Cutoffs: A Pre-Registered Evidence Audit of 91 LLM Trading Papers
-Local Stochastic Volatility Iterations

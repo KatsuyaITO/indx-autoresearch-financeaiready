@@ -1,3 +1,10 @@
+Design an Algorithmic Stablecoin based on a Predictive PID Controller
+Critical step size of stochastic gradient descent for a linear neuron: an exact solution and the role of the input spectrum
+CCFinance: Reconstructing Financial News Samples from Web Archives
+Wasserstein Penalisation as an Endogenous Breadth Constraint in Penalised Mean-Variance Portfolio Selection
+Marked INAR model and the rough Hawkes--Heston limit
+Know When to Abstain: Conformal Confidence Estimation for Text-to-SQL
+Gated Payoff-Weighted Net Profit Maximization For Online Portfolio Selection With Transaction Costs
 Do Econophysics-Inspired Inputs Improve Neural Covariance Forecasting? A Leakage-Free Walk-Forward Study of Intraday DJIA Data
 Error analysis for the numerical approximation of the quantile hedging problem
 Distributional Deep Hedging
@@ -13,7 +20,3 @@ Vibe-Trading: Towards Agent-Native Trading
 When Price Charts Rhyme: Historical Visual Retrieval for Stock Return Prediction
 Beyond Strike Remapping: Conditional-Gamma Pricing of Leveraged ETF Options under Local Volatility
 Which Past Matters? Training History and Multi-Forecast Horizon in Equity Transformers
-Mollification Regularization and Asymptotic Correction for Analytical Expansion of BSDEs with Non-Smooth Terminal Conditions. I. Theory
-Markets for Compute and Inference: Structure, Financing, and Risk Transfer
-PIRanNN: Random-Feature Pricing and Calibration under Jump-Diffusion and Stochastic-Volatility Models
-Short Windows, Unmodelled Costs, Unknown Cutoffs: A Pre-Registered Evidence Audit of 91 LLM Trading Papers

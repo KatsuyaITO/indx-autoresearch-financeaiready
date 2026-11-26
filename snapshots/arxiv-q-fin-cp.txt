@@ -1,3 +1,5 @@
+Delta-Vega Hedging with Deep Reinforcement Learning: From Simulation to Reality
+A Kernel Framework for Linear Operator Equations
 Design an Algorithmic Stablecoin based on a Predictive PID Controller
 Critical step size of stochastic gradient descent for a linear neuron: an exact solution and the role of the input spectrum
 CCFinance: Reconstructing Financial News Samples from Web Archives
@@ -18,5 +20,3 @@ Sensitivity analysis in real options studies: systematic review and recommendati
 Spectral Pricing of Corridor Products under Layered Local Volatility
 Vibe-Trading: Towards Agent-Native Trading
 When Price Charts Rhyme: Historical Visual Retrieval for Stock Return Prediction
-Beyond Strike Remapping: Conditional-Gamma Pricing of Leveraged ETF Options under Local Volatility
-Which Past Matters? Training History and Multi-Forecast Horizon in Equity Transformers

@@ -16,7 +16,3 @@ Held-to-Maturity Accounting: Hidden Losses and Systemic Fragility
 Feasible sub-replicating portfolios for basket options via the block rearrangement algorithm
 Auto-Alpha: A Framework for Autonomous Factor Research
 Quantum Calibration of Local-Volatility Surfaces from Sparse Option Quotes
-Sensitivity analysis in real options studies: systematic review and recommendations
-Spectral Pricing of Corridor Products under Layered Local Volatility
-Vibe-Trading: Towards Agent-Native Trading
-When Price Charts Rhyme: Historical Visual Retrieval for Stock Return Prediction
